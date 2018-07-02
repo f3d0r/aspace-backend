@@ -1,20 +1,24 @@
 const express = require('express')
 const app = express()
 const uniqueString = require('unique-string');
+const mysql = require('mysql')
 
 const accountSid = 'twilio_sid';
 const authToken = 'twilio_auth_token';
 
 const client = require('twilio')(accountSid, authToken);
 
-var mysql = require('mysql');
 var connection = mysql.createConnection({
-    host: '159.65.70.74',
-    port: db_port,
+    host: '127.0.0.1',
     user: 'api',
     password: 'db_password',
-    database: 'aspace'
+    database: 'aspace',
+    port: 'db_port',
+    socketPath: '/var/run/mysqld/mysqld.sock'
 });
+connection.connect();
+
+app.use(express.json());
 
 connection.connect(function (err) {
     if (err) {
@@ -29,29 +33,6 @@ var serverPort = 5000;
 app.get('/ping', function (req, res) {
     res.send('pong');
 })
-
-const express = require('express')
-const app = express()
-const mysql = require('mysql')
-
-var connection = mysql.createConnection({
-    host: '127.0.0.1',
-    user: 'api',
-    password: 'db_password',
-    database: 'aspace',
-    port: 'db_port',
-    socketPath: '/var/run/mysqld/mysqld.sock'
-});
-connection.connect();
-
-app.use(express.json());
-
-app.get('/', function (req, res) {
-    connection.query('SELECT * from parking', function (error, results, fields) {
-        if (error) throw error;
-        res.send(JSON.stringify(results));
-    });
-});
 
 app.get('/', function (req, res) {
     connection.query('SELECT * from parking', function (error, results, fields) {
