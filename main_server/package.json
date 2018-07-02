@@ -1,0 +1,25 @@
+{
+  "name": "aspace_backend",
+  "version": "1.0.0",
+  "description": "Code base for aspace, Inc. backend, consisting of a node.js/Express.js backend stack, available at https://api.trya.space.",
+  "main": "app.js",
+  "scripts": {
+    "test": "debug"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/aspace/backend.git"
+  },
+  "author": "Fedor Paretsky (for aspace, Inc.)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://gitlab.com/aspace/backend/issues"
+  },
+  "homepage": "https://gitlab.com/aspace/backend#README",
+  "dependencies": {
+    "express": "^4.16.3",
+    "mysql": "github:mysqljs/mysql",
+    "twilio": "^3.17.3",
+    "unique-string": "^1.0.0"
+  }
+}
