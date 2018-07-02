@@ -17,6 +17,9 @@
   },
   "homepage": "https://gitlab.com/aspace/backend#README",
   "dependencies": {
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "mysql": "^2.15.0",
+    "twilio": "^3.17.4",
+    "unique-string": "^1.0.0"
   }
 }
