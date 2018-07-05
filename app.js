@@ -66,35 +66,13 @@ app.get('/ping', function (req, res) {
 // ADMIN APP ENDPOINTS
 
 admin.get('/', function (req, res) {
-    basicAuthSuccess(req, res, function () {
+    basicAuth(req, res, function () {
         res.status(200).send("Welcome to the admin sub-API for aspace! :)");
     });
 });
 
-function basicAuthSuccess(req, res, successCB) {
-    var auth = req.get("authorization");
-    if (!auth) {
-        res.set("WWW-Authenticate", "Basic realm=\"Authorization Required\"");
-        res.status(401).send("Authorization Required");
-    } else {
-        var credentials = new Buffer(auth.split(" ").pop(), "base64").toString("ascii").split(":");
-        if (credentials[0] == "" || credentials[1] == "") {
-            sendErrorJSON(res, 'INVALID_BASIC_AUTH');
-        } else {
-            authCheck(ADMIN_TABLE, credentials[0], credentials[1],
-                function () {
-                    successCB();
-                },
-                function () {
-                    sendErrorJSON(res, 'INVALID_BASIC_AUTH');
-                }
-            );
-        }
-    }
-}
-
 admin.get('/add_auth_key', function (req, res) {
-    basicAuthSuccess(req, res, function () {
+    basicAuth(req, res, function () {
         var authKey = uniqueString();
         var sql = "INSERT INTO `database_authority` (`auth_key`, `permission`) VALUES (" + escapeQuery(authKey) + ", " + escapeQuery("update_spots") + ")";
         connection.query(sql, function (error, results, fields) {
@@ -330,6 +308,28 @@ function databasePermissionCheck(database, auth_key, permission, successCB, fail
             failureCB();
         }
     });
+}
+
+function basicAuth(req, res, successCB) {
+    var auth = req.get("authorization");
+    if (!auth) {
+        res.set("WWW-Authenticate", "Basic realm=\"Authorization Required\"");
+        res.status(401).send("Authorization Required");
+    } else {
+        var credentials = new Buffer(auth.split(" ").pop(), "base64").toString("ascii").split(":");
+        if (credentials[0] == "" || credentials[1] == "") {
+            sendErrorJSON(res, 'INVALID_BASIC_AUTH');
+        } else {
+            authCheck(ADMIN_TABLE, credentials[0], credentials[1],
+                function () {
+                    successCB();
+                },
+                function () {
+                    sendErrorJSON(res, 'INVALID_BASIC_AUTH');
+                }
+            );
+        }
+    }
 }
 
 // SERVER SET UP
