@@ -98,5 +98,5 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         ERROR: 19,
         INFO: "spot_status_changed"
-    }
+    },
 });

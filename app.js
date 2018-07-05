@@ -3,13 +3,9 @@ const express = require('express');
 const uniqueString = require('unique-string');
 const request = require("request");
 const mysql = require('mysql');
-const bcrypt = require('bcrypt');
 var ERROR_CODES = require('./errorCodes');
 
 // CONSTANTS
-const TWILIO_ACCOUNT_SID = 'twilio_sid';
-const TWILIO_AUTH_TOKEN = 'twilio_auth_token';
-
 const DATABASE_USER = 'api';
 const DATABASE_PASSWORD = 'db_password';
 const DATABASE_NAME = 'aspace';
@@ -19,10 +15,16 @@ const SOCKET_PATH = '/var/run/mysqld/mysqld.sock';
 const ADMIN_TABLE = 'aspace_admins';
 const API_PORT = 3000;
 
-// CONNECTION AND CLIENT SET UP
+// BCRYPT SETUP
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
-const client = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+// CONNECTION AND TWILIO SET UP
+const TWILIO_ACCOUNT_SID = 'twilio_sid';
+const TWILIO_AUTH_TOKEN = 'twilio_auth_token';
+const twilio = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
+// MYSQL SET UP
 var connection = mysql.createConnection({
     host: '159.65.70.74',
     user: DATABASE_USER,
@@ -39,6 +41,8 @@ connection.connect(function (err) {
     }
     console.log('MySQL successfully connected!');
 });
+
+// EXPRESS SET UP
 
 var app = express();
 var auth = express();
@@ -62,32 +66,45 @@ app.get('/ping', function (req, res) {
 // ADMIN APP ENDPOINTS
 
 admin.get('/', function (req, res) {
-    res.status(200).send("This is the admin sub-API for aspace! :)");
+    basicAuthSuccess(req, res, function () {
+        res.status(200).send("Welcome to the admin sub-API for aspace! :)");
+    });
 });
 
-admin.get('/add_auth_key', function (req, res) {
+function basicAuthSuccess(req, res, successCB) {
     var auth = req.get("authorization");
     if (!auth) {
         res.set("WWW-Authenticate", "Basic realm=\"Authorization Required\"");
-        return res.status(401).send("Authorization Required");
+        res.status(401).send("Authorization Required");
     } else {
         var credentials = new Buffer(auth.split(" ").pop(), "base64").toString("ascii").split(":");
-        authCheck(ADMIN_TABLE, credentials[0], credentials[1],
-            function () {
-                var authKey = uniqueString();
-                var sql = "INSERT INTO `database_authority` (`auth_key`, `permission`) VALUES (" + escapeQuery(authKey) + ", " + escapeQuery("update_spots") + ")";
-                connection.query(sql, function (error, results, fields) {
-                    if (results.affectedRows == 1)
-                        sendErrorJSON(res, 'AUTH_KEY_ADDED', "Your new auth key is : " + authKey);
-                    else
-                        sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
-                });
-            },
-            function () {
-                sendErrorJSON(res, 'INVALID_BASIC_AUTH');
-            }
-        );
+        if (credentials[0] == "" || credentials[1] == "") {
+            console.log("EMPTY!");
+            sendErrorJSON(res, 'INVALID_BASIC_AUTH');
+        } else {
+            authCheck(ADMIN_TABLE, credentials[0], credentials[1],
+                function () {
+                    successCB();
+                },
+                function () {
+                    sendErrorJSON(res, 'INVALID_BASIC_AUTH');
+                }
+            );
+        }
     }
+}
+
+admin.get('/add_auth_key', function (req, res) {
+    basicAuthSuccess(req, res, function () {
+        var authKey = uniqueString();
+        var sql = "INSERT INTO `database_authority` (`auth_key`, `permission`) VALUES (" + escapeQuery(authKey) + ", " + escapeQuery("update_spots") + ")";
+        connection.query(sql, function (error, results, fields) {
+            if (results.affectedRows == 1)
+                sendErrorJSON(res, 'AUTH_KEY_ADDED', "Your new auth key is : " + authKey);
+            else
+                sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
+        });
+    });
 });
 
 // PARKING ENDPOINTS
@@ -223,7 +240,7 @@ auth.post("/check_pin", function (req, res) {
 
 // MISC FUNCTIONS
 function sendVerificationText(phoneNumber, pin) {
-    client.messages
+    twilio.messages
         .create({
             body: "aspace code: " + pin + ". Happy Parking! :)",
             from: 'twilio_origin_phone_number',
@@ -285,10 +302,13 @@ function lookupPhone(phoneNumber, successCallBack, failCallBack) {
 
 function authCheck(database, username, password, successCB, failureCB) {
     connection.query("SELECT * FROM `" + database + "` WHERE `username` = " + escapeQuery(username), function (error, rows) {
-        if (rows.length == 1)
-            successCB();
-        else
-            failureCB();
+        bcrypt.compare(password, rows[0].password, function (err, res) {
+            if (res) {
+                successCB();
+            } else {
+                failureCB();
+            }
+        });
     });
 }
 
