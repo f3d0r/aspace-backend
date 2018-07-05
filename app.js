@@ -120,20 +120,18 @@ parking.post('/update_status', function (req, res) {
     } else if (!queryExists(req, 'occupied')) {
         sendErrorJSON(res, 'MISSING_PARAMETER', 'occupied required');
     } else {
-        var sql = "SELECT * FROM `database_authority` WHERE `auth_key` = " + escapeQuery(req.query.auth_key) + " AND `permission` = 'update_spots'";
-        connection.query(sql, function (error, rows) {
-            if (rows.length == 1) {
-                var sql = "UPDATE `parking` set `occupied` = " + escapeQuery(req.query.occupied) + " WHERE `spot_id` = " + escapeQuery(req.query.spot_id);
-                connection.query(sql, function (error, results, fields) {
+        databasePermissionCheck("database_authority", req.auth_key, "update_spots", function () {
+            var sql = "UPDATE `parking` set `occupied` = " + escapeQuery(req.query.occupied) + " WHERE `spot_id` = " + escapeQuery(req.query.spot_id);
+            connection.query(sql, function (error, results, fields) {
                     if (results.affectedRows == 1) {
                         sendErrorJSON(res, 'SPOT_STATUS_CHANGED', results[0]);
                     } else {
                         sendErrorJSON(res, 'INVALID_SPOT_ID');
                     }
+                },
+                function () {
+                    sendErrorJSON(res, 'INVALID_AUTH_KEY');
                 });
-            } else {
-                sendErrorJSON(res, 'INVALID_AUTH_KEY');
-            }
         });
     }
 });
@@ -167,7 +165,7 @@ parking.get('/get_status', function (req, res) {
 
 parking.post('/add_points', function (req, res) {
     var body = req.body;
-    insertSpot(body, e0);
+    insertSpot(body, 0);
     res.send("OK");
 });
 
@@ -309,6 +307,17 @@ function authCheck(database, username, password, successCB, failureCB) {
                 failureCB();
             }
         });
+    });
+}
+
+function databasePermissionCheck(database, auth_key, permission, successCB, failureCB) {
+    var sql = "SELECT * FROM `" + escapeQuery(database) + "` WHERE `auth_key` = " + escapeQuery(auth_key) + " AND `permission` LIKE = " + escapeQuery("%" + permission + "%");
+    connection.query(sql, function (error, rows) {
+        if (rows.length == 1) {
+            successCB();
+        } else {
+            failureCB();
+        }
     });
 }
 
