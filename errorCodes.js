@@ -99,4 +99,14 @@ module.exports = Object.freeze({
         ERROR: 19,
         INFO: "spot_status_changed"
     },
+    MISSING_BODY: {
+        HTTP_CODE: 422,
+        ERROR: 20,
+        INFO: "missing_body"
+    },
+    INVALID_STATUS_ENTERED: {
+        HTTP_CODE: 422,
+        ERROR: 21,
+        INFO: "invalid_status_entered"
+    }
 });
