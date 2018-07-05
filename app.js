@@ -3,6 +3,7 @@ const express = require('express');
 const uniqueString = require('unique-string');
 const request = require("request");
 const mysql = require('mysql');
+const bcrypt = require('bcrypt');
 var ERROR_CODES = require('./errorCodes');
 
 // CONSTANTS
@@ -15,6 +16,7 @@ const DATABASE_NAME = 'aspace';
 const DATABASE_PORT = 'db_port';
 const SOCKET_PATH = '/var/run/mysqld/mysqld.sock';
 
+const ADMIN_TABLE = 'aspace_admins';
 const API_PORT = 3000;
 
 // CONNECTION AND CLIENT SET UP
@@ -41,9 +43,11 @@ connection.connect(function (err) {
 var app = express();
 var auth = express();
 var parking = express();
+var admin = express();
 app.use(express.json());
 app.use('/auth', auth);
 app.use('/parking', parking);
+app.use('/admin', admin);
 
 // MAIN APP ENDPOINTS
 
@@ -53,6 +57,37 @@ app.get('/', function (req, res) {
 
 app.get('/ping', function (req, res) {
     res.status(200).send("pong");
+});
+
+// ADMIN APP ENDPOINTS
+
+admin.get('/', function (req, res) {
+    res.status(200).send("This is the admin sub-API for aspace! :)");
+});
+
+admin.get('/add_auth_key', function (req, res) {
+    var auth = req.get("authorization");
+    if (!auth) {
+        res.set("WWW-Authenticate", "Basic realm=\"Authorization Required\"");
+        return res.status(401).send("Authorization Required");
+    } else {
+        var credentials = new Buffer(auth.split(" ").pop(), "base64").toString("ascii").split(":");
+        authCheck(ADMIN_TABLE, credentials[0], credentials[1],
+            function () {
+                var authKey = uniqueString();
+                var sql = "INSERT INTO `database_authority` (`auth_key`, `permission`) VALUES (" + escapeQuery(authKey) + ", " + escapeQuery("update_spots") + ")";
+                connection.query(sql, function (error, results, fields) {
+                    if (results.affectedRows == 1)
+                        sendErrorJSON(res, 'AUTH_KEY_ADDED', "Your new auth key is : " + authKey);
+                    else
+                        sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
+                });
+            },
+            function () {
+                sendErrorJSON(res, 'INVALID_BASIC_AUTH');
+            }
+        );
+    }
 });
 
 // PARKING ENDPOINTS
@@ -73,10 +108,10 @@ parking.post('/update_status', function (req, res) {
             if (rows.length == 1) {
                 var sql = "UPDATE `parking` set `occupied` = " + escapeQuery(req.query.occupied) + " WHERE `spot_id` = " + escapeQuery(req.query.spot_id);
                 connection.query(sql, function (error, results, fields) {
-                    if (results.affectedRows == 0) {
-                        sendErrorJSON(res, 'INVALID_SPOT_ID');
+                    if (results.affectedRows == 1) {
+                        sendErrorJSON(res, 'SPOT_STATUS_CHANGED', results[0]);
                     } else {
-                        res.status(200).send("spot_id successfully updated!");
+                        sendErrorJSON(res, 'INVALID_SPOT_ID');
                     }
                 });
             } else {
@@ -245,6 +280,15 @@ function lookupPhone(phoneNumber, successCallBack, failCallBack) {
         } else {
             successCallBack(body);
         }
+    });
+}
+
+function authCheck(database, username, password, successCB, failureCB) {
+    connection.query("SELECT * FROM `" + database + "` WHERE `username` = " + escapeQuery(username), function (error, rows) {
+        if (rows.length == 1)
+            successCB();
+        else
+            failureCB();
     });
 }
 

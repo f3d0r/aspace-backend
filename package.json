@@ -17,7 +17,7 @@
   },
   "homepage": "https://gitlab.com/aspace/backend#README",
   "dependencies": {
-    "axios": "^0.18.0",
+    "bcrypt": "^2.0.1",
     "express": "^4.16.3",
     "mysql": "github:mysqljs/mysql",
     "request": "^2.87.0",

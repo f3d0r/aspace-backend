@@ -78,5 +78,25 @@ module.exports = Object.freeze({
         HTTP_CODE: 404,
         ERROR_CODE: 15,
         INFO: "invalid_spot_id"
+    },
+    INVALID_BASIC_AUTH: {
+        HTTP_CODE: 401,
+        ERROR: 16,
+        INFO: "invalid_basic_auth"
+    },
+    AUTH_KEY_ADDED: {
+        HTTP_CODE: 200,
+        ERROR: 17,
+        INFO: "auth_key_added"
+    },
+    AUTH_KEY_NOT_ADDED: {
+        HTTP_CODE: 500,
+        ERROR: 18,
+        INFO: "auth_key_not_added"
+    },
+    SPOT_STATUS_CHANGED: {
+        HTTP_CODE: 200,
+        ERROR: 19,
+        INFO: "spot_status_changed"
     }
 });
