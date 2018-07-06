@@ -4,6 +4,8 @@
   "description": "Code base for aspace, Inc. backend, consisting of a node.js/Express.js backend stack, available at https://api.trya.space.",
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
+    "deploy": "pm2 start app.js --watch",
     "test": "debug"
   },
   "repository": {
@@ -17,8 +19,9 @@
   },
   "homepage": "https://gitlab.com/aspace/backend#README",
   "dependencies": {
-    "bcrypt": "^2.0.1",
+    "bcrypt": "^3.0.0",
     "express": "^4.16.3",
+    "moment": "^2.22.2",
     "mysql": "github:mysqljs/mysql",
     "request": "^2.87.0",
     "twilio": "^3.17.4",

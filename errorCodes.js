@@ -108,5 +108,15 @@ module.exports = Object.freeze({
         HTTP_CODE: 422,
         ERROR: 21,
         INFO: "invalid_status_entered"
+    },
+    NEW_ACCESS_CODE: {
+        HTTP_CODE: 200,
+        ERROR: 22,
+        INFO: "new_access_code"
+    },
+    PIN_EXPIRED: {
+        HTTP_CODE: 200,
+        ERROR: 23,
+        INFO: "pin_expired"
     }
 });

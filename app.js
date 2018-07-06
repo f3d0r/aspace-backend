@@ -3,7 +3,9 @@ const express = require('express');
 const uniqueString = require('unique-string');
 const request = require("request");
 const mysql = require('mysql');
+const moment = require('moment');
 var ERROR_CODES = require('./errorCodes');
+
 
 // CONSTANTS
 const DATABASE_USER = 'api';
@@ -14,6 +16,8 @@ const SOCKET_PATH = '/var/run/mysqld/mysqld.sock';
 
 const ADMIN_TABLE = 'aspace_admins';
 const API_PORT = 3000;
+
+const PIN_EXPIRY_MINUTES = 1;
 
 // BCRYPT SETUP
 const bcrypt = require('bcrypt');
@@ -174,19 +178,32 @@ auth.get('/', function (req, res) {
 auth.post("/phone_login", function (req, res) {
     if (!queryExists(req, 'phone_number')) {
         sendErrorJSON(res, 'MISSING_PARAMETER', 'phone_number required');
+    } else if (!queryExists(req, 'device_id')) {
+        sendErrorJSON(res, 'MISSING_PARAMETER', 'device_id required');
     } else {
-        lookupPhone(req.query.phone_number, function (response) {
+        lookupPhone(req.query.phone_number, function (formattedPhoneNumber) {
+            var sql = "SELECT `user_id` FROM `users` WHERE `phone_number` = " + escapeQuery(formattedPhoneNumber);
             connection.query(sql, function (error, rows) {
-                if (rows.length == 0) {
-                    var userId = uniqueString();
-                    var code = Math.floor(100000 + Math.random() * 900000);
-                    var sql = "INSERT INTO `verification_codes` (`user_id`, `phone_number`, `verify_code`) VALUES ('" + escapeQuery(userId, false) + "', '" + escapeQuery(response.phone_number, false) + "', '" + escapeQuery(code, false) + "')";
-                    connection.query(sql, function (error, rows) {
-                        sendErrorJSON(res, 'NEW_PHONE');
-                        sendVerificationText(response.phone_number, code);
+                verifyUser = {};
+                verifyUser['phone_number'] = formattedPhoneNumber;
+                var pin = Math.floor(100000 + Math.random() * 900000);
+                verifyUser['verify_pin'] = pin;
+                verifyUser['device_id'] = req.query.device_id;
+                verifyUser['expiry_date'] = getExpiryTimestamp(PIN_EXPIRY_MINUTES, 'm');
+                if (rows.length == 1) {
+                    verifyUser['user_id'] = rows[0].user_id;
+                    connection.query('INSERT INTO `user_verify_codes` SET ?', verifyUser, function (error, results, fields) {
+                        if (error) throw error;
+                        sendVerificationText(formattedPhoneNumber, pin);
+                        sendErrorJSON(res, 'RETURN_PHONE');
                     });
                 } else {
-                    sendErrorJSON(res, 'RETURN_PHONE');
+                    verifyUser['user_id'] = uniqueString();
+                    connection.query('INSERT INTO `user_verify_codes` SET ?', verifyUser, function (error, results, fields) {
+                        if (error) throw error;
+                        sendVerificationText(formattedPhoneNumber, pin);
+                        sendErrorJSON(res, 'NEW_PHONE');
+                    });
                 }
             });
         }, function () {
@@ -198,16 +215,42 @@ auth.post("/phone_login", function (req, res) {
 auth.post("/check_pin", function (req, res) {
     if (!queryExists(req, 'phone_number')) {
         sendErrorJSON(res, 'MISSING_PARAMETER', 'phone_number required');
+    } else if (!queryExists(req, 'device_id')) {
+        sendErrorJSON(res, 'MISSING_PARAMETER', 'device_id required');
     } else if (!queryExists(req, 'verify_pin')) {
         sendErrorJSON(res, 'MISSING_PARAMETER', 'verify_pin required');
     } else {
-        lookupPhone(req.query.phone_number, function (response) {
-            var sql = "SELECT * FROM `verification_codes` WHERE `phone` = " + escapeQuery(response.phone_number) + " AND `code` = " + escapeQuery(req.query.verify_pin);
+        lookupPhone(req.query.phone_number, function (formattedPhoneNumber) {
+            var sql = "SELECT * FROM `user_verify_codes` WHERE `phone_number` = " + escapeQuery(formattedPhoneNumber) + " AND `device_id` = " + escapeQuery(req.query.device_id) + " AND `verify_pin` = " + escapeQuery(req.query.verify_pin);
             connection.query(sql, function (error, rows) {
                 if (rows.length == 1) {
-                    res.send("{\"userId\" : \"" + rows[0].userId + "\"}");
+                    if (timeStampPassed(moment.utc(rows[0].expiry_date))) {
+                        deleteVerificationCode(formattedPhoneNumber, req.query.device_id);
+                        sendErrorJSON(res, 'PIN_EXPIRED');
+                    } else {
+                        var newAccessCode = uniqueString();
+                        accessCode = {};
+                        expiry_date = getExpiryTimestamp(2, 'months');
+                        accessCode['user_id'] = rows[0].user_id;
+                        accessCode['access_code'] = newAccessCode;
+                        accessCode['device_id'] = req.query.device_id;
+                        accessCode['expiry_date'] = expiry_date;
+                        accessCode['grant_date'] = getFormattedTime(moment().utc());
+                        connection.query('INSERT INTO `user_access_codes` SET ?', accessCode, function (error, results, fields) {
+                            if (error) throw error;
+                            jsonReturn = {};
+                            jsonReturn['access_code'] = newAccessCode
+                            jsonReturn['expiry'] = expiry_date;
+                            sendErrorJSON(res, 'NEW_ACCESS_CODE', jsonReturn);
+                            deleteVerificationCode(formattedPhoneNumber, req.query.device_id);
+                            newUserJSON = {};
+                            newUserJSON['user_id'] = rows[0].user_id;
+                            newUserJSON['phone_number'] = formattedPhoneNumber;
+                            addUser(newUserJSON);
+                        });
+                    }
                 } else {
-                    sendErrorJSON(res, 'INVALID_PIN');
+                    sendErrorJSON(res, 'INVALID_PIN')
                 }
             });
         }, function () {
@@ -282,7 +325,7 @@ function lookupPhone(phoneNumber, successCallBack, failCallBack) {
         if (body.status == 404) {
             failCallBack(body.status);
         } else {
-            successCallBack(body);
+            successCallBack(body.phone_number);
         }
     });
 }
@@ -330,6 +373,32 @@ function basicAuth(req, res, successCB) {
             );
         }
     }
+}
+
+function deleteVerificationCode(phoneNumber, deviceId) {
+    var sql = "DELETE FROM `user_verify_codes` WHERE `phone_number` = " + escapeQuery(phoneNumber) + " AND `device_id` = " + escapeQuery(deviceId);
+    connection.query(sql, function (error, rows) {
+        if (error) throw error;
+    });
+}
+
+function addUser(newUserJSON) {
+    connection.query('INSERT INTO `users` SET ?', newUserJSON, function (error, results, fields) {
+        if (error) throw error;
+    });
+}
+
+
+function timeStampPassed(otherUTCMoment) {
+    return moment().isAfter(otherUTCMoment);
+}
+
+function getExpiryTimestamp(amount, type) {
+    return getFormattedTime(moment().utc().add(amount, type));
+}
+
+function getFormattedTime(momentTime) {
+    return momentTime.format("YYYY-MM-DD HH:mm:ss");
 }
 
 // SERVER SET UP
