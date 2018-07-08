@@ -107,7 +107,7 @@ parking.post('/update_status', function (req, res) {
                 var sql = "UPDATE `parking` set `occupied` = " + escapeQuery(req.query.occupied) + " WHERE `spot_id` = " + escapeQuery(req.query.spot_id);
                 connection.query(sql, function (error, results, fields) {
                     if (results.affectedRows == 1) {
-                        sendErrorJSON(res, 'SPOT_STATUS_CHANGED', results[0]);
+                        sendErrorJSON(res, 'SPOT_STATUS_CHANGED');
                     } else {
                         sendErrorJSON(res, 'INVALID_SPOT_ID');
                     }

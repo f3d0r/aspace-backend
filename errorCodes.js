@@ -14,50 +14,15 @@ module.exports = Object.freeze({
         ERROR_CODE: 2,
         INFO: "return_phone"
     },
-    INVALID_PASSWORD: {
-        HTTP_CODE: 200,
-        ERROR_CODE: 3,
-        INFO: "invalid_password"
-    },
     INVALID_PIN: {
         HTTP_CODE: 200,
         ERROR_CODE: 4,
         INFO: "invalid_pin"
     },
     DB_ERROR: {
-        HTTP_CODE: 200,
+        HTTP_CODE: 500,
         ERROR_CODE: 5,
         INFO: "db_error"
-    },
-    NOT_FOUND: {
-        HTTP_CODE: 200,
-        ERROR_CODE: 6,
-        INFO: "not_found"
-    },
-    COULD_NOT_CREATE_USER: {
-        HTTP_CODE: 200,
-        ERROR_CODE: 7,
-        INFO: "could_not_create_user"
-    },
-    PASSWORD_RESET_EXPIRED: {
-        HTTP_CODE: 200,
-        ERROR_CODE: 8,
-        INFO: "password_reset_expired"
-    },
-    PASSWORD_RESET_HASH_MISMATCH: {
-        HTTP_CODE: 200,
-        ERROR_CODE: 9,
-        INFO: "password_reset_hash_mismatch"
-    },
-    PASSWORD_RESET_PHONE_MISMATCH: {
-        HTTP_CODE: 200,
-        ERROR_CODE: 10,
-        INFO: "password_reset_phone_mismatch"
-    },
-    COULD_NOT_RESET_PASSWORD: {
-        HTTP_CODE: 200,
-        ERROR_CODE: 11,
-        INFO: "could_not_reset_password"
     },
     INVALID_PHONE: {
         HTTP_CODE: 200,
@@ -90,7 +55,7 @@ module.exports = Object.freeze({
         INFO: "auth_key_added"
     },
     AUTH_KEY_NOT_ADDED: {
-        HTTP_CODE: 500,
+        HTTP_CODE: 403,
         ERROR: 18,
         INFO: "auth_key_not_added"
     },
@@ -115,7 +80,7 @@ module.exports = Object.freeze({
         INFO: "new_access_code"
     },
     PIN_EXPIRED: {
-        HTTP_CODE: 200,
+        HTTP_CODE: 403,
         ERROR: 23,
         INFO: "pin_expired"
     }
