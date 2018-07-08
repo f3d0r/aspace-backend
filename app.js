@@ -6,7 +6,6 @@ const mysql = require('mysql');
 const moment = require('moment');
 var ERROR_CODES = require('./errorCodes');
 
-
 // CONSTANTS
 const DATABASE_USER = 'api';
 const DATABASE_PASSWORD = 'db_password';
