@@ -1,7 +1,7 @@
 {
   "name": "aspace_backend",
   "version": "1.0.0",
-  "description": "Code base for aspace, Inc. backend, consisting of a node.js/Express.js backend stack, available at https://api.trya.space.",
+  "description": "aspace, Inc. - Backend (node.js/Espress.js stack), available at https://api.trya.space.",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
