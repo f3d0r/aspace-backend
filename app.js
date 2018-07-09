@@ -182,10 +182,10 @@ parking.post('/add_points', function (req, res) {
     }
 });
 
-parking.post('/check_block_id_exists', function (req, res) {
+parking.get('/check_block_id_exists', function (req, res) {
     connection.query('SELECT * from parking where block_id = ' + escapeQuery(req.query.block_id), function (error, results, fields) {
         if (error) throw error;
-        res.send(results.length == 0 ? "F" : "T");
+        res.status(200).send(results.length == 0 ? "F" : "T");
     });
 });
 
