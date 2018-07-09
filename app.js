@@ -185,7 +185,13 @@ parking.post('/add_points', function (req, res) {
 parking.get('/check_block_id_exists', function (req, res) {
     connection.query('SELECT * from parking where block_id = ' + escapeQuery(req.query.block_id), function (error, results, fields) {
         if (error) throw error;
-        res.status(200).send(results.length == 0 ? "F" : "T");
+        var jsonReturn = {};
+        if (results.length == 0) {
+            jsonReturn['block_id_exists'] = "F";
+        } else {
+            jsonReturn['block_id_exists'] = "T";
+        }
+        res.status(200).send(jsonReturn);
     });
 });
 
