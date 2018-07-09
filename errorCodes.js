@@ -31,12 +31,12 @@ module.exports = Object.freeze({
     },
     INVALID_AUTH_KEY: {
         HTTP_CODE: 403,
-        ERROR: 13,
+        ERROR_CODE: 13,
         INFO: "invalid_auth_key"
     },
     MISSING_AUTH_KEY: {
         HTTP_CODE: 401,
-        ERROR: 14,
+        ERROR_CODE: 14,
         INFO: "missing_auth_key"
     },
     INVALID_SPOT_ID: {
@@ -46,42 +46,42 @@ module.exports = Object.freeze({
     },
     INVALID_BASIC_AUTH: {
         HTTP_CODE: 401,
-        ERROR: 16,
+        ERROR_CODE: 16,
         INFO: "invalid_basic_auth"
     },
     AUTH_KEY_ADDED: {
         HTTP_CODE: 200,
-        ERROR: 17,
+        ERROR_CODE: 17,
         INFO: "auth_key_added"
     },
     AUTH_KEY_NOT_ADDED: {
         HTTP_CODE: 403,
-        ERROR: 18,
+        ERROR_CODE: 18,
         INFO: "auth_key_not_added"
     },
     SPOT_STATUS_CHANGED: {
         HTTP_CODE: 200,
-        ERROR: 19,
+        ERROR_CODE: 19,
         INFO: "spot_status_changed"
     },
     MISSING_BODY: {
         HTTP_CODE: 422,
-        ERROR: 20,
+        ERROR_CODE: 20,
         INFO: "missing_body"
     },
     INVALID_STATUS_ENTERED: {
         HTTP_CODE: 422,
-        ERROR: 21,
+        ERROR_CODE: 21,
         INFO: "invalid_status_entered"
     },
     NEW_ACCESS_CODE: {
         HTTP_CODE: 200,
-        ERROR: 22,
+        ERROR_CODE: 22,
         INFO: "new_access_code"
     },
     PIN_EXPIRED: {
         HTTP_CODE: 403,
-        ERROR: 23,
+        ERROR_CODE: 23,
         INFO: "pin_expired"
     },
     INVALID_BLOCK_ID: {

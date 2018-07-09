@@ -75,18 +75,24 @@ admin.get('/', function (req, res) {
 });
 
 admin.get('/ping', function (req, res) {
-    res.status(200).send("pong");
+    basicAuth(req, res, function () {
+        res.status(200).send("pong");
+    });
 });
 
 admin.get('/add_auth_key', function (req, res) {
     basicAuth(req, res, function () {
         var authKey = uniqueString();
-        var sql = "INSERT INTO `database_authority` (`auth_key`, `permission`) VALUES (" + escapeQuery(authKey) + ", " + escapeQuery("update_spots") + ")";
-        connection.query(sql, function (error, results, fields) {
-            if (results.affectedRows == 1)
-                sendErrorJSON(res, 'AUTH_KEY_ADDED', "Your new auth key is : " + authKey);
-            else
+        var sql = "INSERT INTO `database_authority` (`auth_key`, `permission`) VALUES (?, ?)";
+        connection.query(sql, [authKey, "update_spots"], function (error, results, fields) {
+            if (results.affectedRows == 1) {
+                var jsonReturn = {};
+                jsonReturn['auth_key'] = authKey;
+                jsonReturn['permissions'] = "update_spots";
+                sendErrorJSON(res, 'AUTH_KEY_ADDED', jsonReturn);
+            } else {
                 sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
+            }
         });
     });
 });
@@ -111,8 +117,8 @@ parking.post('/update_status', function (req, res) {
         sendErrorJSON(res, 'INVALID_STATUS_ENTERED', "occupied query must be equal to 'N', 'F', 'T'");
     } else {
         databasePermissionCheck("database_authority", req.query.auth_key, "update_spots", function () {
-                var sql = "UPDATE `parking` set `occupied` = " + escapeQuery(req.query.occupied) + " WHERE `spot_id` = " + escapeQuery(req.query.spot_id);
-                connection.query(sql, function (error, results, fields) {
+                var sql = "UPDATE `parking` SET `occupied` = ? WHERE `spot_id` = ?";
+                connection.query(sql, [req.query.occupied, req.query.spot_id], function (error, results, fields) {
                     if (results.affectedRows == 1) {
                         sendErrorJSON(res, 'SPOT_STATUS_CHANGED');
                     } else {
@@ -130,7 +136,7 @@ parking.get('/get_status', function (req, res) {
     if (!queryExists(req, 'block_id') && !queryExists(req, 'spot_id')) {
         sendErrorJSON(res, 'MISSING_PARAMETER', 'block_id or spot_id required');
     } else if (!queryExists(req, 'block_id')) {
-        connection.query('SELECT * from parking where spot_id = ' + escapeQuery(req.query.spot_id), function (error, results, fields) {
+        connection.query('SELECT * from parking where `spot_id` = ?', [req.query.spot_id], function (error, results, fields) {
             if (error) {
                 res.status(500).send(error);
             }
@@ -141,7 +147,7 @@ parking.get('/get_status', function (req, res) {
             }
         });
     } else if (!queryExists(req, 'spot_id')) {
-        connection.query('SELECT * from parking where block_id = ' + escapeQuery(req.query.block_id), function (error, results, fields) {
+        connection.query('SELECT * from parking where `block_id` = ?', [req.query.block_id], function (error, results, fields) {
             if (error) {
                 res.status(500).send(error);
             }
@@ -152,7 +158,7 @@ parking.get('/get_status', function (req, res) {
             }
         });
     } else {
-        connection.query('SELECT * from parking where block_id = ' + escapeQuery(req.query.block_id) + ' and spot_id = ' + escapeQuery(req.query.spot_id), function (error, results, fields) {
+        connection.query('SELECT * from parking where `block_id` = ? AND `spot_id` = ?', [req.query.block_id, req.query.spot_id], function (error, results, fields) {
             if (error) {
                 res.status(500).send(error);
             }
@@ -165,10 +171,34 @@ parking.get('/get_status', function (req, res) {
     }
 });
 
-parking.post('/add_points', function (req, res) {
+parking.get('/get_status_bbox', function (req, res) {
+    if (typeof req.body == 'undefined' || req.body === null) {
+        sendErrorJSON(res, 'MISSING_BODY');
+    } else if (typeof req.body.sw == 'undefined' || req.body.sw === null) {
+        sendErrorJSON(res, 'MISSING_BODY', "Missing body.sw");
+    } else if (typeof req.body.ne == 'undefined' || req.body.ne === null) {
+        sendErrorJSON(res, 'MISSING_BODY', "Missing body.ne");
+    } else if (typeof req.body.sw.lat == 'undefined' || req.body.sw.lat === null) {
+        sendErrorJSON(res, 'MISSING_BODY', "Missing body.sw.lat");
+    } else if (typeof req.body.sw.lng == 'undefined' || req.body.sw.lng === null) {
+        sendErrorJSON(res, 'MISSING_BODY', "Missing body.sw.lng");
+    } else if (typeof req.body.ne.lat == 'undefined' || req.body.ne.lat === null) {
+        sendErrorJSON(res, 'MISSING_BODY', "Missing body.ne.lat");
+    } else if (typeof req.body.ne.lng == 'undefined' || req.body.ne.lng === null) {
+        sendErrorJSON(res, 'MISSING_BODY', "Missing body.ne.lng");
+    } else {
+        var sql = "SELECT * from `parking` WHERE `lat` >= ? AND `lng` >= ? AND `lat` <= ? AND `lng` <= ?";
+        connection.query(sql, [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], function (error, results, fields) {
+            if (error) throw error;
+            res.status(200).send(results);
+        });
+    }
+});
+
+parking.post('/add_spots', function (req, res) {
     if (!queryExists(req, 'auth_key')) {
         sendErrorJSON(res, 'MISSING_AUTH_KEY');
-    } else if (JSON.stringify(req.body) == "{}") {
+    } else if (JSON.stringify(req.body) == "{}" || typeof req.body == 'undefined' || req.body === null) {
         sendErrorJSON(res, "MISSING_BODY");
     } else {
         databasePermissionCheck("database_authority", req.query.auth_key, "add_spots", function () {
@@ -183,7 +213,7 @@ parking.post('/add_points', function (req, res) {
 });
 
 parking.get('/block_id_exists', function (req, res) {
-    connection.query('SELECT * from parking where block_id = ' + escapeQuery(req.query.block_id), function (error, results, fields) {
+    connection.query('SELECT * from parking where `block_id` = ?', [req.query.block_id], function (error, results, fields) {
         if (error) throw error;
         var jsonReturn = {};
         if (results.length == 0) {
@@ -211,8 +241,8 @@ auth.post("/phone_login", function (req, res) {
         sendErrorJSON(res, 'MISSING_PARAMETER', 'device_id required');
     } else {
         lookupPhone(req.query.phone_number, function (formattedPhoneNumber) {
-            var sql = "SELECT `user_id` FROM `users` WHERE `phone_number` = " + escapeQuery(formattedPhoneNumber);
-            connection.query(sql, function (error, rows) {
+            var sql = "SELECT `user_id` FROM `users` WHERE `phone_number` = ?";
+            connection.query(sql, [formattedPhoneNumber], function (error, rows) {
                 verifyUser = {};
                 verifyUser['phone_number'] = formattedPhoneNumber;
                 var pin = Math.floor(100000 + Math.random() * 900000);
@@ -250,8 +280,8 @@ auth.post("/check_pin", function (req, res) {
         sendErrorJSON(res, 'MISSING_PARAMETER', 'verify_pin required');
     } else {
         lookupPhone(req.query.phone_number, function (formattedPhoneNumber) {
-            var sql = "SELECT * FROM `user_verify_codes` WHERE `phone_number` = " + escapeQuery(formattedPhoneNumber) + " AND `device_id` = " + escapeQuery(req.query.device_id) + " AND `verify_pin` = " + escapeQuery(req.query.verify_pin);
-            connection.query(sql, function (error, rows) {
+            var sql = "SELECT * FROM `user_verify_codes` WHERE `phone_number` = ? AND `device_id` = ? AND `verify_pin` = ?";
+            connection.query(sql, [formattedPhoneNumber, req.query.device_id, req.query.verify_pin], function (error, rows) {
                 if (rows.length == 1) {
                     if (timeStampPassed(moment.utc(rows[0].expiry_date))) {
                         deleteVerificationCode(formattedPhoneNumber, req.query.device_id);
@@ -272,10 +302,16 @@ auth.post("/check_pin", function (req, res) {
                             jsonReturn['expiry'] = expiry_date;
                             sendErrorJSON(res, 'NEW_ACCESS_CODE', jsonReturn);
                             deleteVerificationCode(formattedPhoneNumber, req.query.device_id);
-                            newUserJSON = {};
-                            newUserJSON['user_id'] = rows[0].user_id;
-                            newUserJSON['phone_number'] = formattedPhoneNumber;
-                            addUser(newUserJSON);
+                            connection.query('SELECT `user_id` from `users` WHERE user_id = ?', [rows[0].user_id], function (error, rows) {
+                                if (error) throw error;
+                                if (rows.length == 0) {
+                                    newUserJSON = {};
+                                    newUserJSON['user_id'] = accessCode['user_id'];
+                                    newUserJSON['phone_number'] = formattedPhoneNumber;
+                                    addUser(newUserJSON);
+                                }
+                            });
+
                         });
                     }
                 } else {
@@ -330,10 +366,6 @@ function queryExists(req, queryName) {
     return true;
 }
 
-function escapeQuery(query) {
-    return connection.escapeId(query).split('`').join('\'');
-}
-
 function lookupPhone(phoneNumber, successCallBack, failCallBack) {
     var authorization = Buffer.from(TWILIO_ACCOUNT_SID + ":" + TWILIO_AUTH_TOKEN).toString('base64');
     var options = {
@@ -360,7 +392,7 @@ function lookupPhone(phoneNumber, successCallBack, failCallBack) {
 }
 
 function authCheck(database, username, password, successCB, failureCB) {
-    connection.query("SELECT * FROM `" + database + "` WHERE `username` = " + escapeQuery(username), function (error, rows) {
+    connection.query("SELECT * FROM " + connection.escapeId(database) + " WHERE `username` = ?", [username], function (error, rows) {
         bcrypt.compare(password, rows[0].password, function (err, res) {
             if (res) {
                 successCB();
@@ -372,8 +404,8 @@ function authCheck(database, username, password, successCB, failureCB) {
 }
 
 function databasePermissionCheck(database, auth_key, permission, successCB, failureCB) {
-    var sql = "SELECT * FROM `" + database + "` WHERE `auth_key` = " + escapeQuery(auth_key) + " AND `permission` LIKE " + escapeQuery("%" + permission + "%");
-    connection.query(sql, function (error, rows) {
+    var sql = "SELECT * FROM " + connection.escapeId(database) + " WHERE `auth_key` = ? AND `permission` LIKE ?";
+    connection.query(sql, [auth_key, "%" + permission + "%"], function (error, rows) {
         if (rows.length == 1) {
             successCB();
         } else {
@@ -405,8 +437,8 @@ function basicAuth(req, res, successCB) {
 }
 
 function deleteVerificationCode(phoneNumber, deviceId) {
-    var sql = "DELETE FROM `user_verify_codes` WHERE `phone_number` = " + escapeQuery(phoneNumber) + " AND `device_id` = " + escapeQuery(deviceId);
-    connection.query(sql, function (error, rows) {
+    var sql = "DELETE FROM `user_verify_codes` WHERE `phone_number` = ? AND `device_id` = ?";
+    connection.query(sql, [phoneNumber, deviceId], function (error, rows) {
         if (error) throw error;
     });
 }
