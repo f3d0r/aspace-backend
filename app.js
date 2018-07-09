@@ -134,21 +134,33 @@ parking.get('/get_status', function (req, res) {
             if (error) {
                 res.status(500).send(error);
             }
-            res.status(200).send(JSON.stringify(results));
+            if (results.length == 0) {
+                sendErrorJSON(res, 'INVALID_SPOT_ID');
+            } else {
+                res.status(200).send(JSON.stringify(results));
+            }
         });
     } else if (!queryExists(req, 'spot_id')) {
         connection.query('SELECT * from parking where block_id = ' + escapeQuery(req.query.block_id), function (error, results, fields) {
             if (error) {
                 res.status(500).send(error);
             }
-            res.status(200).send(JSON.stringify(results));
+            if (results.length == 0) {
+                sendErrorJSON(res, 'INVALID_BLOCK_ID');
+            } else {
+                res.status(200).send(JSON.stringify(results));
+            }
         });
     } else {
         connection.query('SELECT * from parking where block_id = ' + escapeQuery(req.query.block_id) + ' and spot_id = ' + escapeQuery(req.query.spot_id), function (error, results, fields) {
             if (error) {
                 res.status(500).send(error);
             }
-            res.status(200).send(JSON.stringify(results));
+            if (results.length == 0) {
+                sendErrorJSON(res, 'INVALID_BLOCK_ID_OR_SPOT_ID');
+            } else {
+                res.status(200).send(JSON.stringify(results));
+            }
         });
     }
 });

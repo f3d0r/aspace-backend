@@ -83,5 +83,15 @@ module.exports = Object.freeze({
         HTTP_CODE: 403,
         ERROR: 23,
         INFO: "pin_expired"
+    },
+    INVALID_BLOCK_ID: {
+        HTTP_CODE: 404,
+        ERROR_CODE: 24,
+        INFO: "invalid_block_id"
+    },
+    INVALID_BLOCK_ID_OR_SPOT_ID: {
+        HTTP_CODE: 404,
+        ERROR_CODE: 25,
+        INFO: "invalid_block_id_or_spot_id"
     }
 });
