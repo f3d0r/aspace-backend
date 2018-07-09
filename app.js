@@ -74,6 +74,10 @@ admin.get('/', function (req, res) {
     });
 });
 
+admin.get('/ping', function (req, res) {
+    res.status(200).send("pong");
+});
+
 admin.get('/add_auth_key', function (req, res) {
     basicAuth(req, res, function () {
         var authKey = uniqueString();
@@ -90,6 +94,10 @@ admin.get('/add_auth_key', function (req, res) {
 // PARKING ENDPOINTS
 parking.get('/', function (req, res) {
     res.status(200).send("This is the parking sub-API for aspace! :)");
+});
+
+parking.get('/ping', function (req, res) {
+    res.status(200).send("pong");
 });
 
 parking.post('/update_status', function (req, res) {
@@ -172,6 +180,10 @@ parking.post('/check_block_id_exists', function (req, res) {
 // AUTH ENDPOINTS
 auth.get('/', function (req, res) {
     res.status(200).send("This is the user authentication sub-API for aspace! :)");
+});
+
+auth.get('/ping', function (req, res) {
+    res.status(200).send("pong");
 });
 
 auth.post("/phone_login", function (req, res) {
