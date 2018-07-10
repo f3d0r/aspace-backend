@@ -80,21 +80,39 @@ admin.get('/ping', function (req, res) {
     });
 });
 
-admin.get('/add_auth_key', function (req, res) {
-    basicAuth(req, res, function () {
-        var authKey = uniqueString();
-        var sql = "INSERT INTO `database_authority` (`auth_key`, `permission`) VALUES (?, ?)";
-        connection.query(sql, [authKey, "update_spots"], function (error, results, fields) {
-            if (results.affectedRows == 1) {
-                var jsonReturn = {};
-                jsonReturn['auth_key'] = authKey;
-                jsonReturn['permissions'] = "update_spots";
-                sendErrorJSON(res, 'AUTH_KEY_ADDED', jsonReturn);
+admin.post('/request_auth_key', function (req, res) {
+    if (!queryExists(req, 'username')) {
+        sendErrorJSON(res, 'MISSING_PARAMETER', 'username required');
+    } else if (!queryExists(req, 'password')) {
+        sendErrorJSON(res, 'MISSING_PARAMETER', 'password required');
+    } else if (!queryExists(req, 'requested_permission')) {
+        sendErrorJSON(res, 'MISSING_PARAMETER', 'requested_permission required');
+    } else {
+        var sql = "SELECT * FROM `aspace_admins` WHERE `username` = ? AND `auth_key_permissions` LIKE ?";
+        connection.query(sql, [req.query.username, "%" + req.query.requested_permission + "%"], function (error, rows) {
+            if (rows.length == 1) {
+                bcrypt.compare(req.query.password, rows[0].password, function (err, match) {
+                    if (match) {
+                        var authKey = uniqueString();
+                        var sql = "INSERT INTO `database_authority` (`request_user`, `auth_key`, `permission`) VALUES (?, ?, ?)";
+                        connection.query(sql, [req.query.username, authKey, req.query.requested_permission], function (error, results, fields) {
+                            if (results.affectedRows == 1) {
+                                var jsonReturn = {};
+                                jsonReturn['auth_key'] = authKey;
+                                jsonReturn['requested_permission'] = req.query.requested_permission;
+                                sendErrorJSON(res, 'AUTH_KEY_ADDED', jsonReturn);
+                            }
+                        });
+                    } else {
+                        sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
+                    }
+                });
+
             } else {
                 sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
             }
         });
-    });
+    }
 });
 
 // PARKING ENDPOINTS
@@ -412,8 +430,8 @@ function lookupPhone(phoneNumber, successCallBack, failCallBack) {
 
 function authCheck(database, username, password, successCB, failureCB) {
     connection.query("SELECT * FROM " + connection.escapeId(database) + " WHERE `username` = ?", [username], function (error, rows) {
-        bcrypt.compare(password, rows[0].password, function (err, res) {
-            if (res) {
+        bcrypt.compare(password, rows[0].password, function (err, match) {
+            if (match) {
                 successCB();
             } else {
                 failureCB();
