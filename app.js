@@ -196,21 +196,16 @@ parking.get('/get_status_bbox', function (req, res) {
 });
 
 parking.get('/get_status_radius', function (req, res) {
-    var miles = 0;
     if (JSON.stringify(req.body) == "{}" || typeof req.body == 'undefined' || req.body === null) {
         sendErrorJSON(res, "MISSING_BODY", "lat/lng body required");
     } else if (typeof req.body.lat == 'undefined' || req.body.lat === null) {
         sendErrorJSON(res, 'MISSING_BODY', "Missing body.lat");
     } else if (typeof req.body.lng == 'undefined' || req.body.lng === null) {
         sendErrorJSON(res, 'MISSING_BODY', "Missing body.lng");
-    } else if (queryExists(req, 'radius_miles')) {
-        miles = req.query.radius_miles;
-    } else if (queryExists(req, 'radius_feet')) {
-        miles = req.query.radius_feet / 5280;
+    } else if (!queryExists(req, 'radius_feet')) {
+        sendErrorJSON(res, 'MISSING_PARAMETER', "radius_feet required");
     } else {
-        sendErrorJSON(res, 'MISSING_PARAMETER', "radius_miles or radius_feet required");
-    }
-    if (miles != 0) {
+        var miles = req.query.radius_feet / 5280;
         var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(?) ) + sin( radians(?) ) * sin(radians(lat)) ) ) AS distance FROM parking HAVING distance < ? ORDER BY distance"
         connection.query(sql, [req.body.lat, req.body.lng, req.body.lat, miles], function (error, results, fields) {
             if (error) throw error;
