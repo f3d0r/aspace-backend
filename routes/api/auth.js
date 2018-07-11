@@ -91,7 +91,6 @@ router.post("/check_pin", function (req, res) {
                                         newUserJSON['user_id'] = accessCode['user_id'];
                                         newUserJSON['phone_number'] = formattedPhoneNumber;
                                         sql.insert.addObject('users', newUserJSON, function () {
-                                            addUser(newUserJSON);
                                         }, function (error) {
                                             throw error;
                                         });
