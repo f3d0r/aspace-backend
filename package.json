@@ -21,10 +21,24 @@
   "dependencies": {
     "bcrypt": "^3.0.0",
     "express": "^4.16.3",
+    "module-alias": "^2.1.0",
     "moment": "^2.22.2",
     "mysql": "github:mysqljs/mysql",
     "request": "^2.87.0",
-    "twilio": "^3.17.4",
+    "twilio": "^3.17.5",
     "unique-string": "^1.0.0"
-  }
+  },
+  "_moduleAliases": {
+    "@root": ".",
+    "@auth_bcrypt": "misc/auth/bcrypt",
+    "@auth_basic": "misc/auth/basic",
+    "@errors": "misc/errors/errorHandler",
+    "@misc": "misc",
+    "@config": "config",
+    "@sql": "database/sqlActions",
+    "@connection": "app",
+    "@twilio": "misc/twilio",
+    "@timestamp": "misc/timestamp"
+  },
+  "_moduleDirectories": ["node_modules"]
 }
