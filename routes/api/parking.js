@@ -152,12 +152,12 @@ router.get('/get_min_size_parking', function (req, res) {
         errors.sendErrorJSON(res, 'MISSING_BODY', "Missing body.lng");
     } else if (!errors.queryExists(req, 'radius_feet')) {
         errors.sendErrorJSON(res, 'MISSING_PARAMETER', "radius_feet required");
-    } else if (!errors.queryExists(req, 'spot_size')) {
-        errors.sendErrorJSON(res, 'MISSING_PARAMETER', "spot_size required");
+    } else if (!errors.queryExists(req, 'spot_size_feet')) {
+        errors.sendErrorJSON(res, 'MISSING_PARAMETER', "spot_size_feet required");
     } else {
         var miles = req.query.radius_feet / 5280;
         sql.select.selectRadius('parking', req.body.lat, req.body.lng, miles, function (results) {
-            res.status(200).send(parkingCalc.searchApplicableParking(results, req.query.spot_size));;
+            res.status(200).send(parkingCalc.searchApplicableParking(results, req.query.spot_size_feet));;
         }, function () {}, function (error) {
             throw error;
         });
