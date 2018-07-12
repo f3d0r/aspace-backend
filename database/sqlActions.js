@@ -93,7 +93,7 @@ module.exports = {
         },
         selectRadius: function (database, lat, lng, miles, successCB, noneFoundCB, failCB) {
             db.getConnection(function (err, connection) {
-                var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ? ORDER BY distance"
+                var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
                 connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
                     if (error) {
                         return failCB(error);

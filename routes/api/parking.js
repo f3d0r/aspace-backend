@@ -1,6 +1,7 @@
 var router = require('express').Router();
 var errors = require('@errors');
 var sql = require('@sql');
+var parkingCalc = require('@parking-calc');
 
 router.get('/', function (req, res) {
     res.status(200).send("This is the parking sub-API for aspace! :)");
@@ -104,6 +105,7 @@ router.get('/get_status_radius', function (req, res) {
     } else {
         var miles = req.query.radius_feet / 5280;
         sql.select.selectRadius('parking', req.body.lat, req.body.lng, miles, function (results) {
+            // res.status(200).send(parkingCalc.searchApplicableParking(results, ));
             res.status(200).send(results);
         }, function () {}, function (error) {
             throw error;

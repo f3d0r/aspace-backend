@@ -38,7 +38,8 @@
     "@sql": "database/sqlActions",
     "@connection": "app",
     "@twilio": "misc/twilio",
-    "@timestamp": "misc/timestamp"
+    "@timestamp": "misc/timestamp",
+    "@parking-calc": "misc/parkingCalc"
   },
   "_moduleDirectories": ["node_modules"]
 }
