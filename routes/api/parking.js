@@ -86,7 +86,9 @@ router.get('/get_status_bbox', function (req, res) {
     } else {
         sql.select.regularSelect('parking', ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
                 res.status(200).send(results);
-            }, function () {},
+            }, function () {
+                // res.status(200).send("[]");
+            },
             function (error) {
                 throw error
             });

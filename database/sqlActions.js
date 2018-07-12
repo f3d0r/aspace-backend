@@ -76,16 +76,12 @@ module.exports = {
                     if (error) {
                         return failCB(error);
                     }
-                    if (rows.length > 0) {
-                        if (numResults == null) {
-                            successCB(rows);
-                        } else if (numResults == rows.length) {
-                            successCB(rows);
-                        } else {
-                            noneFoundCB();
-                        }
-                    } else {
+                    if (numResults == null) {
+                        successCB(rows)
+                    } else if (numResults != null && rows.length == 0) {
                         noneFoundCB();
+                    } else {
+                        successCB(rows);
                     }
                 });
                 connection.release();
