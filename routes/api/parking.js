@@ -143,4 +143,25 @@ router.get('/block_id_exists', function (req, res) {
     })
 });
 
+router.get('/get_min_size_parking', function (req, res) {
+    if (JSON.stringify(req.body) == "{}" || typeof req.body == 'undefined' || req.body === null) {
+        errors.sendErrorJSON(res, "MISSING_BODY", "lat/lng body required");
+    } else if (typeof req.body.lat == 'undefined' || req.body.lat === null) {
+        errors.sendErrorJSON(res, 'MISSING_BODY', "Missing body.lat");
+    } else if (typeof req.body.lng == 'undefined' || req.body.lng === null) {
+        errors.sendErrorJSON(res, 'MISSING_BODY', "Missing body.lng");
+    } else if (!errors.queryExists(req, 'radius_feet')) {
+        errors.sendErrorJSON(res, 'MISSING_PARAMETER', "radius_feet required");
+    } else if (!errors.queryExists(req, 'spot_size')) {
+        errors.sendErrorJSON(res, 'MISSING_PARAMETER', "spot_size required");
+    } else {
+        var miles = req.query.radius_feet / 5280;
+        sql.select.selectRadius('parking', req.body.lat, req.body.lng, miles, function (results) {
+            res.status(200).send(parkingCalc.searchApplicableParking(results, req.query.spot_size));;
+        }, function () {}, function (error) {
+            throw error;
+        });
+    }
+});
+
 module.exports = router;

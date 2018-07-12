@@ -16,5 +16,8 @@ module.exports = {
     },
     bcrypt: {
         SALT_ROUNDS: 10
+    },
+    sensors: {
+        sensorDeltaFeet: 2
     }
 }
