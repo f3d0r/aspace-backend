@@ -1,5 +1,6 @@
-const bcryptImport = require('bcrypt');
+var bcryptImport = require('bcryptjs');
 var sql = require('@sql');
+const constants = require('@config');
 
 module.exports = {
     authCheck: function (database, username, password, successCB, failureCB) {
@@ -22,10 +23,12 @@ module.exports = {
                 if (match) {
                     successCB();
                 } else {
-                    console.log(username)
                     failureCB();
                 }
             });
         }
     }
+    // generateAuth: function (password) {
+    //     console.log("hash for \"" + password + "\" : " + bcryptImport.hashSync(password, constants.bcrypt.SALT_ROUNDS));
+    // }
 }

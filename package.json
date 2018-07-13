@@ -19,7 +19,7 @@
   },
   "homepage": "https://gitlab.com/aspace/backend#README",
   "dependencies": {
-    "bcrypt": "^3.0.0",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "module-alias": "^2.1.0",
@@ -40,7 +40,8 @@
     "@connection": "app",
     "@twilio": "misc/twilio",
     "@timestamp": "misc/timestamp",
-    "@parking-calc": "misc/parkingCalc"
+    "@parking-calc": "misc/parkingCalc",
+    "@bcrypt": "misc/auth/bcrypt"
   },
   "_moduleDirectories": [
     "node_modules"

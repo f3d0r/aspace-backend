@@ -54,7 +54,6 @@ function sortByBlockID(rawList) {
     }
     sortedJSON = JSON.parse(JSON.stringify(rawJSON));
 
-    // console.log(sortedJSON);
     return sortedJSON;
 }
 
