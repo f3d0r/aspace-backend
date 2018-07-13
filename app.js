@@ -4,12 +4,17 @@ require('module-alias/register');
 const express = require('express');
 const bodyParser = require('body-parser');
 const constants = require('@config')
+var cors = require('cors')
 
 // EXPRESS SET UP
 var app = express();
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
+
 app.use(bodyParser.json());
+app.use(cors())
 
 app.use(require('./routes'));
 
@@ -23,6 +28,6 @@ app.get('/ping', function (req, res) {
 });
 
 // START SERVER
-var server = app.listen(constants.express.API_PORT, function(){
-  console.log('Listening on port ' + server.address().port);
+var server = app.listen(constants.express.API_PORT, function () {
+    console.log('Listening on port ' + server.address().port);
 });

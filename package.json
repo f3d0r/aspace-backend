@@ -20,6 +20,7 @@
   "homepage": "https://gitlab.com/aspace/backend#README",
   "dependencies": {
     "bcrypt": "^3.0.0",
+    "cors": "^2.8.4",
     "express": "^4.16.3",
     "module-alias": "^2.1.0",
     "moment": "^2.22.2",
@@ -41,5 +42,7 @@
     "@timestamp": "misc/timestamp",
     "@parking-calc": "misc/parkingCalc"
   },
-  "_moduleDirectories": ["node_modules"]
+  "_moduleDirectories": [
+    "node_modules"
+  ]
 }
