@@ -68,7 +68,8 @@ router.get('/get_status', function (req, res) {
     }
 });
 
-router.get('/get_status_bbox', function (req, res) {
+router.post('/get_status_bbox', function (req, res) {
+    console.log(req.body);
     if (typeof req.body == 'undefined' || req.body === null) {
         errors.sendErrorJSON(res, 'MISSING_BODY');
     } else if (typeof req.body.sw == 'undefined' || req.body.sw === null) {
@@ -95,7 +96,7 @@ router.get('/get_status_bbox', function (req, res) {
     }
 });
 
-router.get('/get_status_radius', function (req, res) {
+router.post('/get_status_radius', function (req, res) {
     if (JSON.stringify(req.body) == "{}" || typeof req.body == 'undefined' || req.body === null) {
         errors.sendErrorJSON(res, "MISSING_BODY", "lat/lng body required");
     } else if (typeof req.body.lat == 'undefined' || req.body.lat === null) {
@@ -145,7 +146,7 @@ router.get('/block_id_exists', function (req, res) {
     })
 });
 
-router.get('/get_min_size_parking', function (req, res) {
+router.post('/get_min_size_parking', function (req, res) {
     if (JSON.stringify(req.body) == "{}" || typeof req.body == 'undefined' || req.body === null) {
         errors.sendErrorJSON(res, "MISSING_BODY", "lat/lng body required");
     } else if (typeof req.body.lat == 'undefined' || req.body.lat === null) {
