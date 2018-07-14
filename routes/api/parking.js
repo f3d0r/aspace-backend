@@ -43,7 +43,7 @@ router.get('/get_status', function (req, res) {
         errors.sendErrorJSON(res, 'MISSING_PARAMETER', 'block_id or spot_id required');
     } else if (!errors.queryExists(req, 'block_id')) {
         sql.select.regularSelect('parking', ['spot_id'], ['='], [req.query.spot_id], null, function (results) {
-            res.status(200).send(JSON.stringify(results));
+            res.status(200).send(results);
         }, function () {
             errors.sendErrorJSON(res, 'INVALID_SPOT_ID');
         }, function (error) {
@@ -51,7 +51,7 @@ router.get('/get_status', function (req, res) {
         })
     } else if (!errors.queryExists(req, 'spot_id')) {
         sql.select.regularSelect('parking', ['block_id'], ['='], [req.query.block_id], null, function (results) {
-            res.status(200).send(JSON.stringify(results));
+            res.status(200).send(results);
         }, function () {
             errors.sendErrorJSON(res, 'INVALID_BLOCK_ID');
         }, function (error) {
@@ -59,7 +59,7 @@ router.get('/get_status', function (req, res) {
         })
     } else {
         sql.select.regularSelect('parking', ['block_id', 'spot_id'], ['=', '='], [req.query.block_id, req.query.spot_id], null, function (results) {
-            res.status(200).send(JSON.stringify(results));
+            res.status(200).send(results);
         }, function () {
             errors.sendErrorJSON(res, 'INVALID_BLOCK_ID_OR_SPOT_ID');
         }, function (error) {
