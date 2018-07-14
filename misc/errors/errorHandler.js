@@ -13,7 +13,7 @@ module.exports = {
         } else if (typeof extraJSON != 'undefined' && extraJSON != null) {
             responseJSON.error['info'] = extraJSON;
         }
-        res.status(ERROR_CODES[error].HTTP_CODE).send(responseJSON);
+        res.status(ERROR_CODES[error].HTTP_CODE).json(responseJSON);
     },
     queryExists: function(req, queryName) {
         if (typeof req.query[queryName] == 'undefined' || req.query[queryName] === null) {

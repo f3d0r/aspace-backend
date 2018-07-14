@@ -43,7 +43,7 @@ router.get('/get_status', function (req, res) {
         errors.sendErrorJSON(res, 'MISSING_PARAMETER', 'block_id or spot_id required');
     } else if (!errors.queryExists(req, 'block_id')) {
         sql.select.regularSelect('parking', ['spot_id'], ['='], [req.query.spot_id], null, function (results) {
-            res.status(200).send(results);
+            res.status(200).json(results);
         }, function () {
             errors.sendErrorJSON(res, 'INVALID_SPOT_ID');
         }, function (error) {
@@ -51,7 +51,7 @@ router.get('/get_status', function (req, res) {
         })
     } else if (!errors.queryExists(req, 'spot_id')) {
         sql.select.regularSelect('parking', ['block_id'], ['='], [req.query.block_id], null, function (results) {
-            res.status(200).send(results);
+            res.status(200).json(results);
         }, function () {
             errors.sendErrorJSON(res, 'INVALID_BLOCK_ID');
         }, function (error) {
@@ -59,7 +59,7 @@ router.get('/get_status', function (req, res) {
         })
     } else {
         sql.select.regularSelect('parking', ['block_id', 'spot_id'], ['=', '='], [req.query.block_id, req.query.spot_id], null, function (results) {
-            res.status(200).send(results);
+            res.status(200).json(results);
         }, function () {
             errors.sendErrorJSON(res, 'INVALID_BLOCK_ID_OR_SPOT_ID');
         }, function (error) {
@@ -86,7 +86,7 @@ router.post('/get_status_bbox', function (req, res) {
         errors.sendErrorJSON(res, 'MISSING_BODY', "Missing body.ne.lng");
     } else {
         sql.select.regularSelect('parking', ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
-                res.status(200).send(results);
+                res.status(200).json(results);
             }, function () {
                 // res.status(200).send("[]");
             },
@@ -108,8 +108,7 @@ router.post('/get_status_radius', function (req, res) {
     } else {
         var miles = req.query.radius_feet / 5280;
         sql.select.selectRadius('parking', req.body.lat, req.body.lng, miles, function (results) {
-            // res.status(200).send(parkingCalc.searchApplicableParking(results, ));
-            res.status(200).send(results);
+            res.status(200).json(results);
         }, function () {}, function (error) {
             throw error;
         });
@@ -137,10 +136,10 @@ router.get('/block_id_exists', function (req, res) {
     var jsonReturn = {};
     sql.select.regularSelect('parking', ['block_id'], ['='], [req.query.block_id], null, function () {
         jsonReturn['block_id_exists'] = "T";
-        res.status(200).send(jsonReturn);
+        res.status(200).json(jsonReturn);
     }, function () {
         jsonReturn['block_id_exists'] = "F";
-        res.status(200).send(jsonReturn);
+        res.status(200).json(jsonReturn);
     }, function (error) {
         throw error;
     })
@@ -160,7 +159,7 @@ router.post('/get_min_size_parking', function (req, res) {
     } else {
         var miles = req.query.radius_feet / 5280;
         sql.select.selectRadius('parking', req.body.lat, req.body.lng, miles, function (results) {
-            res.status(200).send(parkingCalc.searchApplicableParking(results, req.query.spot_size_feet));;
+            res.status(200).json(parkingCalc.searchApplicableParking(results, req.query.spot_size_feet));;
         }, function () {}, function (error) {
             throw error;
         });
