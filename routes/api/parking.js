@@ -118,7 +118,7 @@ router.post('/get_status_radius', function (req, res) {
 
 router.get('/block_id_exists', function (req, res) {
     var jsonReturn = {};
-    sql.select.regularSelect('parking', ['block_id'], ['='], [req.query.block_id], null, function () {
+    sql.select.regularSelect('parking', ['block_id'], ['='], [req.query.block_id], 1, function () {
         jsonReturn['block_id_exists'] = "T";
         res.status(200).json(jsonReturn);
     }, function () {

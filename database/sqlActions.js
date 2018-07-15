@@ -28,7 +28,7 @@ module.exports = {
                         successCB(results);
                     }
                 });
-                connection.release(); 
+                connection.release();
             });
         }
     },
@@ -53,6 +53,22 @@ module.exports = {
             db.getConnection(function (err, connection) {
                 var sql = "SELECT * FROM " + connection.escapeId(database) + " WHERE `username` = ? AND `auth_key_permissions` LIKE ?";
                 connection.query(sql, [username, "%" + permission + "%"], function (error, rows) {
+                    if (error) {
+                        return failCB(error);
+                    }
+                    if (rows.length == 1) {
+                        successCB(rows);
+                    } else {
+                        failCB();
+                    }
+                });
+                connection.release();
+            });
+        },
+        tempAuthKeyCheck: function (database, username, genKey, permission, successCB, failCB) {
+            db.getConnection(function (err, connection) {
+                var sql = "SELECT * FROM " + connection.escapeId(database) + " WHERE `request_user` = ? AND `temp_key` = ? AND `permissions` LIKE ?";
+                connection.query(sql, [username, genKey, "%" + permission + "%"], function (error, rows) {
                     if (error) {
                         return failCB(error);
                     }

@@ -12,8 +12,8 @@ module.exports = {
                 failCB('INVALID_BASIC_AUTH');
             } else {
                 bcrypt.authCheck(constants.mysql_config.ADMIN_TABLE, credentials[0], credentials[1],
-                    function () {
-                        successCB();
+                    function (username, permissions) {
+                        successCB(username, permissions);
                     },
                     function () {
                         failCB('INVALID_BASIC_AUTH');

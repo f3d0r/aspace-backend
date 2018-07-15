@@ -1,6 +1,5 @@
 var bcryptImport = require('bcryptjs');
 var sql = require('@sql');
-const constants = require('@config');
 
 module.exports = {
     authCheck: function (database, username, password, successCB, failureCB) {
@@ -8,7 +7,7 @@ module.exports = {
             sql.select.regularSelect(database, ['username'], ['='], [username], 1, function (results) {
                 bcryptImport.compare(password, results[0].password, function (err, match) {
                     if (match) {
-                        successCB();
+                        successCB(username, results[0].auth_key_permissions);
                     } else {
                         failureCB();
                     }
@@ -19,7 +18,7 @@ module.exports = {
                 failureCB(error);
             })
         } else {
-            bcryptImport.compare(username, password, function (err, match) {
+            bcryptImport.compare(password, hashedPassword, function (err, match) {
                 if (match) {
                     successCB();
                 } else {
@@ -28,7 +27,4 @@ module.exports = {
             });
         }
     }
-    // generateAuth: function (password) {
-    //     console.log("hash for \"" + password + "\" : " + bcryptImport.hashSync(password, constants.bcrypt.SALT_ROUNDS));
-    // }
 }
