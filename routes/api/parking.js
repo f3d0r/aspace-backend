@@ -174,13 +174,11 @@ router.post('/upload_spots', function (req, res) {
         errors.sendErrorJSON(res, 'MISSING_AUTH_KEY');
     } else if (JSON.stringify(req.body) == "{}" || typeof req.body == 'undefined' || req.body === null) {
         errors.sendErrorJSON(res, "MISSING_BODY", "body with parking spots to upload required");
-    } else if (!errors.queryExists(req, 'block_id')) {
-        errors.sendErrorJSON(res, 'MISSING_PARAMETER', "block_id required");
     } else {
         sql.select.databasePermissionCheck('database_authority', req.query.auth_key, 'upload_spots', function () {
-            sql.insert.addSpots(req.body, function(results) {
+            sql.insert.addSpots(req.body, function (results) {
                 res.status(200).send("SUCCESS!");
-            }, function(error) {
+            }, function (error) {
                 console.log("ERROR! : " + error);
             });
         }, function () {
