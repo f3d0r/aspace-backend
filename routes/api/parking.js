@@ -88,7 +88,7 @@ router.post('/get_status_bbox', function (req, res) {
         sql.select.regularSelect('parking', ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
                 res.status(200).json(results);
             }, function () {
-                // res.status(200).send("[]");
+                res.status(200).json("[]");
             },
             function (error) {
                 throw error
@@ -109,7 +109,9 @@ router.post('/get_status_radius', function (req, res) {
         var miles = req.query.radius_feet / 5280;
         sql.select.selectRadius('parking', req.body.lat, req.body.lng, miles, function (results) {
             res.status(200).json(results);
-        }, function () {}, function (error) {
+        }, function () {
+            res.status(200).json([]);
+        }, function (error) {
             throw error;
         });
     }
@@ -159,8 +161,10 @@ router.post('/get_min_size_parking', function (req, res) {
     } else {
         var miles = req.query.radius_feet / 5280;
         sql.select.selectRadius('parking', req.body.lat, req.body.lng, miles, function (results) {
-            res.status(200).json(parkingCalc.searchApplicableParking(results, req.query.spot_size_feet));;
-        }, function () {}, function (error) {
+            res.status(200).json(parkingCalc.searchApplicableParking(results, req.query.spot_size_feet));
+        }, function () {
+            res.status(200).json([]);
+        }, function (error) {
             throw error;
         });
     }
