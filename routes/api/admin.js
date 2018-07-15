@@ -80,15 +80,14 @@ router.post('/finalize_temp_auth_key', function (req, res) {
                 }, function (error) {
                     errors.sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
                 });
+                sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {}, function () {
+                    errors.sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
+                });
             },
             function () {
                 errors.sendErrorJSON(res, 'INVALID_AUTH_KEY');
             });
     }
-    sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {
-    }, function () {
-        errors.sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
-    });
 });
 
 module.exports = router;
