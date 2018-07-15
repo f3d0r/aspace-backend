@@ -21,7 +21,7 @@ router.post('/update_status', function (req, res) {
     } else if (req.query.occupied != "F" && req.query.occupied != "T" && req.query.occupied != "N") {
         errors.sendErrorJSON(res, 'INVALID_STATUS_ENTERED', "occupied query must be equal to 'N', 'F', 'T'");
     } else {
-        sql.select.databasePermissionCheck('database_authority', req.query.auth_key, 'update_spots', function () {
+        sql.select.databasePermissionCheck('database_authority', req.query.auth_key, 'update_status', function () {
             sql.update.updateSpotStatus(req.query.spot_id, req.query.occupied, function () {
                     errors.sendErrorJSON(res, 'SPOT_STATUS_CHANGED');
                 },
@@ -113,23 +113,6 @@ router.post('/get_status_radius', function (req, res) {
         }, function (error) {
             throw error;
         });
-    }
-});
-
-router.post('/add_spots', function (req, res) {
-    if (!errors.queryExists(req, 'auth_key')) {
-        errors.sendErrorJSON(res, 'MISSING_AUTH_KEY');
-    } else if (JSON.stringify(req.body) == "{}" || typeof req.body == 'undefined' || req.body === null) {
-        errors.sendErrorJSON(res, "MISSING_BODY");
-    } else {
-        databasePermissionCheck("database_authority", req.query.auth_key, "add_spots", function () {
-                var body = req.body;
-                sql.insert.insertSpot(body, 0);
-                res.send("OK");
-            },
-            function () {
-                errors.sendErrorJSON(res, 'INVALID_AUTH_KEY');
-            });
     }
 });
 
