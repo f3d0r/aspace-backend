@@ -140,6 +140,7 @@ module.exports = {
                         sql += "`" + keys[index] + "` = ?";
                     }
                 }
+                console.log("SQL CODE FOR DELETE : " + mysql.format(sql, values));
                 connection.query(sql, values, function (error, rows) {
                     if (error) {
                         return failCB(error);
