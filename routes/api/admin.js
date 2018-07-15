@@ -76,13 +76,14 @@ router.post('/finalize_temp_auth_key', function (req, res) {
                 sql.insert.addObject('database_authority', newAuth, function (results) {
                     errors.sendErrorJSON(res, 'AUTH_KEY_ADDED', newAuth);
                 }, function (error) {
-                    errors.sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
+                    errors.sendErrorJSON(res, 'INVALID_PERMISSION');
                 });
+                sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {}, function (error) {});
             },
             function (error) {
                 errors.sendErrorJSON(res, 'INVALID_PERMISSION');
+                sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {}, function (error) {});
             });
-        sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {}, function (error) {});
     }
 });
 

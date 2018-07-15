@@ -75,7 +75,7 @@ module.exports = {
                     if (rows.length == 1) {
                         successCB(rows);
                     } else {
-                        failCB("There is no error.");
+                        failCB();
                     }
                 });
                 connection.release();
