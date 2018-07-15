@@ -69,7 +69,6 @@ router.get('/get_status', function (req, res) {
 });
 
 router.post('/get_status_bbox', function (req, res) {
-    console.log(req.body);
     if (typeof req.body == 'undefined' || req.body === null) {
         errors.sendErrorJSON(res, 'MISSING_BODY');
     } else if (typeof req.body.sw == 'undefined' || req.body.sw === null) {

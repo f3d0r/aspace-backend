@@ -21,7 +21,6 @@ module.exports = {
                     mappedSpots.push([currentSpot.lng, currentSpot.lat, currentSpot.block_id]);
                 })
                 var sql = 'INSERT INTO `parking` (`lng`, `lat`, `block_id`) VALUES ?';
-                console.log(mappedSpots);
                 connection.query(sql, [mappedSpots], function (error, results, fields) {
                     if (error) {
                         failCB(error);
@@ -29,6 +28,7 @@ module.exports = {
                         successCB(results);
                     }
                 });
+                connection.release(); 
             });
         }
     },
