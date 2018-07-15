@@ -14,17 +14,23 @@ module.exports = {
                 connection.release();
             });
         },
-        // TODO: Re-write method to not be recursive, use full JSON object inserts
-        // insertSpot: function (points, current) { 
-        //     db.getConnection(function (err, connection) {
-        //         connection.query('INSERT INTO `parking` SET ?', points[current], function (error, results, fields) {
-        //             if (error) throw error;
-        //         });
-        //         if (current < points.length - 1) {
-        //             insertSpot(points, current + 1);
-        //         }
-        //     });
-        // }
+        addSpots: function (points, successCB, failCB) {
+            db.getConnection(function (err, connection) {
+                mappedSpots = []
+                points.forEach(function (currentSpot) {
+                    mappedSpots.push([currentSpot.lng, currentSpot.lat, currentSpot.block_id]);
+                })
+                var sql = 'INSERT INTO `parking` (`lng`, `lat`, `block_id`) VALUES ?';
+                console.log(mappedSpots);
+                connection.query(sql, [mappedSpots], function (error, results, fields) {
+                    if (error) {
+                        failCB(error);
+                    } else {
+                        successCB(results);
+                    }
+                });
+            });
+        }
     },
     select: {
         databasePermissionCheck: function (database, auth_key, permission, successCB, failCB) {
