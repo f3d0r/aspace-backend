@@ -93,5 +93,10 @@ module.exports = Object.freeze({
         HTTP_CODE: 404,
         ERROR_CODE: 25,
         INFO: "invalid_block_id_or_spot_id"
+    },
+    INVALID_PERMISSION: {
+        HTTP_CODE: 200,
+        ERROR_CODE: 26,
+        INFO: "invalid_permission"
     }
 });

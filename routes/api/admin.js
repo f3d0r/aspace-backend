@@ -7,8 +7,6 @@ var uniqueString = require('unique-string');
 var path = require('path');
 var express = require('express');
 
-// router.use(express.static("html/key"));
-
 router.get('/', function (req, res) {
     basicAuth.authenticate(req, function () {
         res.status(200).send("Welcome to the admin sub-API for aspace! :)");
@@ -77,21 +75,14 @@ router.post('/finalize_temp_auth_key', function (req, res) {
                 newAuth['permission'] = req.query.requested_permission;
                 sql.insert.addObject('database_authority', newAuth, function (results) {
                     errors.sendErrorJSON(res, 'AUTH_KEY_ADDED', newAuth);
-                    console.log("In here!");
                 }, function (error) {
-                    console.log("INSERT ERROR: " + error);
-                    errors.sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
-                });
-                sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {
-                    console.log("SUCCESSFULLY DELETED!");
-                }, function (error) {
-                    console.log("DELETE ERROR: " + error);
                     errors.sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
                 });
             },
-            function () {
-                errors.sendErrorJSON(res, 'INVALID_AUTH_KEY');
+            function (error) {
+                errors.sendErrorJSON(res, 'INVALID_PERMISSION');
             });
+        sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {}, function (error) {});
     }
 });
 

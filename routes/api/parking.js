@@ -29,7 +29,6 @@ router.post('/update_status', function (req, res) {
                     errors.sendErrorJSON(res, 'INVALID_SPOT_ID');
                 },
                 function (error) {
-                    console.log("ERROR!");
                     throw error;
                 });
         }, function () {

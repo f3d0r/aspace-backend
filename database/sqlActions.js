@@ -75,7 +75,7 @@ module.exports = {
                     if (rows.length == 1) {
                         successCB(rows);
                     } else {
-                        failCB();
+                        failCB("There is no error.");
                     }
                 });
                 connection.release();
@@ -140,7 +140,6 @@ module.exports = {
                         sql += "`" + keys[index] + "` = ?";
                     }
                 }
-                console.log("SQL CODE FOR DELETE : " + mysql.format(sql, values));
                 connection.query(sql, values, function (error, rows) {
                     if (error) {
                         return failCB(error);

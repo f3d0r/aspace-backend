@@ -261,13 +261,13 @@
 
   <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
   <script>
-    var metadataUsername = $("meta[itemprop=username]");
-    var metadataAuthKey = $("meta[itemprop=temp-auth-key]");
+    var metadataUsername = $("meta[itemprop=username]").attr('content');
+    var metadataAuthKey = $("meta[itemprop=temp-auth-key]").attr('content');
     var permission = null;
 
     $(document).ready(function () {
-      $('input.username').val(metadataUsername.attr('content'));
-      $('input.password').val(metadataAuthKey.attr('content'));
+      $('input.username').val(metadataUsername);
+      $('input.password').val(metadataAuthKey);
 
       $('.username').ready(function () {
         $('.icon-paper-plane').addClass("next");
@@ -324,14 +324,13 @@
       $.ajax({
         "async": true,
         "crossDomain": true,
-        "url": "localhost:3000/admin/finalize_temp_auth_key?request_user=" + metadataUsername + "&temp_auth_key=" + metadataAuthKey +
+        "url": "https://api.trya.space/v1/admin/finalize_temp_auth_key?request_user=" + metadataUsername + "&temp_auth_key=" + metadataAuthKey +
           "&requested_permission=" + permission,
         // "url": "https://api.trya.space/v1/admin/finalize_temp_auth_key?request_user=" + metadataUsername + "&temp_auth_key=" + metadataAuthKey +
         //   "&requested_permission=" + permission,
         "method": "POST",
         "headers": {},
         success: function (msg) {
-          console.log(msg.error.info);
           $(".end_message").css("background-color", "limegreen");
           $(".end_message p").css("font-size", "12px");
           $(".end_message").html("<p>SUCCESS!<br>" + msg.error.info.auth_key + "<br>Permission: " + msg.error.info
