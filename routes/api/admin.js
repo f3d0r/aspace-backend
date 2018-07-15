@@ -77,13 +77,15 @@ router.post('/finalize_temp_auth_key', function (req, res) {
                 newAuth['permission'] = req.query.requested_permission;
                 sql.insert.addObject('database_authority', newAuth, function (results) {
                     errors.sendErrorJSON(res, 'AUTH_KEY_ADDED', newAuth);
+                    console.log("In here!");
                 }, function (error) {
+                    console.log("INSERT ERROR: " + error);
                     errors.sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
                 });
                 sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {
                     console.log("SUCCESSFULLY DELETED!");
-                }, function () {
-                    console.log("SOMETHING WENT WRONG");
+                }, function (error) {
+                    console.log("DELETE ERROR: " + error);
                     errors.sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
                 });
             },

@@ -324,8 +324,10 @@
       $.ajax({
         "async": true,
         "crossDomain": true,
-        "url": "https://api.trya.space/v1/admin/finalize_temp_auth_key?request_user=" + metadataUsername + "&temp_auth_key=" + metadataAuthKey +
+        "url": "localhost:3000/admin/finalize_temp_auth_key?request_user=" + metadataUsername + "&temp_auth_key=" + metadataAuthKey +
           "&requested_permission=" + permission,
+        // "url": "https://api.trya.space/v1/admin/finalize_temp_auth_key?request_user=" + metadataUsername + "&temp_auth_key=" + metadataAuthKey +
+        //   "&requested_permission=" + permission,
         "method": "POST",
         "headers": {},
         success: function (msg) {
