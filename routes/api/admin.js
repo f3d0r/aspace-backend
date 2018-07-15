@@ -76,12 +76,7 @@ router.post('/finalize_temp_auth_key', function (req, res) {
                 newAuth['auth_key'] = uniqueString();
                 newAuth['permission'] = req.query.requested_permission;
                 sql.insert.addObject('database_authority', newAuth, function (results) {
-                    sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {
-                        errors.sendErrorJSON(res, 'AUTH_KEY_ADDED', newAuth);
-                    }, function () {
-                        errors.sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
-
-                    })
+                    errors.sendErrorJSON(res, 'AUTH_KEY_ADDED', newAuth);
                 }, function (error) {
                     errors.sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
                 });
@@ -90,6 +85,10 @@ router.post('/finalize_temp_auth_key', function (req, res) {
                 errors.sendErrorJSON(res, 'INVALID_AUTH_KEY');
             });
     }
+    sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {
+    }, function () {
+        errors.sendErrorJSON(res, 'AUTH_KEY_NOT_ADDED');
+    });
 });
 
 module.exports = router;
