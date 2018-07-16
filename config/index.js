@@ -12,7 +12,7 @@ module.exports = {
         ADMIN_TABLE: 'aspace_admins'
     },
     auth: {
-        PIN_EXPIRY_MINUTES: 1
+        PIN_EXPIRY_MINUTES: 5
     },
     bcrypt: {
         SALT_ROUNDS: 10
