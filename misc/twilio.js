@@ -26,7 +26,7 @@ module.exports = {
 
         request(options, function (error, response, body) {
             if (error) {
-                console.log("ERROR! : " + error);
+                failCallBack(error);
             }
             body = JSON.parse(body);
             if (body.status == 404) {

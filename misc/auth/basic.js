@@ -1,5 +1,5 @@
 var bcrypt = require('@auth_bcrypt');
-const constants = require('@config')
+const constants = require('@config');
 
 module.exports = {
     authenticate: function (req, successCB, failCB) {

@@ -15,12 +15,8 @@ router.get('/ping', function (req, res) {
     res.status(200).send("pong");
 });
 
-router.post("/phone_login", function (req, res) {
-    if (!errors.queryExists(req, 'phone_number')) {
-        errors.sendErrorJSON(res, 'MISSING_PARAMETER', 'phone_number required');
-    } else if (!errors.queryExists(req, 'device_id')) {
-        errors.sendErrorJSON(res, 'MISSING_PARAMETER', 'device_id required');
-    } else {
+router.post("/phone_login", function (req, res, next) {
+    errors.checkQueries(req, res, ['phone_number', 'device_id'], function () {
         twilio.lookupPhone(req.query.phone_number, function (formattedPhoneNumber) {
             verifyUser = {};
             verifyUser['phone_number'] = formattedPhoneNumber;
@@ -32,44 +28,37 @@ router.post("/phone_login", function (req, res) {
                 verifyUser['user_id'] = rows[0].user_id;
                 sql.insert.addObject('user_verify_codes', verifyUser, function () {
                     twilio.sendVerifyText(formattedPhoneNumber, pin);
-                    errors.sendErrorJSON(res, 'RETURN_PHONE');
+                    next('RETURN_PHONE');
                 }, function (error) {
-                    throw error;
+                    next(error);
                 });
             }, function () {
                 verifyUser['user_id'] = uniqueString();
                 sql.insert.addObject('user_verify_codes', verifyUser, function () {
                     twilio.sendVerifyText(formattedPhoneNumber, pin);
-                    errors.sendErrorJSON(res, 'NEW_PHONE');
+                    next('NEW_PHONE');
                 }, function (error) {
-                    throw error;
+                    next(error);
                 });
             }, function (error) {
-                throw error;
+                next(error);
             });
         }, function () {
-            errors.sendErrorJSON(res, 'INVALID_PHONE');
+            next('INVALID_PHONE');
         });
-
-    }
+    });
 });
 
-router.post("/check_pin", function (req, res) {
-    if (!errors.queryExists(req, 'phone_number')) {
-        errors.sendErrorJSON(res, 'MISSING_PARAMETER', 'phone_number required');
-    } else if (!errors.queryExists(req, 'device_id')) {
-        errors.sendErrorJSON(res, 'MISSING_PARAMETER', 'device_id required');
-    } else if (!errors.queryExists(req, 'verify_pin')) {
-        errors.sendErrorJSON(res, 'MISSING_PARAMETER', 'verify_pin required');
-    } else {
+router.post("/check_pin", function (req, res, next) {
+    errors.checkQueries(req, res, ['phone_number', 'device_id', 'verify_pin'], function () {
         twilio.lookupPhone(req.query.phone_number, function (formattedPhoneNumber) {
                 sql.select.regularSelect("user_verify_codes", ['phone_number', 'device_id', 'verify_pin'], ['=', '=', '='], [formattedPhoneNumber, req.query.device_id, req.query.verify_pin], 1,
                     function (rows) {
                         if (timestamp.timePassed(moment.utc(rows[0].expiry_date))) {
                             sql.remove.regularDelete('user_verify_codes', ['phone_number', 'device_id'], [formattedPhoneNumber, req.query.device_id], function () {
-                                errors.sendErrorJSON(res, 'PIN_EXPIRED');
+                                next('PIN_EXPIRED');
                             }, function (error) {
-                                throw error;
+                                next(error);
                             });
                         } else {
                             var newAccessCode = uniqueString();
@@ -84,38 +73,37 @@ router.post("/check_pin", function (req, res) {
                                 jsonReturn = {};
                                 jsonReturn['access_code'] = newAccessCode
                                 jsonReturn['expiry'] = expiry_date;
-                                errors.sendErrorJSON(res, 'NEW_ACCESS_CODE', jsonReturn);
+                                next('NEW_ACCESS_CODE', jsonReturn);
                                 sql.remove.regularDelete('user_verify_codes', ['phone_number', 'device_id'], [formattedPhoneNumber, req.query.device_id], function () {
                                     sql.select.regularSelect('users', ['user_id'], ['='], [rows[0].user_id], 1, function () {}, function () {
                                         newUserJSON = {};
                                         newUserJSON['user_id'] = accessCode['user_id'];
                                         newUserJSON['phone_number'] = formattedPhoneNumber;
-                                        sql.insert.addObject('users', newUserJSON, function () {
-                                        }, function (error) {
-                                            throw error;
+                                        sql.insert.addObject('users', newUserJSON, function () {}, function (error) {
+                                            next(error);
                                         });
                                     }, function (error) {
-                                        throw error;
+                                        next(error);
                                     })
                                 }, function (error) {
-                                    throw error;
+                                    next(error);
                                 });
                             }, function (error) {
-                                throw error;
+                                next(error);
                             });
                         }
                     },
                     function () {
-                        errors.sendErrorJSON(res, 'INVALID_PIN')
+                        next('INVALID_PIN')
                     },
                     function (error) {
-                        throw error;
+                        next(error);
                     });
             },
             function () {
-                errors.sendErrorJSON(res, 'INVALID_PHONE');
+                next('INVALID_PHONE');
             });;
-    }
+    });
 });
 
 module.exports = router;

@@ -19,5 +19,8 @@ module.exports = {
     },
     sensors: {
         sensorDeltaFeet: 2
+    },
+    slack: {
+        webhook: '***REMOVED***'
     }
 }

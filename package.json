@@ -19,10 +19,12 @@
   },
   "homepage": "https://gitlab.com/aspace/backend#README",
   "dependencies": {
+    "@slack/client": "^4.3.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.4",
     "ejs": "^2.6.1",
     "express": "^4.16.3",
+    "express-errors-to-slack": "^1.0.3",
     "module-alias": "^2.1.0",
     "moment": "^2.22.2",
     "mysql": "github:mysqljs/mysql",
@@ -42,7 +44,9 @@
     "@twilio": "misc/twilio",
     "@timestamp": "misc/timestamp",
     "@parking-calc": "misc/parkingCalc",
-    "@bcrypt": "misc/auth/bcrypt"
+    "@bcrypt": "misc/auth/bcrypt",
+    "@route-optimization": "misc/routeOptimization",
+    "@body-structure": "config/bodyStructs"
   },
   "_moduleDirectories": [
     "node_modules"

@@ -98,5 +98,10 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         ERROR_CODE: 26,
         INFO: "invalid_permission"
+    },
+    ROUTE_CALCULATION_ERROR: {
+        HTTP_CODE: 400,
+        ERROR_CODE: 27,
+        INFO: "route_calculation_error"
     }
 });

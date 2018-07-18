@@ -7,7 +7,7 @@ var uniqueString = require('unique-string');
 var path = require('path');
 var express = require('express');
 
-router.get('/', function (req, res) {
+router.get('/', function (req, res, next) {
     basicAuth.authenticate(req, function () {
         res.status(200).send("Welcome to the admin sub-API for aspace! :)");
     }, function (error) {
@@ -15,25 +15,32 @@ router.get('/', function (req, res) {
             res.set("WWW-Authenticate", "Basic realm=\"Authorization Required\"");
             res.status(401).send("Authorization Required");
         } else if (error == 'INVALID_BASIC_AUTH') {
-            errors.sendErrorJSON(res, 'INVALID_BASIC_AUTH');
+            next('INVALID_BASIC_AUTH');
+            next(error);
         }
     });
 });
 
-router.get('/ping', function (req, res) {
+router.get('/ping', function (req, res, next) {
     basicAuth.authenticate(req, function () {
         res.status(200).send("pong");
     }, function (error) {
         if (error == 'NO_AUTH') {
             res.set("WWW-Authenticate", "Basic realm=\"Authorization Required\"");
             res.status(401).send("Authorization Required");
+            const err = new Error('No Basic Auth');
+            err.status = 401;
+            next(err)
         } else if (error == 'INVALID_BASIC_AUTH') {
-            errors.sendErrorJSON(res, 'INVALID_BASIC_AUTH');
+            next('INVALID_BASIC_AUTH');
+            const err = new Error('Invalid Basic Auth');
+            err.status = 401;
+            next(err)
         }
     });
 });
 
-router.get('/get_auth_key', function (req, res) {
+router.get('/get_auth_key', function (req, res, next) {
     basicAuth.authenticate(req, function (username, permissions) {
         var newTempAuthKeyInsert = {};
         newTempAuthKeyInsert['request_user'] = username;
@@ -48,25 +55,21 @@ router.get('/get_auth_key', function (req, res) {
             res.render('get_auth_key.ejs', metaData);
         }, function (error) {
             res.status(400).send(error);
+            next(error);
         });
     }, function (error) {
         if (error == 'NO_AUTH') {
             res.set("WWW-Authenticate", "Basic realm=\"Authorization Required\"");
             res.status(401).send("Authorization Required");
         } else if (error == 'INVALID_BASIC_AUTH') {
-            errors.sendErrorJSON(res, 'INVALID_BASIC_AUTH');
+            next('INVALID_BASIC_AUTH');
         }
+        next(error);
     });
 });
 
-router.post('/finalize_temp_auth_key', function (req, res) {
-    if (!errors.queryExists(req, 'request_user')) {
-        errors.sendErrorJSON(res, 'MISSING_PARAMETER', 'request_user required');
-    } else if (!errors.queryExists(req, 'temp_auth_key')) {
-        errors.sendErrorJSON(res, 'MISSING_PARAMETER', 'temp_auth_key required');
-    } else if (!errors.queryExists(req, 'requested_permission')) {
-        errors.sendErrorJSON(res, 'MISSING_PARAMETER', 'requested_permission required');
-    } else {
+router.post('/finalize_temp_auth_key', function (req, res, next) {
+    errors.checkQueries(req, res, ['request_user', 'temp_auth_key', 'requested_permission'], function () {
         sql.select.tempAuthKeyCheck('temp_gen_auth_key', req.query.request_user, req.query.temp_auth_key, req.query.requested_permission,
             function (results) {
                 var newAuth = {};
@@ -74,17 +77,23 @@ router.post('/finalize_temp_auth_key', function (req, res) {
                 newAuth['auth_key'] = uniqueString();
                 newAuth['permission'] = req.query.requested_permission;
                 sql.insert.addObject('database_authority', newAuth, function (results) {
-                    errors.sendErrorJSON(res, 'AUTH_KEY_ADDED', newAuth);
+                    next('AUTH_KEY_ADDED', newAuth);
                 }, function (error) {
-                    errors.sendErrorJSON(res, 'INVALID_PERMISSION');
+                    next('INVALID_PERMISSION');
+                    next(error);
                 });
-                sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {}, function (error) {});
+                sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {}, function (error) {
+                    next(error);
+                });
             },
             function (error) {
-                errors.sendErrorJSON(res, 'INVALID_PERMISSION');
-                sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {}, function (error) {});
+                next('INVALID_PERMISSION');
+                next(error);
+                sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {}, function (error) {
+                    next(error);
+                });
             });
-    }
+    });
 });
 
 module.exports = router;
