@@ -128,12 +128,3 @@ def multi_spot(radii, origin, destination, car_size, params=['parking_price'], w
         spot_list[i]["Time"] = time
         spot_list[i]["Coord"] = coord
     return spot_list
-
-
-def directions(optimal_spots_dict, origin):
-    coords = list(set([d["Coord"]
-                       for d in optimal_spots_dict if 'Coord' in d]))
-    coords = ','.join([str(i) for i in origin])+';'+';'.join(coords)
-    response = requests.request("GET", prefix2 + coords + suffix2)
-    routes = json.loads(str(response.text))
-    return routes

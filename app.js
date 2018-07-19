@@ -53,7 +53,7 @@ function sendSlackError(error, req) {
     var message = "aspace Backend Error Notification\n" + "Error: " + error + "\nreq: " + req.url;
     webhook.send(message, function (err, res) {
         if (err) {
-            console.log('Error:', err);
+            console.log('Error: ', err);
         }
     });
 }

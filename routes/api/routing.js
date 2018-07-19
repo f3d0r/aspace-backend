@@ -30,10 +30,9 @@ router.post('/get_route_waypoints', function (req, res, next) {
         res.status(422).json(errors.getErrorJSON('MISSING_BODY', "Missing body.car_size"));
     } else {
         routeOptimization.getRouteWaypoints(req.body.origin.lng, req.body.origin.lat, req.body.dest.lng, req.body.dest.lat, req.body.car_size, function (response) {
-            res.send(response);
+            res.status(200).send(response);
         }, function (error) {
             next('ROUTE_CALCULATION_ERROR');
-            next(error);
         })
     }
 });
