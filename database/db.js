@@ -3,7 +3,7 @@ var mysql = require('mysql');
 const DATABASE_USER = 'api';
 const DATABASE_PASSWORD = 'db_password';
 const DATABASE_NAME = 'aspace';
-const DATABASE_IP = '159.65.70.74';
+const DATABASE_IP = '206.189.175.212';
 const DATABASE_PORT = 'db_port';
 // const SOCKET_PATH = '/var/run/mysqld/mysqld.sock';
 
