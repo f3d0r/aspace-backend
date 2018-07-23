@@ -77,7 +77,7 @@ router.post('/finalize_temp_auth_key', function (req, res, next) {
                 newAuth['auth_key'] = uniqueString();
                 newAuth['permission'] = req.query.requested_permission;
                 sql.insert.addObject('database_authority', newAuth, function (results) {
-                    res.status(200).json(newAuth);
+                    res.status(200).send(errors.getErrorJSON('AUTH_KEY_ADDED', newAuth));
                     next('AUTH_KEY_ADDED', newAuth);
                 }, function (error) {
                     next('INVALID_PERMISSION');
