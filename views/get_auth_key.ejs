@@ -320,7 +320,6 @@
     );
 
     function requestKey() {
-      console.log("SENDING REQUEST!");
       $.ajax({
         "async": true,
         "crossDomain": true,
@@ -330,8 +329,6 @@
         "method": "POST",
         "headers": {},
         success: function (msg) {
-          console.log("RECEIVED RESPONSE:");
-          console.log(msg);
           if (msg.error.error_info == "invalid_permission") {
             $(".end_message").html("<p>Invalid Permission or Authority!</p>");
             $(".end_message").css("background-color", "red");
