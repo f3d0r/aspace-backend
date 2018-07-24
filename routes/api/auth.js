@@ -23,10 +23,7 @@ router.get('/verification_twiml', function (req, res) {
             const response = new VoiceResponse();
             response.say('Your aspace verification code is ');
             for (var index = 0; index < pin.length; index++) {
-                response.say(pin[index]);
-                response.pause({
-                    length: 0.5
-                });
+                response.say(pin[index] + ', ');
             }
             response.say('Happy Parking!');
             res.set('Content-Type', 'text/xml');
