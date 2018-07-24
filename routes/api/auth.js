@@ -21,8 +21,7 @@ router.get('/verification_twiml', function (req, res) {
         if (req.query.auth_key == constants.auth.INTERNAL_AUTH_KEY) {
             const response = new VoiceResponse();
             response.say({
-                    voice: 'man',
-                    language: 'en',
+                    language: 'en-US'
                 },
                 'Your aspace verification code is ' + req.query.verification_pin + '. Happy Parking!'
             );
