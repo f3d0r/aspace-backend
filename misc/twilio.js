@@ -13,13 +13,15 @@ module.exports = {
             .done();
     },
     sendVerifyCall: function (phoneNumber, pin) {
-        const twimlURL = 'https://api.trya.space/v1/auth/verification_twiml?verification_pin=' + pin + '&auth_key=' + constants.auth.INTERNAL_AUTH_KEY;
-        console.log(twimlURL);
+        const twimlURL = 'http://api.trya.space/v1/auth/verification_twiml?verification_pin=' + pin + '&auth_key=' + constants.auth.INTERNAL_AUTH_KEY;
         twilioClient.calls
             .create({
                 url: twimlURL,
                 from: 'twilio_origin_phone_number',
                 to: phoneNumber
+            }).catch(function (err) {
+                console.log("TWILIO ERROR: ");
+                console.error(err.message);
             })
             .done();
     },

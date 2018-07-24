@@ -18,13 +18,15 @@ router.get('/ping', function (req, res) {
 
 router.get('/verification_twiml', function (req, res) {
     errors.checkQueries(req, res, ['verification_pin', 'auth_key'], function () {
+        var pin = req.query.verification_pin;
         if (req.query.auth_key == constants.auth.INTERNAL_AUTH_KEY) {
             const response = new VoiceResponse();
-            response.say({
-                    language: 'en-US'
-                },
-                'Your aspace verification code is ' + req.query.verification_pin + '. Happy Parking!'
-            );
+            response.say('Your aspace verification code is ' + pin[0]);
+            for (var index = 0; index < pin.length; index++) {
+                response.say(pin[index]);
+                response.pause();
+            }
+            response.say('Happy Parking!');
             res.set('Content-Type', 'text/xml');
             res.status(200).send(response.toString());
         } else {
