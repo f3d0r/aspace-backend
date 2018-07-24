@@ -6,6 +6,7 @@ var timestamp = require("@timestamp");
 const constants = require('@config');
 var moment = require('moment');
 var uniqueString = require('unique-string');
+const VoiceResponse = require('twilio').twiml.VoiceResponse;
 
 router.get('/', function (req, res) {
     res.status(200).send("This is the user authentication sub-API for aspace! :)");
@@ -15,8 +16,26 @@ router.get('/ping', function (req, res) {
     res.status(200).send("pong");
 });
 
+router.get('/verification_twiml', function (req, res) {
+    errors.checkQueries(req, res, ['verification_pin', 'auth_key'], function () {
+        if (req.query.auth_key == constants.auth.INTERNAL_AUTH_KEY) {
+            const response = new VoiceResponse();
+            response.say({
+                    voice: 'man',
+                    language: 'en',
+                },
+                'Your aspace verification code is ' + req.query.verification_pin + '. Happy Parking!'
+            );
+            // res.set('Content-Type', 'text/xml');
+            res.status(200).send(response.toString());
+        } else {
+            res.status(401).send('INVALID_AUTH_KEY');
+        }
+    });
+});
+
 router.post("/phone_login", function (req, res, next) {
-    errors.checkQueries(req, res, ['phone_number', 'device_id'], function () {
+    errors.checkQueries(req, res, ['phone_number', 'device_id', 'call_verify'], function () {
         twilio.lookupPhone(req.query.phone_number, function (formattedPhoneNumber) {
             verifyUser = {};
             verifyUser['phone_number'] = formattedPhoneNumber;
@@ -27,7 +46,11 @@ router.post("/phone_login", function (req, res, next) {
             sql.select.regularSelect('users', ['phone_number'], '=', [formattedPhoneNumber], 1, function (rows) {
                 verifyUser['user_id'] = rows[0].user_id;
                 sql.insert.addObject('user_verify_codes', verifyUser, function () {
-                    twilio.sendVerifyText(formattedPhoneNumber, pin);
+                    if (req.query.call_verify == 'T') {
+                        twilio.sendVerifyCall(formattedPhoneNumber, pin);
+                    } else {
+                        twilio.sendVerifyText(formattedPhoneNumber, pin);
+                    }
                     next('RETURN_PHONE');
                 }, function (error) {
                     next(error);
@@ -35,7 +58,11 @@ router.post("/phone_login", function (req, res, next) {
             }, function () {
                 verifyUser['user_id'] = uniqueString();
                 sql.insert.addObject('user_verify_codes', verifyUser, function () {
-                    twilio.sendVerifyText(formattedPhoneNumber, pin);
+                    if (req.query.call_verify == 'T') {
+                        twilio.sendVerifyCall(formattedPhoneNumber, pin);
+                    } else {
+                        twilio.sendVerifyText(formattedPhoneNumber, pin);
+                    }
                     next('NEW_PHONE');
                 }, function (error) {
                     next(error);

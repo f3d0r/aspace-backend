@@ -1,18 +1,12 @@
 var mysql = require('mysql');
-
-const DATABASE_USER = 'api';
-const DATABASE_PASSWORD = 'db_password';
-const DATABASE_NAME = 'aspace';
-const DATABASE_IP = '206.189.175.212';
-const DATABASE_PORT = 'db_port';
-// const SOCKET_PATH = '/var/run/mysqld/mysqld.sock';
+const constants = require('@config');
 
 var pool = mysql.createPool({
-    host: DATABASE_IP,
-    user: DATABASE_USER,
-    password: DATABASE_PASSWORD,
-    database: DATABASE_NAME,
-    port: DATABASE_PORT
+    host: constants.db.DATABASE_IP,
+    user: constants.db.DATABASE_USER,
+    password: constants.db.DATABASE_PASSWORD,
+    database: constants.db.DATABASE_NAME,
+    port: constants.db.DATABASE_PORT
 });
 
 exports.getConnection = function (callback) {

@@ -12,14 +12,22 @@ module.exports = {
             })
             .done();
     },
+    sendVerifyCall: function (phoneNumber, pin) {
+        const twimlURL = 'https://api.trya.space/v1/auth/verification_twiml?verification_pin=' + pin + '&auth_key=' + constants.auth.INTERNAL_AUTH_KEY;
+        twilioClient.calls
+            .create({
+                url: twimlURL,
+                from: 'twilio_origin_phone_number',
+                to: phoneNumber
+            })
+            .done();
+    },
     lookupPhone: function (phoneNumber, successCallBack, failCallBack) {
         var authorization = Buffer.from(constants.twilio.TWILIO_ACCOUNT_SID + ":" + constants.twilio.TWILIO_AUTH_TOKEN).toString('base64');
         var options = {
             method: 'GET',
             url: 'https://lookups.twilio.com/v1/PhoneNumbers/' + phoneNumber,
             headers: {
-                'Postman-Token': 'd4625267-2785-4374-bed7-9918ebd73080',
-                'Cache-Control': 'no-cache',
                 Authorization: 'Basic ' + authorization
             }
         };

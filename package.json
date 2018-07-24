@@ -30,7 +30,8 @@
     "mysql": "github:mysqljs/mysql",
     "request": "^2.87.0",
     "twilio": "^3.17.5",
-    "unique-string": "^1.0.0"
+    "unique-string": "^1.0.0",
+    "xml": "^1.0.1"
   },
   "_moduleAliases": {
     "@root": ".",
