@@ -2,11 +2,15 @@ const ERROR_CODES = require('./errorCodes');
 const bodyStructs = require('@body-structure');
 
 module.exports = {
-    getErrorJSON: function (error, extraJSON) {
+    getResponseJSON: function (error, extraJSON) {
         return getErrorJSONTemp(error, extraJSON);
     },
     getErrorCode: function (error) {
-        return ERROR_CODES[error].HTTP_CODE;
+        try {
+            return ERROR_CODES[error.res_info.code_info].HTTP_CODE;
+        } catch (error) {
+            return 500;
+        }
     },
     checkQueries: function (req, res, queryList, successCB, failCB = defaultQueryMissingCallback) {
         foundQueries = [];
@@ -21,35 +25,24 @@ module.exports = {
         } else {
             successCB();
         }
-    },
-    checkBody: function (req, res, bodyGiven, successCB, failCB) {
-        bodyGiven 
-        requiredJsonBody = bodyStructs[req.baseUrl][req.route.path];
-        var equal = true;
-        for (i in requiredJsonBody)
-            if (!bodyGiven.hasOwnProperty(i))
-                equal = false;
     }
 }
 
 function defaultQueryMissingCallback(res, foundQueries, missingQueries) {
-    res.status(422).send(getErrorJSONTemp('MISSING_PARAMETER', missingQueries[0] + " query required"));
+    res.status(422).send(getErrorJSONTemp('MISSING_PARAMETER', null, missingQueries[0] + " query required"));
 }
 
-function getErrorJSONTemp(error, extraJSON) {
-    if (typeof ERROR_CODES[error] == 'undefined') {
-        return 'undefined';
-    }
+function getErrorJSONTemp(error, resContent, missingParameter) {
     var responseJSON = {
-        error: {
-            error_code: ERROR_CODES[error].ERROR_CODE,
-            error_info: ERROR_CODES[error].INFO
+        res_info: {
+            code: ERROR_CODES[error].RESPONSE_CODE,
+            code_info: error
         }
     };
-    if (typeof extraJSON != 'undefined' && extraJSON != null && error == 'MISSING_PARAMETER') {
-        responseJSON.error['missing_parameter'] = extraJSON;
-    } else if (typeof extraJSON != 'undefined' && extraJSON != null) {
-        responseJSON.error['info'] = extraJSON;
+    if (error == 'MISSING_PARAMETER') {
+        responseJSON.res_info['missing_parameter'] = missingParameter;
+    } else if (typeof resContent != 'undefined' && resContent != null) {
+        responseJSON.res_content = resContent;
     }
     return responseJSON;
 }

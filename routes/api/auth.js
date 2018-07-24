@@ -8,15 +8,15 @@ var moment = require('moment');
 var uniqueString = require('unique-string');
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 
-router.get('/', function (req, res) {
-    res.status(200).send("This is the user authentication sub-API for aspace! :)");
+router.get('/', function (req, res, next) {
+    next(errors.getResponseJSON('SERVER_FUNCTION_SUCCESS', "This is the user authentication sub-API for aspace! :)"));
 });
 
-router.get('/ping', function (req, res) {
-    res.status(200).send("pong");
+router.get('/ping', function (req, res, next) {
+    next(errors.getResponseJSON('SERVER_FUNCTION_SUCCESS', "pong"));
 });
 
-router.get('/verification_twiml', function (req, res) {
+router.get('/verification_twiml', function (req, res, next) {
     errors.checkQueries(req, res, ['verification_pin', 'auth_key'], function () {
         var pin = req.query.verification_pin;
         if (req.query.auth_key == constants.auth.INTERNAL_AUTH_KEY) {
@@ -31,7 +31,7 @@ router.get('/verification_twiml', function (req, res) {
             res.set('Content-Type', 'text/xml');
             res.status(200).send(response.toString());
         } else {
-            res.status(401).send('INVALID_AUTH_KEY');
+            next(errors.getResponseJSON('INVALID_AUTH_KEY'));
         }
     });
 });
@@ -53,7 +53,7 @@ router.post("/phone_login", function (req, res, next) {
                     } else {
                         twilio.sendVerifyText(formattedPhoneNumber, pin);
                     }
-                    next('RETURN_PHONE');
+                    next(errors.getResponseJSON('RETURN_PHONE'));
                 }, function (error) {
                     next(error);
                 });
@@ -65,7 +65,7 @@ router.post("/phone_login", function (req, res, next) {
                     } else {
                         twilio.sendVerifyText(formattedPhoneNumber, pin);
                     }
-                    next('NEW_PHONE');
+                    next(errors.getResponseJSON('NEW_PHONE'));
                 }, function (error) {
                     next(error);
                 });
@@ -73,7 +73,7 @@ router.post("/phone_login", function (req, res, next) {
                 next(error);
             });
         }, function () {
-            next('INVALID_PHONE');
+            next(errors.getResponseJSON('INVALID_PHONE'));
         });
     });
 });
@@ -85,7 +85,7 @@ router.post("/check_pin", function (req, res, next) {
                     function (rows) {
                         if (timestamp.timePassed(moment.utc(rows[0].expiry_date))) {
                             sql.remove.regularDelete('user_verify_codes', ['phone_number', 'device_id'], [formattedPhoneNumber, req.query.device_id], function () {
-                                next('PIN_EXPIRED');
+                                next(errors.getResponseJSON('PIN_EXPIRED'));
                             }, function (error) {
                                 next(error);
                             });
@@ -102,7 +102,7 @@ router.post("/check_pin", function (req, res, next) {
                                 jsonReturn = {};
                                 jsonReturn['access_code'] = newAccessCode
                                 jsonReturn['expiry'] = expiry_date;
-                                next('NEW_ACCESS_CODE', jsonReturn);
+                                next(errors.getResponseJSON('NEW_ACCESS_CODE', jsonReturn));
                                 sql.remove.regularDelete('user_verify_codes', ['phone_number', 'device_id'], [formattedPhoneNumber, req.query.device_id], function () {
                                     sql.select.regularSelect('users', ['user_id'], ['='], [rows[0].user_id], 1, function () {}, function () {
                                         newUserJSON = {};
@@ -123,14 +123,14 @@ router.post("/check_pin", function (req, res, next) {
                         }
                     },
                     function () {
-                        next('INVALID_PIN')
+                        next(errors.getResponseJSON('INVALID_PIN'));
                     },
                     function (error) {
                         next(error);
                     });
             },
             function () {
-                next('INVALID_PHONE');
+                next(errors.getResponseJSON('INVALID_PHONE'));
             });;
     });
 });

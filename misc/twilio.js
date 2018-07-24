@@ -20,7 +20,6 @@ module.exports = {
                 from: 'twilio_origin_phone_number',
                 to: phoneNumber
             }).catch(function (err) {
-                console.log("TWILIO ERROR: ");
                 console.error(err.message);
             })
             .done();

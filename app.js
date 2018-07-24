@@ -25,35 +25,35 @@ app.use(cors());
 app.use(require('./routes'));
 
 // MAIN ENDPOINTS
-app.get('/', function (req, res) {
-    res.status(200).send("Welcome to the aspace API! :)");
+app.get('/', function (req, res, next) {
+    next(errors.getResponseJSON('SERVER_FUNCTION_SUCCESS', "Welcome to the aspace API! :)"));
 });
 
-app.get('/ping', function (req, res) {
-    res.status(200).send("pong");
+app.get('/ping', function (req, res, next) {
+    next(errors.getResponseJSON('SERVER_FUNCTION_SUCCESS', "pong"));
 });
 
 // ERROR HANDLERS
 app.use(errorHandler);
 
-function errorHandler(err, req, res, next) {
-    if (errors.getErrorJSON(err) == 'undefined') {
-        res.status(err.statusCode).json({
-            "bodyReceived": err.body,
-            "error": err.type
-        });
-        sendSlackError(err, req);
+function errorHandler(error, req, res, next) {
+    if (error == 'INVALID_BASIC_AUTH') {
+        res.set("WWW-Authenticate", "Basic realm=\"Authorization Required\"");
+        res.status(401).send("Authorization Required");
+        sendSlackError(error, req);
+    } else if (errors.getErrorCode(error) >= 403) {
+        sendSlackError(error, req);
+        res.status(errors.getErrorCode(error)).send(error);
     } else {
-        res.status(errors.getErrorCode(err)).send(errors.getErrorJSON(err));
+        res.status(errors.getErrorCode(error)).send(error);
     }
-
 }
 
 function sendSlackError(error, req) {
-    var message = "aspace Backend Error Notification\n" + "Error: " + error + "\nreq: " + req.url;
-    webhook.send(message, function (err, res) {
-        if (err) {
-            console.log('Error: ', err);
+    var message = "aspace Backend Error Notification\n" + "Error: " + JSON.stringify(error) + "\nreq: " + req.url;
+    webhook.send(message, function (error, res) {
+        if (error) {
+            console.log('Error: ', error);
         }
     });
 }
