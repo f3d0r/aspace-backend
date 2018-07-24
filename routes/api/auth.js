@@ -26,7 +26,7 @@ router.get('/verification_twiml', function (req, res) {
                 },
                 'Your aspace verification code is ' + req.query.verification_pin + '. Happy Parking!'
             );
-            // res.set('Content-Type', 'text/xml');
+            res.set('Content-Type', 'text/xml');
             res.status(200).send(response.toString());
         } else {
             res.status(401).send('INVALID_AUTH_KEY');
