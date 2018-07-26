@@ -9,11 +9,11 @@ var uniqueString = require('unique-string');
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 
 router.get('/', function (req, res, next) {
-    next(errors.getResponseJSON('SERVER_FUNCTION_SUCCESS', "This is the user authentication sub-API for aspace! :)"));
+    next(errors.getResponseJSON('AUTH_ENDPOINT_FUNCTION_SUCCESS', "This is the user authentication sub-API for aspace! :)"));
 });
 
 router.get('/ping', function (req, res, next) {
-    next(errors.getResponseJSON('SERVER_FUNCTION_SUCCESS', "pong"));
+    next(errors.getResponseJSON('AUTH_ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
 router.get('/verification_twiml', function (req, res, next) {

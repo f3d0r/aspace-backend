@@ -104,19 +104,29 @@ module.exports = Object.freeze({
         RESPONSE_CODE: 27,
         INFO: "route_calculation_error"
     },
-    SERVER_FUNCTION_SUCCESS: {
+    MAIN_ENDPOINT_FUNCTION_SUCCESS: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 30,
-        INFO: "server_function_success"
+        INFO: "parking_endpoint_function_success"
+    },
+    ROUTING_ENDPOINT_FUNCTION_SUCCESS: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 31,
+        INFO: "routing_endpoint_function_success"
+    },
+    ADMIN_ENDPOINT_FUNCTION_SUCCESS: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 32,
+        INFO: "routing_endpoint_function_success"
+    },
+    AUTH_ENDPOINT_FUNCTION_SUCCESS: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 33,
+        INFO: "auth_endpoint_function_success"
     },
     PARKING_ENDPOINT_FUNCTION_SUCCESS: {
         HTTP_CODE: 200,
-        RESPONSE_CODE: 31,
+        RESPONSE_CODE: 34,
         INFO: "parking_endpoint_function_success"
-    },
-    ROUTING_ENDPOINT_SUCCESS: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: 32,
-        INFO: "routing_endpoint_success"
     }
 });

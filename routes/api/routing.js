@@ -4,11 +4,11 @@ var sql = require('@sql');
 var routeOptimization = require('@route-optimization');
 
 router.get('/', function (req, res, next) {
-    next(errors.getResponseJSON('SERVER_FUNCTION_SUCCESS', "This is the routing sub-API for aspace! :)"));
+    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', "This is the routing sub-API for aspace! :)"));
 });
 
 router.get('/ping', function (req, res, next) {
-    next(errors.getResponseJSON('SERVER_FUNCTION_SUCCESS', "pong"));
+    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
 router.post('/get_route_waypoints', function (req, res, next) {

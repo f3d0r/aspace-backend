@@ -4,11 +4,11 @@ var sql = require('@sql');
 var parkingCalc = require('@parking-calc');
 
 router.get('/', function (req, res, next) {
-    next(errors.getResponseJSON('SERVER_FUNCTION_SUCCESS', "This is the parking sub-API for aspace! :)"));
+    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', "This is the parking sub-API for aspace! :)"));
 });
 
 router.get('/ping', function (req, res, next) {
-    next(errors.getResponseJSON('SERVER_FUNCTION_SUCCESS', "pong"));
+    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
 router.post('/update_status', function (req, res, next) {
