@@ -107,7 +107,7 @@ module.exports = Object.freeze({
     MAIN_ENDPOINT_FUNCTION_SUCCESS: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 30,
-        INFO: "parking_endpoint_function_success"
+        INFO: "main_endpoint_function_success"
     },
     ROUTING_ENDPOINT_FUNCTION_SUCCESS: {
         HTTP_CODE: 200,
@@ -117,7 +117,7 @@ module.exports = Object.freeze({
     ADMIN_ENDPOINT_FUNCTION_SUCCESS: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 32,
-        INFO: "routing_endpoint_function_success"
+        INFO: "admin_endpoint_function_success"
     },
     AUTH_ENDPOINT_FUNCTION_SUCCESS: {
         HTTP_CODE: 200,
