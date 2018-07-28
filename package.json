@@ -1,10 +1,12 @@
 {
   "name": "aspace_backend",
   "version": "1.0.0",
-  "description": "aspace, Inc. - Backend (node.js/Espress.js stack), available at https://api.trya.space.",
+  "description": "aspace, Inc. - Backend (node.js/Express.js stack), available at https://api.trya.space.",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
+    "dev": "PORT=3001 node app.js",
+    "prod": "PORT=3000 node app.js",
     "deploy": "pm2 start app.js --watch",
     "test": "debug"
   },
@@ -20,6 +22,7 @@
   "homepage": "https://gitlab.com/aspace/backend#README",
   "dependencies": {
     "@slack/client": "^4.3.1",
+    "aws-sdk": "^2.282.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.4",
     "ejs": "^2.6.1",
@@ -27,8 +30,11 @@
     "express-errors-to-slack": "^1.0.3",
     "module-alias": "^2.1.0",
     "moment": "^2.22.2",
+    "multer": "^1.3.1",
+    "multer-s3": "^2.7.0",
     "mysql": "github:mysqljs/mysql",
     "request": "^2.87.0",
+    "sharp": "^0.20.5",
     "twilio": "^3.17.5",
     "unique-string": "^1.0.0",
     "xml": "^1.0.1"
@@ -38,6 +44,7 @@
     "@auth_bcrypt": "misc/auth/bcrypt",
     "@auth_basic": "misc/auth/basic",
     "@errors": "misc/errors/errorHandler",
+    "@error-codes": "misc/errors/errorCodes",
     "@misc": "misc",
     "@config": "config",
     "@sql": "database/sqlActions",
@@ -47,7 +54,8 @@
     "@parking-calc": "misc/parkingCalc",
     "@bcrypt": "misc/auth/bcrypt",
     "@route-optimization": "misc/routeOptimization",
-    "@body-structure": "config/bodyStructs"
+    "@body-structure": "config/bodyStructs",
+    "@upload": "app"
   },
   "_moduleDirectories": [
     "node_modules"

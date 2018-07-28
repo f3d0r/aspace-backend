@@ -1,14 +1,17 @@
 require('module-alias/register');
 
-// IMPORTS
+// PACKAGE IMPORTS
 const express = require('express');
 const bodyParser = require('body-parser');
-const constants = require('@config');
-const errors = require('@errors');
 const cors = require('cors');
 const {
     IncomingWebhook
 } = require('@slack/client');
+
+// LOCAL IMPORTS
+const constants = require('@config');
+const errors = require('@errors');
+const errorCodes = require("@error-codes");
 
 const webhook = new IncomingWebhook(constants.slack.webhook);
 
@@ -58,7 +61,22 @@ function sendSlackError(error, req) {
     });
 }
 
-// START SERVER
-var server = app.listen(constants.express.API_PORT, function () {
-    console.log('Listening on port ' + server.address().port);
-});
+// Check that all error codes in errorCodes.js are unique
+function runTests() {
+    var responseCodes = [];
+    for (var currentError in errorCodes) {
+        if (responseCodes.includes(errorCodes[currentError].RESPONSE_CODE))
+            return 1;
+        responseCodes.push(errorCodes[currentError].RESPONSE_CODE);
+    }
+    return (typeof process.env.PORT != 'undefined' && process.env.PORT != null) ? 0 : 1;
+}
+
+// Start server
+if (runTests() == 0) {
+    var server = app.listen(process.env.PORT, function () {
+        console.log('Listening on port ' + server.address().port);
+    });
+} else {
+    console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
+}

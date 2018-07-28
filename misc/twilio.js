@@ -7,7 +7,7 @@ module.exports = {
         twilioClient.messages
             .create({
                 body: "aspace code: " + pin + ". Happy Parking! :)",
-                from: 'twilio_origin_phone_number',
+                from: constants.twilio.ORIGIN_PHONE,
                 to: phoneNumber
             })
             .done();
@@ -17,7 +17,7 @@ module.exports = {
         twilioClient.calls
             .create({
                 url: twimlURL,
-                from: 'twilio_origin_phone_number',
+                from: constants.twilio.ORIGIN_PHONE,
                 to: phoneNumber
             }).catch(function (err) {
                 console.error(err.message);

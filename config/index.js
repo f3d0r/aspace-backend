@@ -1,4 +1,8 @@
-var mysql = require('mysql');
+var aws = require('aws-sdk');
+
+const spacesEndpoint = new aws.Endpoint('nyc3.digitaloceanspaces.com');
+const accessKey = 'HN54L3H3ETPTIBL7SXER';
+const secretKey = 'qALnLKpca5tg30EKZVZ7IN1im3PmbF9kCgluPu37T7Q';
 
 module.exports = {
     express: {
@@ -7,6 +11,7 @@ module.exports = {
     twilio: {
         TWILIO_ACCOUNT_SID: 'twilio_sid',
         TWILIO_AUTH_TOKEN: 'twilio_auth_token',
+        ORIGIN_PHONE: 'twilio_origin_phone_number'
     },
     mysql_config: {
         ADMIN_TABLE: 'aspace_admins'
@@ -31,4 +36,15 @@ module.exports = {
         DATABASE_IP: '206.189.175.212',
         DATABASE_PORT: 'db_port'
     },
+    digitalocean: {
+        BUCKET_NAME: 'aspace',
+        S3: new aws.S3({
+            endpoint: spacesEndpoint,
+            accessKeyId: accessKey,
+            secretAccessKey: secretKey
+        })
+    },
+    fs_paths: {
+        profile_pics: 'uploads/profile_pic_temp/'
+    }
 }

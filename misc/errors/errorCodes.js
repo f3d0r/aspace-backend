@@ -128,5 +128,10 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         RESPONSE_CODE: 34,
         INFO: "parking_endpoint_function_success"
+    },
+    USER_ENDPOINT_FUNCTION_SUCCESS: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 35,
+        INFO: "user_endpoint_function_success"
     }
 });
