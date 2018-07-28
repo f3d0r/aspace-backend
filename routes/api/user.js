@@ -47,6 +47,7 @@ router.post('/update_profile_pic', upload.single('photo'), function (req, res, n
             var params = {
                 Bucket: constants.digitalocean.BUCKET_NAME,
                 Key: keyName,
+                ACL: 'public-read',
                 Body: buf,
             };
             constants.digitalocean.S3.upload(params, function (err, data) {
