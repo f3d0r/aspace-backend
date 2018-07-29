@@ -133,5 +133,40 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         RESPONSE_CODE: 35,
         INFO: "user_endpoint_function_success"
+    },
+    PROFILE_PIC_EXISTS: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 36,
+        INFO: "profile_pic_exists"
+    },
+    PROFILE_PIC_NULL: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 37,
+        INFO: "profile_pic_null"
+    },
+    PROFILE_PIC_UPDATED: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 38,
+        INFO: "profile_pic_updated"
+    },
+    INVALID_ACCESS_CODE: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: -2,
+        INFO: "invalid_access_code"
+    },
+    EXPIRED_ACCESS_CODE: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: -3,
+        INFO: "expired_access_code"
+    },
+    INVALID_USER: {
+        HTTP_CODE: 409,
+        RESPONSE_CODE: -4,
+        INFO: "invalid_user"
+    },
+    MULTI_PART_BODY_MISSING: {
+        HTTP_CODE: 422,
+        RESPONSE_CODE: -5,
+        INFO: "multi_part_body_missing"
     }
 });

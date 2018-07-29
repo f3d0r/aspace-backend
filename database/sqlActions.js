@@ -1,5 +1,6 @@
 var db = require('./db');
 var mysql = require('mysql');
+var uniqueString = require('unique-string');
 
 module.exports = {
     insert: {
@@ -173,6 +174,47 @@ module.exports = {
                         successCB();
                     } else {
                         noExistCB();
+                    }
+                });
+                connection.release();
+            });
+        },
+        updateProfilePic(accessCode, deviceId, successCB, failCB) { //return profileID to use for s3 upload
+            db.getConnection(function (err, connection) {
+                var sql = "SELECT * FROM `user_access_codes` WHERE `access_code` = ? AND `device_id` = ?";
+                connection.query(sql, [accessCode, deviceId], function (error, rows) {
+                    if (error) {
+                        return failCB(error);
+                    }
+                    if (rows.length == 0) {
+                        failCB('INVALID_ACCESS_KEY');
+                    } else {
+                        var sql = "SELECT * FROM `users` WHERE `user_id` = ?";
+                        connection.query(sql, [rows[0].user_id], function (error, rows) {
+                            if (error) {
+                                return failCB(error);
+                            }
+                            if (rows.length == 0) {
+                                failCB('INVALID_USER');
+                            } else {
+                                if (rows[0].profile_pic == null) {
+                                    var profilePicID = uniqueString();
+                                    var sql = 'UPDATE `users` SET `profile_pic` = ? WHERE `user_id` = ?';
+                                    connection.query(sql, [profilePicID, rows[0].user_id], function (error, results, fields) {
+                                        if (error) {
+                                            return failCB(error);
+                                        }
+                                        if (results.affectedRows == 0) {
+                                            noExistCB();
+                                        } else {
+                                            successCB(profilePicID);
+                                        }
+                                    });
+                                } else {
+                                    successCB(rows[0].profile_pic);
+                                }
+                            }
+                        });
                     }
                 });
                 connection.release();

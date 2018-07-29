@@ -32,7 +32,6 @@ router.post('/get_route_waypoints', function (req, res, next) {
         routeOptimization.getRouteWaypoints(req.body.origin.lng, req.body.origin.lat, req.body.dest.lng, req.body.dest.lat, req.body.car_size, function (response) {
             next(errors.getResponseJSON('ROUTING_ENDPOINT_SUCCESS', response));
         }, function (error) {
-            console.log(error);
             next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR'));
         })
     }

@@ -42,7 +42,10 @@ module.exports = {
             endpoint: spacesEndpoint,
             accessKeyId: accessKey,
             secretAccessKey: secretKey
-        })
+        }),
+        BUCKET_BASE_URL: 's3_bucket_url',
+        PROFILE_PIC_ENDPOINT: '***REMOVED***',
+        PROFILE_PIC_EXTENSION: '.png'
     },
     fs_paths: {
         profile_pics: 'uploads/profile_pic_temp/'
