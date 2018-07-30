@@ -9,10 +9,10 @@ module.exports = Object.freeze({
         RESPONSE_CODE: 1,
         INFO: "new_phone"
     },
-    RETURN_PHONE: {
+    RETURNING_PHONE: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 2,
-        INFO: "return_phone"
+        INFO: "returning_phone"
     },
     INVALID_PIN: {
         HTTP_CODE: 200,

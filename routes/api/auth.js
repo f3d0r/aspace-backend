@@ -53,7 +53,7 @@ router.post("/phone_login", function (req, res, next) {
                     } else {
                         twilio.sendVerifyText(formattedPhoneNumber, pin);
                     }
-                    next(errors.getResponseJSON('RETURN_PHONE'));
+                    next(errors.getResponseJSON('RETURNING_PHONE'));
                 }, function (error) {
                     next(error);
                 });
