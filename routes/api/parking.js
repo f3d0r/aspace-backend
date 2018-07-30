@@ -35,7 +35,7 @@ router.post('/update_status', function (req, res, next) {
 
 router.get('/get_status', function (req, res, next) {
     errors.checkQueries(req, res, ['block_id', 'spot_id'], function () {
-        sql.select.regularSelect('parking', ['block_id', 'spot_id'], ['=', '='], [req.query.block_id, req.query.spot_id], null, function (results) {
+        sql.select.regularSelect('parking', null, ['block_id', 'spot_id'], ['=', '='], [req.query.block_id, req.query.spot_id], null, function (results) {
             next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', results));
         }, function () {
             next(errors.getResponseJSON('INVALID_BLOCK_ID_OR_SPOT_ID'));
@@ -46,7 +46,7 @@ router.get('/get_status', function (req, res, next) {
         if (missingQueries.length == 2) {
             next(errors.getResponseJSON('MISSING_PARAMETER', null, missingQueries[0] + " query required"));
         } else {
-            sql.select.regularSelect('parking', [foundQueries[0]], ['='], [req.query[foundQueries[0]]], null, function (results) {
+            sql.select.regularSelect('parking', null, [foundQueries[0]], ['='], [req.query[foundQueries[0]]], null, function (results) {
                 next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', results));
             }, function () {
                 next(errors.getResponseJSON('INVALID_BLOCK_ID_OR_SPOT_ID'));
@@ -73,7 +73,7 @@ router.post('/get_status_bbox', function (req, res, next) {
     } else if (typeof req.body.ne.lng == 'undefined' || req.body.ne.lng === null) {
         next(errors.getResponseJSON('MISSING_BODY', "Missing body.ne.lng"));
     } else {
-        sql.select.regularSelect('parking', ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
+        sql.select.regularSelect('parking', null, ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
                 next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', results));
             }, function () {
                 next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', []));
@@ -108,7 +108,7 @@ router.post('/get_status_radius', function (req, res, next) {
 router.get('/block_id_exists', function (req, res, next) {
     errors.checkQueries(req, res, ['block_id'], function () {
         var jsonReturn = {};
-        sql.select.regularSelect('parking', ['block_id'], ['='], [req.query.block_id], 1, function () {
+        sql.select.regularSelect('parking', null, ['block_id'], ['='], [req.query.block_id], 1, function () {
             jsonReturn['block_id_exists'] = "T";
             next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', jsonReturn));
         }, function () {

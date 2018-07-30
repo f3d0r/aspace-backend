@@ -1,4 +1,4 @@
-var bcrypt = require('@auth_bcrypt');
+var bcrypt = require('@auth-bcrypt');
 const constants = require('@config');
 
 module.exports = {

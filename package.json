@@ -41,8 +41,9 @@
   },
   "_moduleAliases": {
     "@root": ".",
-    "@auth_bcrypt": "misc/auth/bcrypt",
-    "@auth_basic": "misc/auth/basic",
+    "@auth-bcrypt": "misc/auth/bcrypt",
+    "@auth-basic": "misc/auth/basic",
+    "@auth-user": "misc/auth/user",
     "@errors": "misc/errors/errorHandler",
     "@error-codes": "misc/errors/errorCodes",
     "@misc": "misc",

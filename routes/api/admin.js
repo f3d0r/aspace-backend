@@ -1,5 +1,5 @@
 var router = require('express').Router();
-var basicAuth = require('@auth_basic');
+var basicAuth = require('@auth-basic');
 var sql = require('@sql');
 var errors = require('@errors');
 var uniqueString = require('unique-string');

@@ -45,7 +45,7 @@ router.post("/phone_login", function (req, res, next) {
             verifyUser['verify_pin'] = pin;
             verifyUser['device_id'] = req.query.device_id;
             verifyUser['expiry_date'] = timestamp.getExpiryTimestamp(constants.auth.PIN_EXPIRY_MINUTES, 'm');
-            sql.select.regularSelect('users', ['phone_number'], '=', [formattedPhoneNumber], 1, function (rows) {
+            sql.select.regularSelect('users', null, ['phone_number'], ['='], [formattedPhoneNumber], 1, function (rows) {
                 verifyUser['user_id'] = rows[0].user_id;
                 sql.insert.addObject('user_verify_codes', verifyUser, function () {
                     if (req.query.call_verify == 'T') {
@@ -81,7 +81,7 @@ router.post("/phone_login", function (req, res, next) {
 router.post("/check_pin", function (req, res, next) {
     errors.checkQueries(req, res, ['phone_number', 'device_id', 'verify_pin'], function () {
         twilio.lookupPhone(req.query.phone_number, function (formattedPhoneNumber) {
-                sql.select.regularSelect("user_verify_codes", ['phone_number', 'device_id', 'verify_pin'], ['=', '=', '='], [formattedPhoneNumber, req.query.device_id, req.query.verify_pin], 1,
+                sql.select.regularSelect('user_verify_codes', null, ['phone_number', 'device_id', 'verify_pin'], ['=', '=', '='], [formattedPhoneNumber, req.query.device_id, req.query.verify_pin], 1,
                     function (rows) {
                         if (timestamp.timePassed(moment.utc(rows[0].expiry_date))) {
                             sql.remove.regularDelete('user_verify_codes', ['phone_number', 'device_id'], [formattedPhoneNumber, req.query.device_id], function () {
@@ -104,7 +104,7 @@ router.post("/check_pin", function (req, res, next) {
                                 jsonReturn['expiry'] = expiry_date;
                                 next(errors.getResponseJSON('NEW_ACCESS_CODE', jsonReturn));
                                 sql.remove.regularDelete('user_verify_codes', ['phone_number', 'device_id'], [formattedPhoneNumber, req.query.device_id], function () {
-                                    sql.select.regularSelect('users', ['user_id'], ['='], [rows[0].user_id], 1, function () {}, function () {
+                                    sql.select.regularSelect('users', null, ['user_id'], ['='], [rows[0].user_id], 1, function () {}, function () {
                                         newUserJSON = {};
                                         newUserJSON['user_id'] = accessCode['user_id'];
                                         newUserJSON['phone_number'] = formattedPhoneNumber;

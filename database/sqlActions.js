@@ -82,9 +82,18 @@ module.exports = {
                 connection.release();
             });
         },
-        regularSelect: function (database, keys, operators, values, numResults, successCB, noneFoundCB, failCB) {
+        regularSelect: function (database, selection, keys, operators, values, numResults, successCB, noneFoundCB, failCB) {
             db.getConnection(function (err, connection) {
-                var sql = "SELECT * FROM " + connection.escapeId(database) + " WHERE ";
+                var sql = 'SELECT ';
+                if (selection == null || selection == "*") {
+                    sql += '*';
+                } else {
+                    sql += selection[0] + ' ';
+                    for (index = 1; index < selection.length; index++) {
+                        sql += ', ' + selection[index]
+                    }
+                }
+                sql += ' FROM ' + connection.escapeId(database) + ' WHERE ';
                 if (keys.length != operators.length || operators.length != values.length) {
                     return failCB('Key length must match value length.');
                 }

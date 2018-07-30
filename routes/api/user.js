@@ -6,6 +6,7 @@ var uniqueString = require('unique-string');
 var errors = require('@errors');
 const constants = require('@config');
 var sql = require('@sql');
+var userAuth = require('@auth-user');
 
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -28,15 +29,51 @@ router.get('/ping', function (req, res, next) {
     next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
-router.get('/get_car', function (req, res, next) {
-    errors.checkQueries(req, res, ['access_code', 'car_id'], function () {
-
+router.get('/get_vehicles', function (req, res, next) {
+    errors.checkQueries(req, res, ['access_code', 'device_id'], function () {
+        userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
+            sql.select.regularSelect('user_vehicles', ['vehicle_id', 'vehicle_vin', 'vehicle_year', 'vehicle_make', 'vehicle_model', 'vehicle_color', 'vehicle_length_feet'], ['user_id'], ['='], [user[0].user_id], null, function (userVehicles) {
+                next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS', userVehicles));
+            }, function () {
+                next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS', {}));
+            }, function (err) {
+                next(err);
+            });
+        }, function () {
+            next(errors.getResponseJSON('INVALID_ACCESS_CODE'));
+        });
     });
 });
 
-router.post('/manipulate_car', function (req, res, next) {
-    errors.checkQueries(req, res, ['access_code', 'device_id', 'car_id', 'action'], function () {
+router.post('/remove_vehicle', function (req, res, next) {
+    errors.checkQueries(req, res, ['access_code', 'device_id', 'vehicle_id'], function () {
+        userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
+            sql.remove.regularDelete('user_vehicles', ['user_id', 'vehicle_id'], [user[0].user_id, req.query.vehicle_id], function (userVehicles) {
+                next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS'));
+            }, function (err) {
+                next(err);
+            });
+        }, function () {
+            next(errors.getResponseJSON('INVALID_ACCESS_CODE'));
+        });
+    });
+});
 
+router.post('/add_vehicle', function (req, res, next) {
+    errors.checkQueries(req, res, ['access_code', 'device_id', 'vehicle_vin'], function () {
+        userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
+            var newVehicle = {};
+            newVehicle['user_id'] = user[0].user_id;
+            newVehicle['vehicle_id'] = uniqueString();
+            newVehicle['vehicle_vin'] = req.query.vehicle_vin;
+            sql.insert.addObject('user_vehicles', newVehicle, function () {
+                next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS', newVehicle['vehicle_id']));
+            }, function (err) {
+                next(err);
+            });
+        }, function () {
+            next(errors.getResponseJSON('INVALID_ACCESS_CODE'));
+        });
     });
 });
 
@@ -77,8 +114,8 @@ router.post('/update_profile_pic', upload.single('photo'), function (req, res, n
 
 router.get('/get_profile_pic', function (req, res, next) {
     errors.checkQueries(req, res, ['access_code', 'device_id'], function () {
-        sql.select.regularSelect('user_access_codes', ['access_code', 'device_id'], ['=', '='], [req.query.access_code, req.query.device_id], 1, function (user) {
-                sql.select.regularSelect('users', ['user_id'], ['='], [user[0].user_id], 0, function (userInfo) {
+        userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
+                sql.select.regularSelect('users', null, ['user_id'], ['='], [user[0].user_id], 0, function (userInfo) {
                         if (userInfo[0].profile_pic == null) {
                             next(errors.getResponseJSON('PROFILE_PIC_NULL'));
                         } else {
@@ -93,9 +130,6 @@ router.get('/get_profile_pic', function (req, res, next) {
             },
             function () {
                 next(errors.getResponseJSON('INVALID_ACCESS_CODE'));
-            },
-            function (err) {
-                next(err);
             });
     });
 });
