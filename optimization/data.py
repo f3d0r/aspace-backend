@@ -29,9 +29,9 @@ import json
 url = "https://api.trya.space/v1/parking/get_min_size_parking"
 headers = {'content-type': 'application/json'}
 prefix1 = "https://api.mapbox.com/directions-matrix/v1/mapbox/"
-suffix1 = "?access_token=pk.eyJ1IjoiYXNwYWNlLWluYyIsImEiOiJjamo5MGs4OGUxOHU2M3Jzd3hjOXl4NHl1In0.mazlVIdsGDts6XTbutjoCg"
+suffix1 = "?access_token=***REMOVED***"
 prefix2 = "https://api.mapbox.com/directions/v5/mapbox/driving/"
-suffix2 = "?steps=true&geometries=polyline&access_token=pk.eyJ1IjoiYXNwYWNlLWluYyIsImEiOiJjamo5MGs4OGUxOHU2M3Jzd3hjOXl4NHl1In0.mazlVIdsGDts6XTbutjoCg"
+suffix2 = "?steps=true&geometries=polyline&access_token=***REMOVED***"
 
 
 def acquireX(origin, destination, radius, spot_size, params):
