@@ -93,11 +93,6 @@ cluster(function (worker) {
     if (runTests() == 0) {
         var server = app.listen(process.env.PORT, function () {
             console.log('Listening on port ' + server.address().port);
-            sendSlackError({
-                "cpuCount": cpuCount
-            }, {
-                "url": ""
-            })
         });
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
