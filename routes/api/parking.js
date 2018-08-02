@@ -122,7 +122,9 @@ router.get('/block_id_exists', function (req, res, next) {
 
 router.post('/get_min_size_parking', function (req, res, next) {
     errors.checkQueries(req, res, ['radius_feet', 'spot_size_feet'], function () {
-        if (JSON.stringify(req.body) == "{}" || typeof req.body == 'undefined' || req.body === null) {
+        if (req.query.spot_size_feet <= 0) {
+            next(errors.getResponseJSON('INVALID_PARAMETER', "spot_size_feet query should be > 0."));
+        } else if (JSON.stringify(req.body) == "{}" || typeof req.body == 'undefined' || req.body === null) {
             next(errors.getResponseJSON('MISSING_BODY', "lat/lng body required"));
         } else if (typeof req.body.lat == 'undefined' || req.body.lat === null) {
             next(errors.getResponseJSON('MISSING_BODY', "Missing body.lat"));

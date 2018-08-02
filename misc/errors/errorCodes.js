@@ -4,6 +4,11 @@ module.exports = Object.freeze({
         RESPONSE_CODE: -1,
         INFO: "missing_parameter"
     },
+    INVALID_PARAMETER: {
+        HTTP_CODE: 422,
+        RESPONSE_CODE: -6,
+        INFO: "invalid_parameter"
+    },
     NEW_PHONE: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 1,

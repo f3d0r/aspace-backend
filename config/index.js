@@ -6,7 +6,7 @@ const secretKey = 'qALnLKpca5tg30EKZVZ7IN1im3PmbF9kCgluPu37T7Q';
 
 module.exports = {
     express: {
-        API_PORT: 3000
+        RESPONSE_TIMEOUT_MILLI: 30000
     },
     twilio: {
         TWILIO_ACCOUNT_SID: 'twilio_sid',
