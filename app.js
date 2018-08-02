@@ -5,6 +5,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const timeout = require('connect-timeout');
+var helmet = require('helmet')
 
 const {
     IncomingWebhook
@@ -25,6 +26,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 app.use(cors());
+app.use(helmet())
 app.use(require('./routes'));
 app.use(errorHandler);
 
