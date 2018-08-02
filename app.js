@@ -7,6 +7,7 @@ const cors = require('cors');
 const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
+var toobusy = require('express-toobusy')();
 
 const {
     IncomingWebhook
@@ -25,6 +26,7 @@ var app = express();
 
 cluster(function (worker) {
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
+    app.use(toobusy);
     app.use(bodyParser.urlencoded({
         extended: false
     }));
