@@ -30,9 +30,8 @@ function addCurrentStripIfQualifies(currentAdjacencies, mostAdjacent, finalMatch
     if (currentAdjacencies.length >= mostAdjacent) {
         var lastIndex = 0;
         for (var index = 0; index < currentAdjacencies.length; index += mostAdjacent - 1) {
-            if (index != 0) {
+            if (index != 0)
                 finalMatchingSpots.push(currentAdjacencies[Math.ceil((index + lastIndex) / 2)]);
-            }
             lastIndex = index;
         }
     }
@@ -48,9 +47,8 @@ function sortByBlockID(rawList) {
     });
 
     for (var index = 0; index < rawList.length; index++) {
-        if (rawList[index].occupied == 'F') {
+        if (rawList[index].occupied == 'F')
             rawJSON[rawList[index].block_id].push(rawList[index]);
-        }
     }
     sortedJSON = JSON.parse(JSON.stringify(rawJSON));
 

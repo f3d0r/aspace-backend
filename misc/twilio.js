@@ -35,15 +35,13 @@ module.exports = {
         };
 
         request(options, function (error, response, body) {
-            if (error) {
+            if (error)
                 failCallBack(error);
-            }
             body = JSON.parse(body);
-            if (body.status == 404) {
+            if (body.status == 404)
                 failCallBack(body.status);
-            } else {
+            else
                 successCallBack(body.phone_number);
-            }
         });
     }
 }
