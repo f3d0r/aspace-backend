@@ -116,6 +116,7 @@ router.post('/update_profile_pic', upload.single('photo'), function (req, res, n
             fs.unlink(req.file.path, function (err) {
                 if (err)
                     next(err);
+                else
                 next(errors.getResponseJSON(error));
             });
         });
