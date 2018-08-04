@@ -66,14 +66,6 @@ router.post('/add_vehicle', function (req, res, next) {
             newVehicle['user_id'] = user[0].user_id;
             newVehicle['vehicle_id'] = uniqueString();
             newVehicle['vehicle_vin'] = req.query.vehicle_vin;
-            if (typeof req.query.vehicle_year != 'undefined' && req.query.vehicle_year !== null && req.query.vehicle_year != '')
-                newVehicle['vehicle_year'] = req.query.vehicle_year;
-            if (typeof req.query.vehicle_make != 'undefined' && req.query.vehicle_make !== null && req.query.vehicle_make != '')
-                newVehicle['vehicle_make'] = req.query.vehicle_make;
-            if (typeof req.query.vehicle_model != 'undefined' && req.query.vehicle_model !== null && req.query.vehicle_model != '')
-                newVehicle['vehicle_model'] = req.query.vehicle_model
-            if (typeof req.query.vehicle_color != 'undefined' && req.query.vehicle_color !== null && req.query.vehicle_color != '')
-                newVehicle['vehicle_color'] = req.query.vehicle_color;
             sql.insert.addObject('user_vehicles', newVehicle, function () {
                 next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS', newVehicle['vehicle_id']));
             }, function (err) {
@@ -100,15 +92,17 @@ router.post('/update_profile_pic', upload.single('photo'), function (req, res, n
                         Body: buf,
                     };
                     constants.digitalocean.S3.upload(params, function (err, data) {
-                        if (err)
+                        if (err) {
                             next(err);
-                        else
+                        } else {
                             fs.unlink(req.file.path, function (err) {
-                                if (err)
+                                if (err) {
                                     next(err);
-                                else
+                                } else {
                                     next(errors.getResponseJSON('PROFILE_PIC_UPDATED', data.Location));
+                                }
                             });
+                        }
                     });
                 });
             }
@@ -117,7 +111,7 @@ router.post('/update_profile_pic', upload.single('photo'), function (req, res, n
                 if (err)
                     next(err);
                 else
-                next(errors.getResponseJSON(error));
+                    next(errors.getResponseJSON(error));
             });
         });
     });
@@ -127,10 +121,11 @@ router.get('/get_profile_pic', function (req, res, next) {
     errors.checkQueries(req, res, ['access_code', 'device_id'], function () {
         userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
                 sql.select.regularSelect('users', null, ['user_id'], ['='], [user[0].user_id], 0, function (userInfo) {
-                        if (userInfo[0].profile_pic == null)
+                        if (userInfo[0].profile_pic == null) {
                             next(errors.getResponseJSON('PROFILE_PIC_NULL'));
-                        else
+                        } else {
                             next(errors.getResponseJSON('PROFILE_PIC_EXISTS', constants.digitalocean.BUCKET_BASE_URL + constants.digitalocean.PROFILE_PIC_ENDPOINT + userInfo[0].profile_pic + constants.digitalocean.PROFILE_PIC_EXTENSION));
+                        }
                     }, function () {
                         next(errors.getResponseJSON('INVALID_USER'));
                     },

@@ -15,8 +15,9 @@ module.exports = {
     checkQueries: function (req, res, queryList, successCB, failCB = defaultQueryMissingCallback) {
         foundQueries = [];
         queryList.forEach(currentQuery => {
-            if (typeof req.query[currentQuery] != 'undefined' && req.query[currentQuery] !== null)
+            if (typeof req.query[currentQuery] != 'undefined' && req.query[currentQuery] !== null) {
                 foundQueries.push(currentQuery);
+            }
         });
         if (queryList.length - foundQueries.length != 0) {
             let missingQueries = queryList.filter(x => !foundQueries.includes(x));
@@ -38,9 +39,10 @@ function getErrorJSONTemp(error, resContent, missingParameter) {
             code_info: error
         }
     };
-    if (error == 'MISSING_PARAMETER')
+    if (error == 'MISSING_PARAMETER') {
         responseJSON.res_info['missing_parameter'] = missingParameter;
-    else if (typeof resContent != 'undefined' && resContent != null)
+    } else if (typeof resContent != 'undefined' && resContent != null) {
         responseJSON.res_content = resContent;
+    }
     return responseJSON;
 }
