@@ -7,6 +7,7 @@ const cors = require('cors');
 const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
+var toobusy = require('express-toobusy')();
 
 const {
     IncomingWebhook
@@ -25,6 +26,7 @@ var app = express();
 
 cluster(function (worker) {
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
+    app.use(toobusy);
     app.use(bodyParser.urlencoded({
         extended: false
     }));
@@ -66,16 +68,14 @@ cluster(function (worker) {
     function sendSlackError(error, req) {
         var message = "aspace Backend Error Notification\n" + "Error: " + JSON.stringify(error) + "\nreq: " + req.url;
         webhook.send(message, function (error, res) {
-            if (error) {
+            if (error)
                 console.log('Error: ', error);
-            }
         });
     }
 
     function haltOnTimedout(req, res, next) {
-        if (!req.timedout) {
+        if (!req.timedout)
             next();
-        }
     }
 
     // Check that all error codes in errorCodes.js are unique
