@@ -164,11 +164,6 @@ module.exports = Object.freeze({
         RESPONSE_CODE: -3,
         INFO: "expired_access_code"
     },
-    INVALID_USER: {
-        HTTP_CODE: 409,
-        RESPONSE_CODE: -4,
-        INFO: "invalid_user"
-    },
     MULTI_PART_BODY_MISSING: {
         HTTP_CODE: 422,
         RESPONSE_CODE: -5,

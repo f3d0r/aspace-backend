@@ -181,7 +181,7 @@ module.exports = {
                             if (error)
                                 return failCB(error);
                             if (rows.length == 0) {
-                                failCB('INVALID_USER');
+                                failCB('INVALID_ACCESS_CODE');
                             } else {
                                 if (rows[0].profile_pic == null) {
                                     var profilePicID = uniqueString();
@@ -190,7 +190,7 @@ module.exports = {
                                         if (error)
                                             return failCB(error);
                                         if (results.affectedRows == 0)
-                                            noExistCB();
+                                            failCB('INVALID_ACCESS_CODE');
                                         else
                                             successCB(profilePicID);
                                     });
