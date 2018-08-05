@@ -173,5 +173,10 @@ module.exports = Object.freeze({
         HTTP_CODE: 422,
         RESPONSE_CODE: -5,
         INFO: "multi_part_body_missing"
+    },
+    INVALID_VEHICLE_ID: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 39,
+        INFO: "invalid_vehicle_id"
     }
 });

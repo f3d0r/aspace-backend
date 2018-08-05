@@ -48,8 +48,12 @@ router.get('/get_vehicles', function (req, res, next) {
 router.post('/remove_vehicle', function (req, res, next) {
     errors.checkQueries(req, res, ['access_code', 'device_id', 'vehicle_id'], function () {
         userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
-            sql.remove.regularDelete('user_vehicles', ['user_id', 'vehicle_id'], [user[0].user_id, req.query.vehicle_id], function (userVehicles) {
-                next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS'));
+            sql.remove.regularDelete('user_vehicles', ['user_id', 'vehicle_id'], [user[0].user_id, req.query.vehicle_id], function (rows) {
+                if (rows.affectedRows == 0) {
+                    next(errors.getResponseJSON('INVALID_VEHICLE_ID'));
+                } else {
+                    next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS'));
+                }
             }, function (err) {
                 next(err);
             });
