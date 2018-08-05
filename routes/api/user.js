@@ -135,7 +135,7 @@ router.get('/get_profile_pic', function (req, res, next) {
                         else
                             next(errors.getResponseJSON('PROFILE_PIC_EXISTS', constants.digitalocean.BUCKET_BASE_URL + constants.digitalocean.PROFILE_PIC_ENDPOINT + userInfo[0].profile_pic + constants.digitalocean.PROFILE_PIC_EXTENSION));
                     }, function () {
-                        next(errors.getResponseJSON('INVALID_USER'));
+                        next(errors.getResponseJSON('PROFILE_PIC_NULL'));
                     },
                     function (err) {
                         next(err)
