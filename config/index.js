@@ -49,5 +49,7 @@ module.exports = {
     },
     fs_paths: {
         profile_pics: 'uploads/profile_pic_temp/'
+    }, local_paths: {
+        favicon: 'assets/favicon.png'
     }
 }

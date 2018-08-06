@@ -8,6 +8,8 @@ const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
+var favicon = require('serve-favicon')
+var path = require('path')
 
 const {
     IncomingWebhook
@@ -25,8 +27,10 @@ const webhook = new IncomingWebhook(constants.slack.webhook);
 var app = express();
 
 cluster(function (worker) {
-    app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
+    app.use(timeout(constants.express.RESPONSE_TIMEOUT_
+    ));
     app.use(toobusy);
+    app.use(favicon(path.join(__dirname, 'assets', 'favicon.png')))
     app.use(bodyParser.urlencoded({
         extended: false
     }));
@@ -92,7 +96,8 @@ cluster(function (worker) {
     // Start server
     if (runTests() == 0) {
         var server = app.listen(process.env.PORT, function () {
-            console.log('Listening on port ' + server.address().port);
+            console.log('Listening on port ' + server.address().port + ', thread #' + worker.id);
+            
         });
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
