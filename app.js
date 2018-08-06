@@ -27,9 +27,9 @@ const webhook = new IncomingWebhook(constants.slack.webhook);
 var app = express();
 
 cluster(function (worker) {
+    app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_));
     app.use(toobusy);
-    app.use(favicon(path.join(__dirname, 'assets', 'favicon.png')))
     app.use(bodyParser.urlencoded({
         extended: false
     }));
