@@ -27,8 +27,7 @@ const webhook = new IncomingWebhook(constants.slack.webhook);
 var app = express();
 
 cluster(function (worker) {
-    app.use(timeout(constants.express.RESPONSE_TIMEOUT_
-    ));
+    app.use(timeout(constants.express.RESPONSE_TIMEOUT_));
     app.use(toobusy);
     app.use(favicon(path.join(__dirname, 'assets', 'favicon.png')))
     app.use(bodyParser.urlencoded({
@@ -97,7 +96,7 @@ cluster(function (worker) {
     if (runTests() == 0) {
         var server = app.listen(process.env.PORT, function () {
             console.log('Listening on port ' + server.address().port + ', thread #' + worker.id);
-            
+
         });
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
