@@ -9,6 +9,11 @@ module.exports = Object.freeze({
         RESPONSE_CODE: -6,
         INFO: "invalid_parameter"
     },
+    INVALID_OR_MISSING_OUTPUT_TYPE: {
+        HTTP_CODE:422,
+        RESPONSE_CODE: -7,
+        INFO: "invalid_or_missing_output_type"
+    },
     NEW_PHONE: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 1,

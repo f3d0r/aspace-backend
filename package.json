@@ -31,6 +31,7 @@
     "express-cluster": "0.0.5",
     "express-errors-to-slack": "^1.0.3",
     "express-toobusy": "0.0.3",
+    "geojson": "^0.5.0",
     "graphql-request": "^1.7.0",
     "helmet": "^3.13.0",
     "module-alias": "^2.1.0",

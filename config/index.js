@@ -49,5 +49,10 @@ module.exports = {
     },
     fs_paths: {
         profile_pics: 'uploads/profile_pic_temp/'
+    },
+    geojson: {
+        settings: {
+            Point: ['lng', 'lat']
+        }
     }
 }
