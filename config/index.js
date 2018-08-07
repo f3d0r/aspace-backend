@@ -52,7 +52,7 @@ module.exports = {
     },
     geojson: {
         settings: {
-            Point: ['lng', 'lat']
+            Point: ['lat', 'lng']
         }
     }
 }
