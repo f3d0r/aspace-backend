@@ -29,6 +29,16 @@ router.get('/ping', function (req, res, next) {
     next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
+router.get('/check_auth', function (req, res, next) {
+    errors.checkQueries(req, res, ['access_code', 'device_id'], function () {
+        userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
+            next(errors.getResponseJSON('VALID_ACCESS_CODE'));
+        }, function () {
+            next(errors.getResponseJSON('INVALID_ACCESS_CODE'));
+        });
+    });
+});
+
 router.get('/get_vehicles', function (req, res, next) {
     errors.checkQueries(req, res, ['access_code', 'device_id'], function () {
         userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {

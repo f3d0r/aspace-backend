@@ -178,5 +178,10 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         RESPONSE_CODE: 39,
         INFO: "invalid_vehicle_id"
+    },
+    VALID_ACCESS_CODE: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 40,
+        INFO: "valid_access_code"
     }
 });
