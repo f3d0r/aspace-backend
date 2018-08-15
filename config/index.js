@@ -54,5 +54,8 @@ module.exports = {
         settings: {
             Point: ['lat', 'lng']
         }
+    },
+    mapbox: {
+        API_KEY: '***REMOVED***'
     }
 }

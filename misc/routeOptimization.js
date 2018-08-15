@@ -1,6 +1,9 @@
 const spawn = require("child_process").spawn;
 const parkingCalc = require('@parking-calc');
 const sql = require('@sql');
+const constants = require('@config');
+const mbxMatrix = require('@mapbox/mapbox-sdk/services/matrix');
+const matrixClient = mbxMatrix({ accessToken: constants.mapbox.API_KEY });
 
 module.exports = {
     getRouteWaypoints: function (originLng, originLat, destinationLng, destinationLat, carSize, successCB, failCB) {
@@ -30,12 +33,27 @@ module.exports = {
 //     });
 // }
 
-// function f(...) {
-
-// }
-
-// function(opt) {
-
-// }
-
-// etc... functions
+// SAMPLE MAPBOX MATRIX CALL (FROM API DOCS)
+// matrixClient
+//   .getMatrix({
+//     points: [
+//       {
+//         coordinates: [2.2, 1.1]
+//       },
+//       {
+//         coordinates: [2.2, 1.1],
+//         approach: 'curb'
+//       },
+//       {
+//         coordinates: [3.2, 1.1]
+//       },
+//       {
+//         coordinates: [4.2, 1.1]
+//       }
+//     ],
+//     profile: 'walking'
+//   })
+//   .send()
+//   .then(response => {
+//       const matrix = response.body;
+//   });
