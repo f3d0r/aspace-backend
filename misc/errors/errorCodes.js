@@ -183,5 +183,10 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         RESPONSE_CODE: 40,
         INFO: "valid_access_code"
+    },
+    BIKES_ENDPOINT_FUNCTION_SUCCESS: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 41,
+        INFO: "bikes_endpoint_function_success"
     }
 });
