@@ -30,10 +30,48 @@ router.post('/get_route_waypoints', function (req, res, next) {
         next(errors.getResponseJSON('MISSING_BODY', "Missing body.car_size"));
     else
         routeOptimization.getRouteWaypoints(req.body.origin.lng, req.body.origin.lat, req.body.dest.lng, req.body.dest.lat, req.body.car_size, function (response) {
-            next(errors.getResponseJSON('ROUTING_ENDPOINT_SUCCESS', response));
+            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', response));
         }, function (error) {
             next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR'));
         });
+});
+
+router.post('/get_route_waypoints_test', function (req, res, next) {
+    var response = {};
+    response['origin'] = {
+        'lng': -122.3584,
+        'lat': 47.7930,
+    };
+    response['destination'] = {
+        'lng': '-122.3336',
+        'lat': '47.6057'
+    };
+    response['park_bike'] = [];
+    response['park_bike'].push({
+        'park': {
+            'lng': '-122.3118',
+            'lat': '47.6182',
+        },
+        'bike': {
+            'lng': '-122.3133',
+            'lat': '47.6168',
+        }
+    });;
+    response['park_walk'] = [];
+    response['park_walk'].push({
+        'park': {
+            'lng': '-122.3344',
+            'lat': '47.6091',
+        }
+    });
+    response['park_direct'] = [];
+    response['park_direct'].push({
+        'park': {
+            'lng': '-122.3336',
+            'lat': '47.6057',
+        }
+    });
+    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', response));
 });
 
 module.exports = router;
