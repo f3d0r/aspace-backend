@@ -69,17 +69,17 @@ router.post('/get_route_waypoints_test', function (req, res, next) {
         'lat': 47.6057,
     }, response['destination']));
 
-    // bboxCoordinates = turf.bbox(turf.lineString(getLatLngAgreggatesFromRoute(response)));
-    // response['bbox'] = {
-    //     'se': {
-    //         'lng': bboxCoordinates[0],
-    //         'lat': bboxCoordinates[1],
-    //     },
-    //     'nw': {
-    //         'lng': bboxCoordinates[2],
-    //         'lat': bboxCoordinates[3]
-    //     }
-    // };
+    bboxCoordinates = turf.bbox(turf.lineString(getLatLngAgreggatesFromRoute(response)));
+    response['bbox'] = {
+        'se': {
+            'lng': bboxCoordinates[0],
+            'lat': bboxCoordinates[1],
+        },
+        'nw': {
+            'lng': bboxCoordinates[2],
+            'lat': bboxCoordinates[3]
+        }
+    };
     next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', response));
 });
 
@@ -107,12 +107,27 @@ function getSegmentInfo(start, end) {
 
 function getLatLngAgreggatesFromRoute(response) {
     latLngAgreggate = [];
-    latLngAgreggate.push([response['origin'].lng, response['origin'].lat]);
-    latLngAgreggate.push([response['destination'].lng, response['destination'].lat]);
-    latLngAgreggate.push([response['park_bike'][0].park.lng, response['park_bike'][0].park.lat]);
-    latLngAgreggate.push([response['park_bike'][0].bike.lng, response['park_bike'][0].bike.lat]);
-    latLngAgreggate.push([response['park_walk'][0].park.lng, response['park_walk'][0].park.lat]);
-    latLngAgreggate.push([response['park_direct'][0].park.lng, response['park_direct'][0].park.lat]);
+
+    latLngAgreggate.push([response.origin.lng, response.origin.lat]);
+    latLngAgreggate.push([response.destination.lng, response.destination.lat]);
+    
+    latLngAgreggate.push([response.park_bike[0].drive_park.start.lng, response.park_bike[0].drive_park.start.lat]);
+    latLngAgreggate.push([response.park_bike[0].drive_park.end.lng, response.park_bike[0].drive_park.end.lat]);
+    latLngAgreggate.push([response.park_bike[0].park_bike.start.lng, response.park_bike[0].park_bike.start.lat]);
+    latLngAgreggate.push([response.park_bike[0].park_bike.end.lng, response.park_bike[0].park_bike.end.lat]);
+    latLngAgreggate.push([response.park_bike[0].bike_walk.start.lng, response.park_bike[0].bike_walk.start.lat]);
+    latLngAgreggate.push([response.park_bike[0].bike_walk.end.lng, response.park_bike[0].bike_walk.end.lat]);
+
+    latLngAgreggate.push([response.park_walk[0].drive_park.start.lng, response.park_walk[0].drive_park.start.lat]);
+    latLngAgreggate.push([response.park_walk[0].drive_park.end.lng, response.park_walk[0].drive_park.end.lat]);
+    latLngAgreggate.push([response.park_walk[0].park_walk.start.lng, response.park_walk[0].park_walk.start.lat]);
+    latLngAgreggate.push([response.park_walk[0].park_walk.end.lng, response.park_walk[0].park_walk.end.lat]);
+
+    latLngAgreggate.push([response.park_direct[0].drive_park.start.lng, response.park_direct[0].drive_park.start.lat]);
+    latLngAgreggate.push([response.park_direct[0].drive_park.end.lng, response.park_direct[0].drive_park.end.lat]);
+    latLngAgreggate.push([response.park_direct[0].park_walk.start.lng, response.park_direct[0].park_walk.start.lat]);
+    latLngAgreggate.push([response.park_direct[0].park_walk.end.lng, response.park_direct[0].park_walk.end.lat]);
+
     return latLngAgreggate;
 }
 
