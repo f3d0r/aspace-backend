@@ -95,9 +95,9 @@ router.post('/get_route_waypoints_test', function (req, res, next) {
 
 function getParkBikeRouteInfo(origin, park, bike, destination) {
     var routeSegments = [];
-    routeSegments.push(getSegmentInfo("Drive to Parking", 'drive_park', origin, park));
-    routeSegments.push(getSegmentInfo("Walk to Bike", 'park_bike', park, bike));
-    routeSegments.push(getSegmentInfo("Bike to Destination", 'bike_walk', bike, destination));
+    routeSegments.push(getSegmentInfo("Drive to Parking", "drive_park", origin, park));
+    routeSegments.push(getSegmentInfo("Walk to Bike", "walk_bike", park, bike));
+    routeSegments.push(getSegmentInfo("Bike to Destination", "bike_dest", bike, destination));
 
     return {
         'segments': routeSegments,
@@ -107,8 +107,8 @@ function getParkBikeRouteInfo(origin, park, bike, destination) {
 
 function getParkWalkRouteInfo(origin, park, destination) {
     var routeSegments = [];
-    routeSegments.push(getSegmentInfo("Drive to Parking", 'drive_park', origin, park));
-    routeSegments.push(getSegmentInfo("Walk to Destination", 'park_walk', park, destination));
+    routeSegments.push(getSegmentInfo("Drive to Parking", "drive_park", origin, park));
+    routeSegments.push(getSegmentInfo("Walk to Destination", "walk_dest", park, destination));
 
     return {
         'segments': routeSegments,
