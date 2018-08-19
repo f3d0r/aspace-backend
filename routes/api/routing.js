@@ -48,6 +48,7 @@ router.post('/get_route_waypoints_test', function (req, res, next) {
         'lng': -122.3336,
         'lat': 47.6057
     };
+
     response['park_bike'] = [];
     response['park_bike'].push(getParkBikeRouteInfo(response['origin'], {
         'lng': -122.3118,
@@ -69,8 +70,60 @@ router.post('/get_route_waypoints_test', function (req, res, next) {
         'lat': 47.6057,
     }, response['destination']));
 
-    bboxCoordinates = turf.bbox(turf.lineString(getLatLngAgreggatesFromRoute(response)));
-    response['bbox'] = {
+    segmentsAgreggate = [];
+    response['park_bike'].forEach(function (routeOption) {
+        routeOption.segments.forEach(function (currentSegment) {
+            segmentsAgreggate = segmentsAgreggate.concat(currentSegment);
+        });
+    });
+
+    response['park_walk'].forEach(function (routeOption) {
+        routeOption.segments.forEach(function (currentSegment) {
+            segmentsAgreggate = segmentsAgreggate.concat(currentSegment);
+        });
+    });
+
+    response['park_direct'].forEach(function (routeOption) {
+        routeOption.segments.forEach(function (currentSegment) {
+            segmentsAgreggate = segmentsAgreggate.concat(currentSegment);
+        });
+    });
+
+    response['bbox'] = getBboxFromSegments(segmentsAgreggate);
+    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', response));
+});
+
+function getParkBikeRouteInfo(origin, park, bike, destination) {
+    var routeSegments = [];
+    routeSegments.push(getSegmentInfo("Drive to Parking", 'drive_park', origin, park));
+    routeSegments.push(getSegmentInfo("Walk to Bike", 'park_bike', park, bike));
+    routeSegments.push(getSegmentInfo("Bike to Destination", 'bike_walk', bike, destination));
+
+    return {
+        'segments': routeSegments,
+        bbox: getBboxFromSegments(routeSegments)
+    }
+}
+
+function getParkWalkRouteInfo(origin, park, destination) {
+    var routeSegments = [];
+    routeSegments.push(getSegmentInfo("Drive to Parking", 'drive_park', origin, park));
+    routeSegments.push(getSegmentInfo("Walk to Destination", 'park_walk', park, destination));
+
+    return {
+        'segments': routeSegments,
+        bbox: getBboxFromSegments(routeSegments)
+    }
+}
+
+function getBboxFromSegments(routeSegments) {
+    var latLngs = [];
+    routeSegments.forEach(function (currentSegment) {
+        latLngs.push([currentSegment.start.lng, currentSegment.start.lat]);
+        latLngs.push([currentSegment.end.lng, currentSegment.end.lat]);
+    });
+    bboxCoordinates = turf.bbox(turf.lineString(latLngs));
+    return {
         'se': {
             'lng': bboxCoordinates[0],
             'lat': bboxCoordinates[1],
@@ -79,56 +132,16 @@ router.post('/get_route_waypoints_test', function (req, res, next) {
             'lng': bboxCoordinates[2],
             'lat': bboxCoordinates[3]
         }
-    };
-    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', response));
-});
-
-function getParkBikeRouteInfo(origin, park, bike, destination) {
-    var routeSegments = {};
-    routeSegments['drive_park'] = getSegmentInfo(origin, park);
-    routeSegments['park_bike'] = getSegmentInfo(park, bike);
-    routeSegments['bike_walk'] = getSegmentInfo(bike, destination);
-    return routeSegments;
+    }
 }
 
-function getParkWalkRouteInfo(origin, park, destination) {
-    var routeSegments = {};
-    routeSegments['drive_park'] = getSegmentInfo(origin, park);
-    routeSegments['park_walk'] = getSegmentInfo(park, destination);
-    return routeSegments;
-}
-
-function getSegmentInfo(start, end) {
+function getSegmentInfo(prettyName, name, start, end) {
     var segment = {};
+    segment['pretty_name'] = prettyName;
+    segment['name'] = name;
     segment['start'] = start;
     segment['end'] = end;
     return segment;
-}
-
-function getLatLngAgreggatesFromRoute(response) {
-    latLngAgreggate = [];
-
-    latLngAgreggate.push([response.origin.lng, response.origin.lat]);
-    latLngAgreggate.push([response.destination.lng, response.destination.lat]);
-    
-    latLngAgreggate.push([response.park_bike[0].drive_park.start.lng, response.park_bike[0].drive_park.start.lat]);
-    latLngAgreggate.push([response.park_bike[0].drive_park.end.lng, response.park_bike[0].drive_park.end.lat]);
-    latLngAgreggate.push([response.park_bike[0].park_bike.start.lng, response.park_bike[0].park_bike.start.lat]);
-    latLngAgreggate.push([response.park_bike[0].park_bike.end.lng, response.park_bike[0].park_bike.end.lat]);
-    latLngAgreggate.push([response.park_bike[0].bike_walk.start.lng, response.park_bike[0].bike_walk.start.lat]);
-    latLngAgreggate.push([response.park_bike[0].bike_walk.end.lng, response.park_bike[0].bike_walk.end.lat]);
-
-    latLngAgreggate.push([response.park_walk[0].drive_park.start.lng, response.park_walk[0].drive_park.start.lat]);
-    latLngAgreggate.push([response.park_walk[0].drive_park.end.lng, response.park_walk[0].drive_park.end.lat]);
-    latLngAgreggate.push([response.park_walk[0].park_walk.start.lng, response.park_walk[0].park_walk.start.lat]);
-    latLngAgreggate.push([response.park_walk[0].park_walk.end.lng, response.park_walk[0].park_walk.end.lat]);
-
-    latLngAgreggate.push([response.park_direct[0].drive_park.start.lng, response.park_direct[0].drive_park.start.lat]);
-    latLngAgreggate.push([response.park_direct[0].drive_park.end.lng, response.park_direct[0].drive_park.end.lat]);
-    latLngAgreggate.push([response.park_direct[0].park_walk.start.lng, response.park_direct[0].park_walk.start.lat]);
-    latLngAgreggate.push([response.park_direct[0].park_walk.end.lng, response.park_direct[0].park_walk.end.lat]);
-
-    return latLngAgreggate;
 }
 
 module.exports = router;
