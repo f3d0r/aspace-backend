@@ -1,18 +1,33 @@
 module.exports = Object.freeze({
-    MISSING_PARAMETER: {
+    INVALID_OR_MISSING_OUTPUT_TYPE: {
         HTTP_CODE: 422,
-        RESPONSE_CODE: -1,
-        INFO: "missing_parameter"
+        RESPONSE_CODE: -7,
+        INFO: "invalid_or_missing_output_type"
     },
     INVALID_PARAMETER: {
         HTTP_CODE: 422,
         RESPONSE_CODE: -6,
         INFO: "invalid_parameter"
     },
-    INVALID_OR_MISSING_OUTPUT_TYPE: {
-        HTTP_CODE:422,
-        RESPONSE_CODE: -7,
-        INFO: "invalid_or_missing_output_type"
+    MULTI_PART_BODY_MISSING: {
+        HTTP_CODE: 422,
+        RESPONSE_CODE: -5,
+        INFO: "multi_part_body_missing"
+    },
+    EXPIRED_ACCESS_CODE: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: -3,
+        INFO: "expired_access_code"
+    },
+    INVALID_ACCESS_CODE: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: -2,
+        INFO: "invalid_access_code"
+    },
+    MISSING_PARAMETER: {
+        HTTP_CODE: 422,
+        RESPONSE_CODE: -1,
+        INFO: "missing_parameter"
     },
     NEW_PHONE: {
         HTTP_CODE: 200,
@@ -29,11 +44,6 @@ module.exports = Object.freeze({
         RESPONSE_CODE: 4,
         INFO: "invalid_pin"
     },
-    DB_ERROR: {
-        HTTP_CODE: 500,
-        RESPONSE_CODE: 5,
-        INFO: "db_error"
-    },
     INVALID_PHONE: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 12,
@@ -43,11 +53,6 @@ module.exports = Object.freeze({
         HTTP_CODE: 403,
         RESPONSE_CODE: 13,
         INFO: "invalid_auth_key"
-    },
-    MISSING_AUTH_KEY: {
-        HTTP_CODE: 401,
-        RESPONSE_CODE: 14,
-        INFO: "missing_auth_key"
     },
     INVALID_SPOT_ID: {
         HTTP_CODE: 404,
@@ -63,11 +68,6 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         RESPONSE_CODE: 17,
         INFO: "auth_key_added"
-    },
-    AUTH_KEY_NOT_ADDED: {
-        HTTP_CODE: 403,
-        RESPONSE_CODE: 18,
-        INFO: "auth_key_not_added"
     },
     SPOT_STATUS_CHANGED: {
         HTTP_CODE: 200,
@@ -158,21 +158,6 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         RESPONSE_CODE: 38,
         INFO: "profile_pic_updated"
-    },
-    INVALID_ACCESS_CODE: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: -2,
-        INFO: "invalid_access_code"
-    },
-    EXPIRED_ACCESS_CODE: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: -3,
-        INFO: "expired_access_code"
-    },
-    MULTI_PART_BODY_MISSING: {
-        HTTP_CODE: 422,
-        RESPONSE_CODE: -5,
-        INFO: "multi_part_body_missing"
     },
     INVALID_VEHICLE_ID: {
         HTTP_CODE: 200,
