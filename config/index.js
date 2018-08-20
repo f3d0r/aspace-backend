@@ -1,8 +1,8 @@
 var aws = require('aws-sdk');
 
 const spacesEndpoint = new aws.Endpoint('nyc3.digitaloceanspaces.com');
-const accessKey = 'HN54L3H3ETPTIBL7SXER';
-const secretKey = 'qALnLKpca5tg30EKZVZ7IN1im3PmbF9kCgluPu37T7Q';
+const accessKey = 'QSF2UYDNAECE32D5EMHQ';
+const secretKey = 'wGIH6ENHjnuM1KPS7nd1BrOSWMkZ56Soy2ai9+sas8M';
 
 module.exports = {
     express: {
@@ -33,7 +33,7 @@ module.exports = {
         DATABASE_USER: 'api',
         DATABASE_PASSWORD: 'db_password',
         DATABASE_NAME: 'aspace',
-        DATABASE_IP: '206.189.175.212',
+        DATABASE_IP: '142.93.29.51',
         DATABASE_PORT: 'db_port'
     },
     digitalocean: {
