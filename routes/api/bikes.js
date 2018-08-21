@@ -31,7 +31,7 @@ router.post('/get_bikes_bbox/:outputType', function (req, res, next) {
     } else if (typeof req.body.ne.lng == 'undefined' || req.body.ne.lng === null) {
         next(errors.getResponseJSON('MISSING_BODY', "Missing body.ne.lng"));
     } else {
-        sql.select.regularSelect('stationless_bikes', null, ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
+        sql.select.regularSelect('bike_locs', null, ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
                 if (req.params.outputType == "json") {
                     next(errors.getResponseJSON('BIKES_ENDPOINT_FUNCTION_SUCCESS', results));
                 } else if (req.params.outputType == "geojson") {
@@ -58,7 +58,7 @@ router.post('/get_bikes_radius/:outputType', function (req, res, next) {
             next(errors.getResponseJSON('MISSING_BODY', "Missing body.lng"));
         } else {
             var miles = req.query.radius_feet / 5280;
-            sql.select.selectRadius('stationless_bikes', req.body.lat, req.body.lng, miles, function (results) {
+            sql.select.selectRadius('bike_locs', req.body.lat, req.body.lng, miles, function (results) {
                 if (req.params.outputType == "json") {
                     next(errors.getResponseJSON('BIKES_ENDPOINT_FUNCTION_SUCCESS', results));
                 } else if (req.params.outputType == "geojson") {
