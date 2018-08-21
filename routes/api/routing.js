@@ -17,39 +17,14 @@ router.get('/ping', function (req, res, next) {
     next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
-router.post('/get_route_waypoints', function (req, res, next) {
-    if (typeof req.body == 'undefined' || req.body === null)
-        next(errors.getResponseJSON('MISSING_BODY'));
-    else if (typeof req.body.origin == 'undefined' || req.body.origin === null)
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.origin"));
-    else if (typeof req.body.dest == 'undefined' || req.body.dest === null)
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.dest"));
-    else if (typeof req.body.origin.lat == 'undefined' || req.body.origin.lat === null)
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.origin.lat"));
-    else if (typeof req.body.origin.lng == 'undefined' || req.body.origin.lng === null)
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.origin.lng"));
-    else if (typeof req.body.dest.lat == 'undefined' || req.body.dest.lat === null)
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.dest.lat"));
-    else if (typeof req.body.dest.lng == 'undefined' || req.body.dest.lng === null)
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.dest.lng"));
-    else if (typeof req.body.car_size == 'undefined' || req.body.car_size === null)
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.car_size"));
-    else
-        routeOptimization.getRouteWaypoints(req.body.origin.lng, req.body.origin.lat, req.body.dest.lng, req.body.dest.lat, req.body.car_size, function (response) {
-            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', response));
-        }, function (error) {
-            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR'));
-        });
-});
-
-router.post('/get_route_waypoints_test', function (req, res, next) {
+router.post('/get_drive_walk_waypoints', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
         getSegmentInfo([{
                     "pretty_name": "Drive to Parking",
                     "name": "drive_park",
                     "origin": {
-                        'lng': parseInt(req.query.origin_lng),
-                        'lat': parseInt(req.query.origin_lat)
+                        'lng': parseFloat(req.query.origin_lng),
+                        'lat': parseFloat(req.query.origin_lat)
                     },
                     "dest": {
                         'lng': -122.3118,
@@ -76,50 +51,24 @@ router.post('/get_route_waypoints_test', function (req, res, next) {
                         'lat': 47.6168
                     },
                     "dest": {
-                        'lng': parseInt(req.query.dest_lng),
-                        'lat': parseInt(req.query.dest_lat)
+                        'lng': parseFloat(req.query.dest_lng),
+                        'lat': parseFloat(req.query.dest_lat)
                     }
                 }
             ],
             function (fullSegmentResponse) {
                 fullSegmentResponse['origin'] = {
-                    'lng': parseInt(req.query.origin_lng),
-                    'lat': parseInt(req.query.origin_lat)
+                    'lng': parseFloat(req.query.origin_lng),
+                    'lat': parseFloat(req.query.origin_lat)
                 };
                 fullSegmentResponse['dest'] = {
-                    'lng': parseInt(req.query.dest_lng),
-                    'lat': parseInt(req.query.dest_lat)
+                    'lng': parseFloat(req.query.dest_lng),
+                    'lat': parseFloat(req.query.dest_lat)
                 }
-                // segmentsAgreggate = [];
-                // response['park_bike'].forEach(function (routeOption) {
-                //     routeOption.segments.forEach(function (currentSegment) {
-                //         segmentsAgreggate = segmentsAgreggate.concat(currentSegment);
-                //     });
-                // });
-                // response['bbox'] = getBboxFromSegments(segmentsAgreggate);
                 next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', fullSegmentResponse));
             });
     });
 });
-
-function getBboxFromSegments(routeSegments) {
-    var latLngs = [];
-    routeSegments.forEach(function (currentSegment) {
-        latLngs.push([currentSegment.start.lng, currentSegment.start.lat]);
-        latLngs.push([currentSegment.end.lng, currentSegment.end.lat]);
-    });
-    bboxCoordinates = turf.bbox(turf.lineString(latLngs));
-    return {
-        'se': {
-            'lng': bboxCoordinates[0],
-            'lat': bboxCoordinates[1],
-        },
-        'nw': {
-            'lng': bboxCoordinates[2],
-            'lat': bboxCoordinates[3]
-        }
-    }
-}
 
 function getSegmentInfo(segments, cb) {
     segmentsReturn = [];
