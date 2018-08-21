@@ -1,8 +1,13 @@
 var router = require('express').Router();
 var errors = require('@errors');
+const constants = require('@config');
 var sql = require('@sql');
 var routeOptimization = require('@route-optimization');
 var turf = require('@turf/turf');
+const mbxDirections = require('@mapbox/mapbox-sdk/services/directions');
+const directionsClient = mbxDirections({
+    accessToken: constants.mapbox.API_KEY
+});
 
 router.get('/', function (req, res, next) {
     next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', "This is the routing sub-API for aspace! :)"));
@@ -38,83 +43,64 @@ router.post('/get_route_waypoints', function (req, res, next) {
 });
 
 router.post('/get_route_waypoints_test', function (req, res, next) {
-    var response = {};
-    response['origin'] = {
-        'lng': -122.3584,
-        'lat': 47.7930,
-    };
-
-    response['destination'] = {
-        'lng': -122.3336,
-        'lat': 47.6057
-    };
-
-    response['park_bike'] = [];
-    response['park_bike'].push(getParkBikeRouteInfo(response['origin'], {
-        'lng': -122.3118,
-        'lat': 47.6182,
-    }, {
-        'lng': -122.3133,
-        'lat': 47.6168,
-    }, response['destination']));
-
-    response['park_walk'] = [];
-    response['park_walk'].push(getParkWalkRouteInfo(response['origin'], {
-        'lng': -122.3344,
-        'lat': 47.6091
-    }, response['destination']));
-
-    response['park_direct'] = [];
-    response['park_direct'].push(getParkWalkRouteInfo(response['origin'], {
-        'lng': -122.3336,
-        'lat': 47.6057,
-    }, response['destination']));
-
-    segmentsAgreggate = [];
-    response['park_bike'].forEach(function (routeOption) {
-        routeOption.segments.forEach(function (currentSegment) {
-            segmentsAgreggate = segmentsAgreggate.concat(currentSegment);
-        });
+    errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
+        getSegmentInfo([{
+                    "pretty_name": "Drive to Parking",
+                    "name": "drive_park",
+                    "origin": {
+                        'lng': parseInt(req.query.origin_lng),
+                        'lat': parseInt(req.query.origin_lat)
+                    },
+                    "dest": {
+                        'lng': -122.3118,
+                        'lat': 47.6182
+                    },
+                },
+                {
+                    "pretty_name": "Walk to Bike",
+                    "name": "walk_bike",
+                    "origin": {
+                        'lng': -122.3118,
+                        'lat': 47.6182
+                    },
+                    "dest": {
+                        'lng': -122.3133,
+                        'lat': 47.6168
+                    }
+                },
+                {
+                    "pretty_name": "Bike to Destination",
+                    "name": "bike_dest",
+                    "origin": {
+                        'lng': -122.3133,
+                        'lat': 47.6168
+                    },
+                    "dest": {
+                        'lng': parseInt(req.query.dest_lng),
+                        'lat': parseInt(req.query.dest_lat)
+                    }
+                }
+            ],
+            function (fullSegmentResponse) {
+                fullSegmentResponse['origin'] = {
+                    'lng': parseInt(req.query.origin_lng),
+                    'lat': parseInt(req.query.origin_lat)
+                };
+                fullSegmentResponse['dest'] = {
+                    'lng': parseInt(req.query.dest_lng),
+                    'lat': parseInt(req.query.dest_lat)
+                }
+                // segmentsAgreggate = [];
+                // response['park_bike'].forEach(function (routeOption) {
+                //     routeOption.segments.forEach(function (currentSegment) {
+                //         segmentsAgreggate = segmentsAgreggate.concat(currentSegment);
+                //     });
+                // });
+                // response['bbox'] = getBboxFromSegments(segmentsAgreggate);
+                next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', fullSegmentResponse));
+            });
     });
-
-    response['park_walk'].forEach(function (routeOption) {
-        routeOption.segments.forEach(function (currentSegment) {
-            segmentsAgreggate = segmentsAgreggate.concat(currentSegment);
-        });
-    });
-
-    response['park_direct'].forEach(function (routeOption) {
-        routeOption.segments.forEach(function (currentSegment) {
-            segmentsAgreggate = segmentsAgreggate.concat(currentSegment);
-        });
-    });
-
-    response['bbox'] = getBboxFromSegments(segmentsAgreggate);
-    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', response));
 });
-
-function getParkBikeRouteInfo(origin, park, bike, destination) {
-    var routeSegments = [];
-    routeSegments.push(getSegmentInfo("Drive to Parking", "drive_park", origin, park));
-    routeSegments.push(getSegmentInfo("Walk to Bike", "walk_bike", park, bike));
-    routeSegments.push(getSegmentInfo("Bike to Destination", "bike_dest", bike, destination));
-
-    return {
-        'segments': routeSegments,
-        bbox: getBboxFromSegments(routeSegments)
-    }
-}
-
-function getParkWalkRouteInfo(origin, park, destination) {
-    var routeSegments = [];
-    routeSegments.push(getSegmentInfo("Drive to Parking", "drive_park", origin, park));
-    routeSegments.push(getSegmentInfo("Walk to Destination", "walk_dest", park, destination));
-
-    return {
-        'segments': routeSegments,
-        bbox: getBboxFromSegments(routeSegments)
-    }
-}
 
 function getBboxFromSegments(routeSegments) {
     var latLngs = [];
@@ -135,13 +121,64 @@ function getBboxFromSegments(routeSegments) {
     }
 }
 
-function getSegmentInfo(prettyName, name, start, end) {
-    var segment = {};
-    segment['pretty_name'] = prettyName;
-    segment['name'] = name;
-    segment['start'] = start;
-    segment['end'] = end;
-    return segment;
+function getSegmentInfo(segments, cb) {
+    segmentsReturn = [];
+    requests = [];
+
+    segments.forEach(function (currentSegment) {
+        var segment = {};
+        segment['pretty_name'] = currentSegment.pretty_name;
+        segment['name'] = currentSegment.name;
+        segment['origin'] = currentSegment.origin;
+        segment['dest'] = currentSegment.dest;
+        segmentsReturn.push(segment);
+        requests.push(getDirectionsRequest(getProfile(segment['name']), segment['origin'], segment['dest']));
+    });
+    Promise.all(requests)
+        .then(data => {
+            for (var index = 0; index < data.length; index++) {
+                segmentsReturn[index]['directions'] = data[index].body;
+            }
+            cb(segmentsReturn);
+        }).catch(function (error) {
+            console.log("ERROR");
+            console.log(error);
+        });
+}
+
+function getDirectionsRequest(profile, origin, dest) {
+    return directionsClient
+        .getDirections({
+            profile: profile,
+            waypoints: [{
+                    coordinates: [origin.lng, origin.lat]
+                },
+                {
+                    coordinates: [dest.lng, dest.lat],
+                }
+            ],
+            annotations: ["duration", "distance", "speed", "congestion"],
+            bannerInstructions: true,
+            geometries: "polyline6",
+            overview: "full",
+            roundaboutExits: true,
+            steps: true,
+            voiceInstructions: true
+        }).send();
+}
+
+function getProfile(segmentName) {
+    if (segmentName == "drive_park") {
+        return "driving-traffic";
+    } else if (segmentName == "walk_bike") {
+        return "walking";
+    } else if (segmentName == "bike_dest") {
+        return "cycling";
+    } else if (segmentName == "walk_dest") {
+        return "walking";
+    } else {
+        return "driving-traffic";
+    }
 }
 
 module.exports = router;
