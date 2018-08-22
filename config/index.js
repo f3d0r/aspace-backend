@@ -1,8 +1,8 @@
 var aws = require('aws-sdk');
 
 const spacesEndpoint = new aws.Endpoint('nyc3.digitaloceanspaces.com');
-const accessKey = 'QSF2UYDNAECE32D5EMHQ';
-const secretKey = 'wGIH6ENHjnuM1KPS7nd1BrOSWMkZ56Soy2ai9+sas8M';
+const accessKey = '***REMOVED***';
+const secretKey = '***REMOVED***';
 
 module.exports = {
     express: {
