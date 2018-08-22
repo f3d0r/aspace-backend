@@ -17,83 +17,32 @@ router.get('/ping', function (req, res, next) {
     next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
-router.post('/get_drive_walk_waypoints', function (req, res, next) {
+router.post('/get_drive_walk_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
-        getSegmentInfo([{
-                    "pretty_name": "Drive to Parking",
-                    "name": "drive_park",
-                    "origin": {
-                        'lng': parseFloat(req.query.origin_lng),
-                        'lat': parseFloat(req.query.origin_lat)
-                    },
-                    "dest": {
-                        'lng': -122.3118,
-                        'lat': 47.6182
-                    },
-                },
-                {
-                    "pretty_name": "Walk to Bike",
-                    "name": "walk_bike",
-                    "origin": {
-                        'lng': -122.3118,
-                        'lat': 47.6182
-                    },
-                    "dest": {
-                        'lng': -122.3133,
-                        'lat': 47.6168
-                    }
-                },
-                {
-                    "pretty_name": "Bike to Destination",
-                    "name": "bike_dest",
-                    "origin": {
-                        'lng': -122.3133,
-                        'lat': 47.6168
-                    },
-                    "dest": {
-                        'lng': parseFloat(req.query.dest_lng),
-                        'lat': parseFloat(req.query.dest_lat)
-                    }
-                }
-            ],
-            function (fullSegmentResponse) {
-                fullSegmentResponse['origin'] = {
-                    'lng': parseFloat(req.query.origin_lng),
-                    'lat': parseFloat(req.query.origin_lat)
-                };
-                fullSegmentResponse['dest'] = {
-                    'lng': parseFloat(req.query.dest_lng),
-                    'lat': parseFloat(req.query.dest_lat)
-                }
-                next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', fullSegmentResponse));
+        getWaypoints(req, function (waypointSet) {
+            formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_bike", "bike_dest"]);
+            reqs = [];
+            formattedRoutes.forEach(function (currentRouteOption) {
+                currentRouteOption.forEach(function (currentSegment) {
+                    reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
+                });
             });
+            Promise.all(reqs)
+                .then(data => {
+                    currentIndex = 0;
+                    formattedRoutes.forEach(function (currentRouteOption) {
+                        currentRouteOption.forEach(function (currentSegment) {
+                            currentSegment['directions'] = data[currentIndex].body.routes;
+                            currentIndex++;
+                        });
+                    });
+                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
+                }).catch(function (error) {
+                    console.log(error);
+                });
+        });
     });
 });
-
-function getSegmentInfo(segments, cb) {
-    segmentsReturn = [];
-    requests = [];
-
-    segments.forEach(function (currentSegment) {
-        var segment = {};
-        segment['pretty_name'] = currentSegment.pretty_name;
-        segment['name'] = currentSegment.name;
-        segment['origin'] = currentSegment.origin;
-        segment['dest'] = currentSegment.dest;
-        segmentsReturn.push(segment);
-        requests.push(getDirectionsRequest(getProfile(segment['name']), segment['origin'], segment['dest']));
-    });
-    Promise.all(requests)
-        .then(data => {
-            for (var index = 0; index < data.length; index++) {
-                segmentsReturn[index]['directions'] = data[index].body;
-            }
-            cb(segmentsReturn);
-        }).catch(function (error) {
-            console.log("ERROR");
-            console.log(error);
-        });
-}
 
 function getDirectionsRequest(profile, origin, dest) {
     return directionsClient
@@ -128,6 +77,68 @@ function getProfile(segmentName) {
     } else {
         return "driving-traffic";
     }
+}
+
+function getSegmentPrettyName(name) {
+    if (name == "drive_park") {
+        return "Drive to Parking";
+    } else if (name == "walk_bike") {
+        return "Walk to Bike";
+    } else if (name == "bike_dest") {
+        return "Bike to Destination";
+    } else if (name == "walk_dest") {
+        return "Walk to Destination";
+    } else {
+        return "Drive to Destination";
+    }
+}
+
+function formatSegments(waypointSets, segmentNames) {
+    formattedSegments = [];
+    waypointSets.forEach(function (currentWaypointSet) {
+        currentSegments = [];
+        for (var index = 0; index < currentWaypointSet.length - 1; index++) {
+            tempSegment = {};
+            tempSegment['name'] = segmentNames[index];
+            tempSegment['pretty_name'] = getSegmentPrettyName(segmentNames[index]);
+            tempSegment['origin'] = currentWaypointSet[index];
+            tempSegment['dest'] = currentWaypointSet[index + 1];
+            currentSegments.push(tempSegment);
+        }
+        formattedSegments.push(currentSegments);
+    });
+    return formattedSegments;
+}
+
+function getWaypoints(req, cb) {
+    waypointReturn = [];
+    waypointReturn.push([{
+        lng: parseFloat(req.query.origin_lng),
+        lat: parseFloat(req.query.origin_lat)
+    }, {
+        lng: -122.3118,
+        lat: 47.6182
+    }, {
+        lng: -122.3133,
+        lat: 47.6168,
+    }, {
+        lng: parseFloat(req.query.dest_lng),
+        lat: parseFloat(req.query.dest_lat)
+    }]);
+    waypointReturn.push([{
+        lng: parseFloat(req.query.origin_lng),
+        lat: parseFloat(req.query.origin_lat)
+    }, {
+        lng: -122.3118,
+        lat: 47.6182
+    }, {
+        lng: -122.3133,
+        lat: 47.6168,
+    }, {
+        lng: parseFloat(req.query.dest_lng),
+        lat: parseFloat(req.query.dest_lat)
+    }]);
+    cb(waypointReturn);
 }
 
 module.exports = router;
