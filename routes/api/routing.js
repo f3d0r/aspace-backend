@@ -200,18 +200,17 @@ function getDriveWalkWaypoints(req, cb) {
 function getDriveDirectWaypoints(req, cb) {
     waypointReturn = [];
     waypointReturn.push([{
-        lng: parseFloat(req.query.origin_lng),
-        lat: parseFloat(req.query.origin_lat)
-    }, {
-        lng: -122.3118,
-        lat: 47.6182
-    }, {
-        lng: -122.3336,
-        lat: 47.6057,
-    }, {
-        lng: parseFloat(req.query.dest_lng),
-        lat: parseFloat(req.query.dest_lat)
-    }]);
+            lng: parseFloat(req.query.origin_lng),
+            lat: parseFloat(req.query.origin_lat)
+        }, {
+            lng: -122.3336,
+            lat: 47.6057,
+        },
+        {
+            lng: parseFloat(req.query.dest_lng),
+            lat: parseFloat(req.query.dest_lat)
+        }
+    ]);
     cb(waypointReturn);
 }
 
