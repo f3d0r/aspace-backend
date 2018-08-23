@@ -19,8 +19,8 @@ router.get('/ping', function (req, res, next) {
 
 router.post('/get_drive_walk_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
-        getWaypoints(req, function (waypointSet) {
-            formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_bike", "bike_dest"]);
+        getDriveWalkWaypoints(req, function (waypointSet) {
+            formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_dest"]);
             reqs = [];
             formattedRoutes.forEach(function (currentRouteOption) {
                 currentRouteOption.forEach(function (currentSegment) {
@@ -46,7 +46,7 @@ router.post('/get_drive_walk_route', function (req, res, next) {
 
 router.post('/get_drive_bike_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
-        getWaypoints(req, function (waypointSet) {
+        getDriveBikeWaypoints(req, function (waypointSet) {
             formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_bike", "bike_dest"]);
             reqs = [];
             formattedRoutes.forEach(function (currentRouteOption) {
@@ -73,8 +73,8 @@ router.post('/get_drive_bike_route', function (req, res, next) {
 
 router.post('/get_drive_direct_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
-        getWaypoints(req, function (waypointSet) {
-            formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_bike", "bike_dest"]);
+        getDriveDirectWaypoints(req, function (waypointSet) {
+            formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_dest"]);
             reqs = [];
             formattedRoutes.forEach(function (currentRouteOption) {
                 currentRouteOption.forEach(function (currentSegment) {
@@ -164,7 +164,7 @@ function formatSegments(waypointSets, segmentNames) {
     return formattedSegments;
 }
 
-function getWaypoints(req, cb) {
+function getDriveBikeWaypoints(req, cb) {
     waypointReturn = [];
     waypointReturn.push([{
         lng: parseFloat(req.query.origin_lng),
@@ -179,6 +179,26 @@ function getWaypoints(req, cb) {
         lng: parseFloat(req.query.dest_lng),
         lat: parseFloat(req.query.dest_lat)
     }]);
+    cb(waypointReturn);
+}
+
+function getDriveWalkWaypoints(req, cb) {
+    waypointReturn = [];
+    waypointReturn.push([{
+        lng: parseFloat(req.query.origin_lng),
+        lat: parseFloat(req.query.origin_lat)
+    }, {
+        lng: -122.3344,
+        lat: 47.6091
+    }, {
+        lng: parseFloat(req.query.dest_lng),
+        lat: parseFloat(req.query.dest_lat)
+    }]);
+    cb(waypointReturn);
+}
+
+function getDriveDirectWaypoints(req, cb) {
+    waypointReturn = [];
     waypointReturn.push([{
         lng: parseFloat(req.query.origin_lng),
         lat: parseFloat(req.query.origin_lat)
@@ -186,8 +206,8 @@ function getWaypoints(req, cb) {
         lng: -122.3118,
         lat: 47.6182
     }, {
-        lng: -122.3133,
-        lat: 47.6168,
+        lng: -122.3336,
+        lat: 47.6057,
     }, {
         lng: parseFloat(req.query.dest_lng),
         lat: parseFloat(req.query.dest_lat)
