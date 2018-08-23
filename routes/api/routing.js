@@ -111,7 +111,7 @@ function getDirectionsRequest(profile, origin, dest) {
             ],
             annotations: ["duration", "distance", "speed", "congestion"],
             bannerInstructions: true,
-            geometries: "polyline6",
+            geometries: "geojson",
             overview: "full",
             roundaboutExits: true,
             steps: true,
