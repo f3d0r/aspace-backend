@@ -72,7 +72,7 @@ router.post('/get_bikes_radius/:outputType', function (req, res, next) {
                 next(error);
             });
         }
-    })
+    });
 });
 
 module.exports = router;
