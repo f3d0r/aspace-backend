@@ -26,39 +26,20 @@ module.exports = {
 	6. Compute and find minimum of cost function
 	7. Return each minimum (i.e. best spot w.r.t. conditions) */
 
-        var car_options = {
-            method: 'POST',
-            url: 'https://api.trya.space/v1/parking/get_min_size_parking/json',
-            qs: {
-                radius_feet: car_radius.toString(),
-                spot_size_feet: spot_size.toString()
-            },
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: {
-                lng: destination[0],
-                lat: destination[1]
-            },
-            json: true
-        };
-
         var parking_spot_data = []
+        sql.select.selectRadius('parking', destination[1], destination[0], car_radius / 5280, function (results) {
+            //results are defined here as var "results"
+            parking_spot_data = results
+            print('park data: ')
+            print(parking_spot_data)
 
-        request(car_options, function (error, response, body) {
-            if (error) throw new Error(error);
-            parking_spot_data = body["res_content"]
-            // print('Number of spots found in radius:')
-            // print(parking_spot_data.length)
+            print('Number of spots found in radius:')
+            print(parking_spot_data.length)
 
             // 2. Filter out occupied spots
-            for (var i = 0; i < parking_spot_data.length; i++) {
-                if (parking_spot_data[i]["occupied"] == 'T') {
-                    delete parking_spot_data[i]
-                }
-            }
-            /* print('Number of UNOCCUPIED spots found in radius:')
-            print(parking_spot_data.length) */
+            parking_spot_data = parking_spot_data.filter(val => val["occupied"] != "T");
+            print('Number of UNOCCUPIED spots found in radius:')
+            print(parking_spot_data.length)
 
             // 3. Acquire driving times
             var driving_reqs = []
@@ -108,8 +89,8 @@ module.exports = {
                 best_spots.push(parking_spot_data[best_car_indices[i]])
             }
             if (code === 0) {
-                /* print('Best drive & park spots:')
-                print(best_spots) */
+                print('Best drive & park spots:')
+                print(best_spots)
                 return best_spots
             }
             if (code === 1) {
@@ -179,6 +160,8 @@ module.exports = {
                     for (i in best_car_indices) {
                         best_spots.push(parking_spot_data[best_bike_indices[i]])
                     }
+                    print('Best park & bike spots: ')
+                    print(best_spots)
                     return best_spots
                 });
             }
@@ -235,9 +218,14 @@ module.exports = {
                 });
                     }
                 })
-            });
         }
+    , function () {
+        //no results were found 
+    }, function (error) {
+        //an error occurred (defined as var "error")
+    });
     }
+}
 
 
 function sub_least(arr) {
