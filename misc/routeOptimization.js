@@ -10,7 +10,7 @@ var googleMapsClient = require('@google/maps').createClient({
 });
 
 //define functions that should be accessible from outside this file inside "module.exports"
-var self = module.exports = {
+module.exports = {
     //getRouteWaypoints: function (someParams, successCB, failCB) {}
 
     // 1. Get parking spots by radius 
@@ -285,9 +285,6 @@ function print(value) {
         console.log(math.format(value, precision))
     }
 }
-
-// Call like: 
-self.OptimalSpot([-122.45, 37.91], [-122.3208, 47.613874], 900, 500, 10, ['parking_price'], [1e-2, 1], 3, 1)
 
 // --BBOX SEARCH FOR BIKES--
 // sql.select.regularSelect('bike_locs', null, ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [someSWLat, someSWLng, someNELat, someNELng], null, function (results) {

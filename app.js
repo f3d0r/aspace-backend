@@ -8,6 +8,7 @@ const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
+var routeOptimization = require('@route-optimization');
 
 const {
     IncomingWebhook
@@ -94,6 +95,7 @@ cluster(function (worker) {
         var server = app.listen(process.env.PORT, function () {
             console.log('Listening on port ' + server.address().port + ', thread #' + worker.id);
         });
+        routeOptimization.OptimalSpot([-122.45, 37.91], [-122.3208, 47.613874], 900, 500, 10, ['parking_price'], [1e-2, 1], 3, 1);
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
