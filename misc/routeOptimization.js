@@ -289,3 +289,23 @@ sql.select.selectRadius('bike_locs', someCenterLat, someCenterLng, miles, functi
 }, function (error) {
     //an error occurred (defined as var "error")
 }); */
+
+
+//BBOX SEARCH FOR PARKING:
+// sql.select.regularSelect('parking', null, ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
+//        //results are defined here as var "results"
+// }, function () {
+//     //no results found
+// },
+// function (error) {
+//     //an error occurred
+// });
+
+//var miles = req.query.radius_feet / 5280;
+// sql.select.selectRadius('parking', req.body.lat, req.body.lng, miles, function (results) {
+        //results are defined here as var "results"
+// }, function () {
+        // no results found
+// }, function (error) {
+      //an error occurred
+// });
