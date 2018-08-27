@@ -1,47 +1,37 @@
-//var errors = require('@errors');
-//const constants = require('@config');
+const constants = require('@config');
 var sql = require('@sql');
-//var request = require("request");
-//var rp = require("request-promise");
 const math = require('mathjs');
 var googleMapsClient = require('@google/maps').createClient({
     Promise: Promise,
     key: 'AIzaSyAw5S7tPXaLOQ499BzWAXqEGpJ50t7G3c0'
 });
 
-//define functions that should be accessible from outside this file inside "module.exports"
 module.exports = {
     // 1. Get parking spots by radius 
-    OptimalSpot: function (origin, destination, car_radius, bike_radius, spot_size, params, param_weights, number_options, code) {
+    /* Algorithm:
+        1. Obtain all spots within certain radius of user destination
+        2. Filter out occupied spots
+        3. For each parking spot, compute driving time from origin to spot and
+        add to walking / biking time from spot to user destination
+        4. Store this total time, the parking cost, and all other parameters
+        in a |params| x |spots| array
+        5. Multiply this parameter array by weights
+        6. Compute cost of each routing option and find minima
+        7. Return minima as routing choices to user 
+    */
+    optimalSpot: function (origin, destination, car_radius, bike_radius, spot_size, params, param_weights, number_options, code, successCB, failCB) {
         // number_options : number of routing options to provide user for specific last-mile transpot choice
         // code : must be 0, 1, or 2; 0 -> park & drive; 1 -> park & bike; 2 -> park & walk
         // other inputs are straightforward...
 
-        /* Algorithm:
-	1. Obtain all spots within certain radius of user destination
-	2. Filter out occupied spots
-	3. For each parking spot, compute driving time from origin to spot and
-	add to walking / biking time from spot to user destination
-	4. Store this total time, the parking cost, and all other parameters
-    in a |params| x |spots| array
-    5. Multiply this parameter array by weights
-	6. Compute cost of each routing option and find minima
-	7. Return minima as routing choices to user */
-
         var parking_spot_data = []
         sql.select.selectRadius('parking', destination[1], destination[0], car_radius / 5280, function (results) {
-            //results are defined here as var "results"
             parking_spot_data = results
-            //print('park data: ')
-            //print(parking_spot_data)
-
-            print('Number of spots found in radius:')
-            print(parking_spot_data.length)
 
             // 2. Filter out occupied spots
             parking_spot_data = parking_spot_data.filter(val => val["occupied"] != "T");
-            print('Number of UNOCCUPIED spots found in radius:')
-            print(parking_spot_data.length)
+            // print('Number of UNOCCUPIED spots found in radius:')
+            // print(parking_spot_data.length)
 
             // 3. Acquire driving times
             var driving_reqs = []
@@ -55,16 +45,15 @@ module.exports = {
                         mode: "driving",
                     }).asPromise()
                     .then(response => {
-                        //print(response)
-                        return response.json.routes[0].legs[0].duration.value
+                        // print(response)
+                        return response.json.routes[0].legs[0].duration.value;
                     })
                     .catch(function (error) {
-                        console.log("DRIVE REQS ERROR:")
-                        print(error.message);
+                        return failCB("No route found");
                     })
                 );
             }
-            //print(driving_reqs);
+            // print(driving_reqs);
             Promise.all(driving_reqs).then(function (results) {
                 var times = [].concat.apply([], results);
                 // 4. Get other cost function parameters
@@ -90,12 +79,11 @@ module.exports = {
                 for (i in best_car_indices) {
                     best_spots.push(parking_spot_data[best_car_indices[i]])
                 }
-                if (code === 0) {
-                    print('Best drive & park spots:')
-                    print(best_spots)
-                    return best_spots
-                }
-                if (code === 1) {
+                if (code == constants.optimize.DRIVE_PARK) {
+                    // print('Best drive & park spots:')
+                    // print(best_spots)
+                    successCB(best_spots)
+                } else if (code == constants.optimize.PARK_BIKE) {
                     // Biking optimization
                     // Acquire available bikes:
                     var bike_data = []
@@ -106,6 +94,7 @@ module.exports = {
                         }, function () {
                             //no results were found 
                         }, function (error) {
+                            return failCB(error);
                             //an error occurred (defined as var "error")
                         });
                     };
@@ -130,19 +119,20 @@ module.exports = {
                                 })
                                 .asPromise()
                                 .then(function (response) {
-                                    //print(response)
-                                    return response.json.routes[0].legs[0].duration.value
+                                    // print(response)
+                                    return response.json.routes[0].legs[0].duration.value;
                                 })
                                 .catch(function (err) {
                                     if (err === 'timeout') {
-                                        print('timeout error')
+                                        // print('timeout error')
                                     } else if (err.json) {
-                                        print("error.json :")
-                                        print(err.json)
-                                        print("Response status: " + err.status) // Current error
+                                        // print("error.json :")
+                                        // print(err.json)
+                                        // print("Response status: " + err.status) // Current error
                                     } else {
-                                        print('network error')
+                                        // print('network error')
                                     }
+                                    return failCB(error);
                                 })
                             );
                         }
@@ -157,17 +147,16 @@ module.exports = {
                         fX = math.multiply(math.matrix(param_weights), X);
                         const best_bike_indices = top_n(fX["_data"], number_options)
                         /* print('bike fX: ' + fX)
-                        print('best bike spots: ' + best_bike_indices) */
+                        // print('best bike spots: ' + best_bike_indices) */
                         best_spots = []
                         for (i in best_car_indices) {
                             best_spots.push(parking_spot_data[best_bike_indices[i]])
                         }
-                        print('Best park & bike spots: ')
-                        print(best_spots)
-                        return best_spots
+                        // print('Best park & bike spots: ')
+                        // print(best_spots)
+                        successCB(best_spots);
                     });
-                }
-                if (code === 2) {
+                } else if (code == constants.optimize.PARK_WALK) {
                     // Walking time optimization
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {
@@ -180,18 +169,19 @@ module.exports = {
                             .asPromise()
                             .then(function (response) {
                                 // print(response)
-                                return response.json.routes[0].legs[0].duration.value
+                                return response.json.routes[0].legs[0].duration.value;
                             })
                             .catch(function (err) {
                                 if (err === 'timeout') {
-                                    print('timeout error')
+                                    // print('timeout error')
                                 } else if (err.json) {
-                                    print("error.json :")
-                                    print(err.json)
-                                    print("Response status: " + err.status) // Current error
+                                    // print("error.json :")
+                                    // print(err.json)
+                                    // print("Response status: " + err.status) // Current error
                                 } else {
-                                    print('network error')
+                                    // print('network error')
                                 }
+                                return failCB(err);
                             })
                         );
                     }
@@ -216,16 +206,16 @@ module.exports = {
                         for (i in best_car_indices) {
                             best_spots.push(parking_spot_data[best_walk_indices[i]])
                         }
-                        print('Best walking spots: ')
-                        print(best_spots)
-                        return best_spots
+                        // print('Best walking spots: ')
+                        // print(best_spots)
+                        successCB(best_spots);
                     });
                 }
             })
         }, function () {
             //no results were found 
         }, function (error) {
-            //an error occurred (defined as var "error")
+            return failCB(error);
         });
     }
 }
@@ -269,43 +259,3 @@ function print(value) {
         console.log(math.format(value, precision))
     }
 }
-
-// --BBOX SEARCH FOR BIKES--
-// sql.select.regularSelect('bike_locs', null, ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [someSWLat, someSWLng, someNELat, someNELng], null, function (results) {
-//         //results are defined here as var "results"
-//     }, function () {
-//         //no results were found 
-//     },
-//     function (error) {
-//         //an error occurred (defined as var "error")
-//     });
-
-/* // --RADIUS SEARCH FOR BIKES--
-var miles = req.query.radius_feet / 5280;
-sql.select.selectRadius('bike_locs', someCenterLat, someCenterLng, miles, function (results) {
-   //results are defined here as var "results"
-}, function () {
-    //no results were found 
-}, function (error) {
-    //an error occurred (defined as var "error")
-}); */
-
-
-//BBOX SEARCH FOR PARKING:
-// sql.select.regularSelect('parking', null, ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
-//        //results are defined here as var "results"
-// }, function () {
-//     //no results found
-// },
-// function (error) {
-//     //an error occurred
-// });
-
-//var miles = req.query.radius_feet / 5280;
-// sql.select.selectRadius('parking', req.body.lat, req.body.lng, miles, function (results) {
-        //results are defined here as var "results"
-// }, function () {
-        // no results found
-// }, function (error) {
-      //an error occurred
-// });

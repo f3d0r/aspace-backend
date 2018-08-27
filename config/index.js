@@ -59,8 +59,8 @@ module.exports = {
         API_KEY: '***REMOVED***'
     },
     optimize: {
-        DRIVE_PARK: 0,
-        PARK_BIKE: 1,
-        PARK_WALK: 2
+        DRIVE_PARK: '***REMOVED***',
+        PARK_BIKE: '***REMOVED***',
+        PARK_WALK: '***REMOVED***'
     }
 }

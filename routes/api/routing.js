@@ -19,6 +19,13 @@ router.get('/ping', function (req, res, next) {
 
 router.post('/get_drive_walk_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
+        routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], 100, 500, 10, ['parking_price'], [1e-2, 1], 3, constants.optimize.PARK_WALK, function (bestSpots) {
+            console.log(bestSpots);
+        }, function (error) {
+            console.log("ERROR: ");
+            console.log(error);
+        });
+
         getDriveWalkWaypoints(req, function (waypointSet) {
             formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_dest"]);
             reqs = [];
