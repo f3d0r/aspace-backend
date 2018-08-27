@@ -84,168 +84,161 @@ module.exports = {
             //print(driving_reqs);
             Promise.all(driving_reqs).then(function (results) {
                 var times = [].concat.apply([], results);
+                // 4. Get other cost function parameters
+            var X = [sub_least(times)]
+            var arr = []
+            for (i in params) {
+                arr = []
+                for (d in parking_spot_data) {
+                    arr.push(parking_spot_data[d][params[i]])
+                }
+                arr = center(arr)
+                X = X.concat([arr["_data"]])
+            }
+            
+            /* print("Parking spot parameters: ")
+            print(X) */
 
-                if (code === 1) {
-                    // Biking optimization
-                    // Acquire available bikes:
-                    var bike_data = []
-                    for (i in parking_spot_data) {
-                        sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
-                            //results are defined here as var "results"
-                            bike_data.push(results)
-                        }, function () {
-                            //no results were found 
-                        }, function (error) {
-                            //an error occurred (defined as var "error")
-                        });
-                    };
+            // Final drive & park optimization
+            var fX = math.multiply(math.matrix(param_weights), X);
+            print("car fX: " + fX)
+            const best_car_indices = top_n(fX["_data"], number_options)
+            var best_spots = []
+            for (i in best_car_indices) {
+                best_spots.push(parking_spot_data[best_car_indices[i]])
+            }
+            if (code === 0) {
+                /* print('Best drive & park spots:')
+                print(best_spots) */
+                return best_spots
+            }
+            if (code === 1) {
+                // Biking optimization
+                // Acquire available bikes:
+                var bike_data = []
+                for (i in parking_spot_data) {
+                    sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
+                        //results are defined here as var "results"
+                        bike_data.push(results)
+                    }, function () {
+                        //no results were found 
+                    }, function (error) {
+                        //an error occurred (defined as var "error")
+                    });
+                };
 
-                    /* print("Parking spot parameters: ")
-                    print(X) */
-
-                    // Final drive & park optimization
-                    var fX = math.multiply(math.matrix(param_weights), X);
-                    print("car fX: " + fX)
-                    const best_car_indices = top_n(fX["_data"], number_options)
-                    var best_spots = []
-                    for (i in best_car_indices) {
-                        best_spots.push(parking_spot_data[best_car_indices[i]])
-                    }
-                    if (code === 0) {
-                        /* print('Best drive & park spots:')
-                        print(best_spots) */
-                        return best_spots
-                    }
-
-                    if (code === 1) {
-                        // Biking optimization
-                        // Acquire available bikes:
-                        var bike_data = []
-                        for (i in parking_spot_data) {
-                            bike_options["body"]["lng"] = parking_spot_data[i]["lng"];
-                            bike_options["body"]["lat"] = parking_spot_data[i]["lat"];
-                            sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
-                                //results are defined here as var "results"
-                                bike_data.push(results)
-                            }, function () {
-                                //no results were found 
-                            }, function (error) {
-                                //an error occurred (defined as var "error")
-                            });
-                        };
-
-                        var bike_coords = []
-                        var bike_reqs = []
-                        for (i in results) {
-                            bike_coords.push([])
-                            // add coordinate
-                            bike_coords[i].push(
-                                parking_spot_data[i]["lat"].toString() + ',' + parking_spot_data[i]["lng"].toString()
-                            )
-                        }
-                        print(results.length)
-                        for (var i = 0; i < results.length; i++) {
-                            for (var j = 0; j < bike_coords[i].length; j++) {
-                                bike_reqs.push(
-                                    googleMapsClient.directions({
-                                        origin: bike_coords[i][j],
-                                        destination: destination[1].toString() + ', ' + destination[0].toString(),
-                                        mode: "bicycling"
-                                    })
-                                    .asPromise()
-                                    .then(function (response) {
-                                        //print(response)
-                                        return response.json.routes[0].legs[0].duration.value
-                                    })
-                                    .catch(function (err) {
-                                        if (err === 'timeout') {
-                                            print('timeout error')
-                                        } else if (err.json) {
-                                            print("error.json :")
-                                            print(err.json)
-                                            print("Response status: " + err.status) // Current error
-                                        } else {
-                                            print('network error')
-                                        }
-                                    })
-                                );
-                            }
-                        }
-                        // print(bike_reqs)
-
-                        Promise.all(bike_reqs).then(function (results) {
-                            // cat these biking times to X and re-optimize!
-                            X.push(sub_least(results))
-                            // print(X)
-                            param_weights.push(1e-1)
-                            fX = math.multiply(math.matrix(param_weights), X);
-                            const best_bike_indices = top_n(fX["_data"], number_options)
-                            /* print('bike fX: ' + fX)
-                            print('best bike spots: ' + best_bike_indices) */
-                            best_spots = []
-                            for (i in best_car_indices) {
-                                best_spots.push(parking_spot_data[best_bike_indices[i]])
-                            }
-                            return best_spots
-                        });
-                    }
-                    if (code === 2) {
-                        // Walking time optimization
-                        var walk_time_reqs = []
-                        for (var i = 0; i < parking_spot_data.length; i++) {
-                            walk_time_reqs.push(
-                                googleMapsClient.directions({
-                                    origin: parking_spot_data[i]["lat"].toString() + ',' + parking_spot_data[i]["lng"].toString(),
-                                    destination: destination[1].toString() + ', ' + destination[0].toString(),
-                                    mode: "walking"
-                                })
-                                .asPromise()
-                                .then(function (response) {
-                                    // print(response)
-                                    return response.json.routes[0].legs[0].duration.value
-                                })
-                                .catch(function (err) {
-                                    if (err === 'timeout') {
-                                        print('timeout error')
-                                    } else if (err.json) {
-                                        print("error.json :")
-                                        print(err.json)
-                                        print("Response status: " + err.status) // Current error
-                                    } else {
-                                        print('network error')
-                                    }
-                                })
-                            );
-                        }
-
-                        Promise.all(walk_time_reqs).then(function (results) {
-                            var X_walk = Object.assign([], X);
-                            var walk_weights = Object.assign([], param_weights)
-                            results = sub_least(results)
-                            results = results["_data"]
-                            X_walk.push(results)
-                            walk_weights.push(1e-2)
-                            /* print('walk X: '+X_walk)
-                            print(X_walk)
-                            print('walk_weights: ' + walk_weights)
-                            print(walk_weights) */
-                            fX = math.multiply(math.matrix(walk_weights), X_walk);
-                            const best_walk_indices = top_n(fX["_data"], number_options);
-                            /* print('walk fX: ' + fX["_data"])
-                            print(fX)
-                            print('best walking spots: ' + best_walk_indices) */
-                            best_spots = []
-                            for (i in best_car_indices) {
-                                best_spots.push(parking_spot_data[best_walk_indices[i]])
-                            }
-                            return best_spots
-                        });
+                var bike_coords = []
+                var bike_reqs = []
+                for (i in results) {
+                    bike_coords.push([])
+                    // add coordinate
+                    bike_coords[i].push(
+                        parking_spot_data[i]["lat"].toString() + ',' + parking_spot_data[i]["lng"].toString()
+                    )
+                }
+                print(results.length)
+                for (var i = 0; i < results.length; i++) {
+                    for (var j = 0; j < bike_coords[i].length; j++) {
+                        bike_reqs.push(
+                            googleMapsClient.directions({
+                                origin: bike_coords[i][j],
+                                destination: destination[1].toString() + ', ' + destination[0].toString(),
+                                mode: "bicycling"
+                            })
+                            .asPromise()
+                            .then(function (response) {
+                                //print(response)
+                                return response.json.routes[0].legs[0].duration.value
+                            })
+                            .catch(function (err) {
+                                if (err === 'timeout') {
+                                    print('timeout error')
+                                } else if (err.json) {
+                                    print("error.json :")
+                                    print(err.json)
+                                    print("Response status: " + err.status) // Current error
+                                } else {
+                                    print('network error')
+                                }
+                            })
+                        );
                     }
                 }
+                // print(bike_reqs)
+
+                Promise.all(bike_reqs).then(function (results) {
+                    // cat these biking times to X and re-optimize!
+                    X.push(sub_least(results))
+                    // print(X)
+                    param_weights.push(1e-1)
+                    fX = math.multiply(math.matrix(param_weights), X);
+                    const best_bike_indices = top_n(fX["_data"], number_options)
+                    /* print('bike fX: ' + fX)
+                    print('best bike spots: ' + best_bike_indices) */
+                    best_spots = []
+                    for (i in best_car_indices) {
+                        best_spots.push(parking_spot_data[best_bike_indices[i]])
+                    }
+                    return best_spots
+                });
+            }
+            if (code === 2) {
+                // Walking time optimization
+                var walk_time_reqs = []
+                for (var i = 0; i < parking_spot_data.length; i++) {
+                    walk_time_reqs.push(
+                        googleMapsClient.directions({
+                            origin: parking_spot_data[i]["lat"].toString() + ',' + parking_spot_data[i]["lng"].toString(),
+                            destination: destination[1].toString() + ', ' + destination[0].toString(),
+                            mode: "walking"
+                        })
+                        .asPromise()
+                        .then(function (response) {
+                            // print(response)
+                            return response.json.routes[0].legs[0].duration.value
+                        })
+                        .catch(function (err) {
+                            if (err === 'timeout') {
+                                print('timeout error')
+                            } else if (err.json) {
+                                print("error.json :")
+                                print(err.json)
+                                print("Response status: " + err.status) // Current error
+                            } else {
+                                print('network error')
+                            }
+                        })
+                    );
+                }
+
+                Promise.all(walk_time_reqs).then(function (results) {
+                    var X_walk = Object.assign([], X);
+                    var walk_weights = Object.assign([], param_weights)
+                    results = sub_least(results)
+                    results = results["_data"]
+                    X_walk.push(results)
+                    walk_weights.push(1e-2)
+                    /* print('walk X: '+X_walk)
+                    print(X_walk)
+                    print('walk_weights: ' + walk_weights)
+                    print(walk_weights) */
+                    fX = math.multiply(math.matrix(walk_weights), X_walk);
+                    const best_walk_indices = top_n(fX["_data"], number_options);
+                    /* print('walk fX: ' + fX["_data"])
+                    print(fX)
+                    print('best walking spots: ' + best_walk_indices) */
+                    best_spots = []
+                    for (i in best_car_indices) {
+                        best_spots.push(parking_spot_data[best_walk_indices[i]])
+                    }
+                    return best_spots
+                });
+                    }
+                })
             });
-        });
+        }
     }
-}
+
 
 function sub_least(arr) {
     var min_vec = math.multiply(math.min(arr), math.ones(1, arr.length))
