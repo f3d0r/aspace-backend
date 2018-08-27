@@ -57,5 +57,10 @@ module.exports = {
     },
     mapbox: {
         API_KEY: '***REMOVED***'
+    },
+    optimize: {
+        DRIVE_PARK: 0,
+        PARK_BIKE: 1,
+        PARK_WALK: 2
     }
 }
