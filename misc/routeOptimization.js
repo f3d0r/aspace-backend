@@ -118,8 +118,6 @@ module.exports = {
             // Acquire available bikes:
             var bike_data = []
             for (i in parking_spot_data) {
-                bike_options["body"]["lng"] = parking_spot_data[i]["lng"];
-                bike_options["body"]["lat"] = parking_spot_data[i]["lat"];
                 sql.select.selectRadius('bike_locs', parking_spot_data[i]["lat"], parking_spot_data[i]["lng"], bike_radius / 5280, function (results) {
                     //results are defined here as var "results"
                     bike_data.push(results)
@@ -282,7 +280,7 @@ function print(value) {
 }
 
 // Call like: 
-OptimalSpot([-122.45, 37.91], [-122.3208, 47.613874], 900, 500, 10, ['parking_price'], [1e-2, 1], 3, 1)
+module.exports.OptimalSpot([-122.45, 37.91], [-122.3208, 47.613874], 900, 500, 10, ['parking_price'], [1e-2, 1], 3, 1)
 
 // --BBOX SEARCH FOR BIKES--
 // sql.select.regularSelect('bike_locs', null, ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [someSWLat, someSWLng, someNELat, someNELng], null, function (results) {
