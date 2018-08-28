@@ -95,9 +95,10 @@ cluster(function (worker) {
         var server = app.listen(process.env.PORT, function () {
             console.log('Listening on port ' + server.address().port + ', thread #' + worker.id);
         });
+        //routeOptimization.optimalSpot([-122.45, 37.91], [-122.3208, 47.613874], '***REMOVED***')
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
 }, {
-    count: 1 // cpuCount
+    count: cpuCount // 1
 })
