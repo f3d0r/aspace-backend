@@ -26,10 +26,10 @@ module.exports = {
 
         // Define optional parameters
         if (car_radius === undefined) {
-            car_radius = 1000;
+            car_radius = 5000;
         }
         if (bike_radius === undefined) {
-            bike_radius = 400;
+            bike_radius = 500;
         }
         if (spot_size === undefined) {
             spot_size = 10;
@@ -94,10 +94,10 @@ module.exports = {
                 const best_car_indices = top_n(fX["_data"], number_options)
                 var best_spots = []
                 for (i in best_car_indices) {
-                    best_spots.push({
-                        parking_spot: parking_spot_data[best_car_indices[i]],
-                        driving_time: times[best_car_indices[i]]
-                    })
+                    parking_spot_data[best_car_indices[i]]["driving_time"] = times[best_car_indices[i]]
+                    best_spots.push(
+                        parking_spot_data[best_car_indices[i]]
+                    )
                 }
                 if (code == constants.optimize.DRIVE_PARK) {
                     /* print('Best drive & park spots:')
@@ -164,9 +164,9 @@ module.exports = {
                         // print('best bike spots: ' + best_bike_indices) */
                         best_spots = []
                         for (i in best_bike_indices) {
+                            parking_spot_data[best_bike_indices[i]]["driving_time"] = times[best_bike_indices[i]]
                             best_spots.push({
                                 parking_spot: parking_spot_data[best_bike_indices[i]],
-                                driving_time: times[best_bike_indices[i]],
                                 bike_locs: bike_data[i],
                                 approx_biking_time: results[best_bike_indices[i]]
                             })
@@ -220,14 +220,12 @@ module.exports = {
                         print('best walking spots: ' + best_walk_indices) */
                         best_spots = []
                         for (i in best_car_indices) {
-                            best_spots.push({
-                                parking_spot: parking_spot_data[best_walk_indices[i]],
-                                driving_time: times[best_walk_indices[i]],
-                                walking_time: walk_times[best_walk_indices[i]]
-                            })
+                            parking_spot_data[best_walk_indices[i]]["driving_time"] = times[best_walk_indices[i]]
+                            parking_spot_data[best_walk_indices[i]]["walking_time"] = walk_times[best_walk_indices[i]]
+                            best_spots.push(parking_spot_data[best_walk_indices[i]])
                         }
-                        print('Best walking spots: ')
-                        print(best_spots)
+                        /* print('Best walking spots: ')
+                        print(best_spots) */
                         successCB(best_spots);
                     });
                 }
