@@ -57,7 +57,7 @@ module.exports = {
             for (var i = 0; i < parking_spot_data.length; i++) {
                 var dest_s = parking_spot_data[i].lng.toString() + ',' +parking_spot_data[i].lat.toString().toString()
                 driving_reqs.push(
-                    rp('https://api.trya.space/v1/routing/engine/route/v1/drive/' + orig_s +';'+ dest_s)
+                    rp('https://routing.trya.space/v1/route/v1/drive/' + orig_s +';'+ dest_s)
                     .then(function (body) {
                        body = JSON.parse(body)
                        return body.routes[0].duration
@@ -124,7 +124,7 @@ module.exports = {
                     for (var i = 0; i < results.length; i++) {
                         for (var j = 0; j < bike_coords[i].length; j++) {
                             bike_reqs.push(
-                                rp('https://api.trya.space/v1/routing/engine/route/v1/bike/' + bike_coords[i][j] +';'+ destination[0].toString() + ',' + destination[1].toString())
+                                rp('https://routing.trya.space/v1/route/v1/bike/' + bike_coords[i][j] +';'+ destination[0].toString() + ',' + destination[1].toString())
                                 .then(function (body) {
                                     body = JSON.parse(body)
                                     return body.routes[0].duration

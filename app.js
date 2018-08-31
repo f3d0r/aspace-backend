@@ -26,7 +26,7 @@ const webhook = new IncomingWebhook(constants.slack.webhook);
 var app = express();
 
 cluster(function (worker) {
-    app.use(timeout(constants.express.RESPONSE_TIMEOUT_));
+    app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
     app.use(toobusy);
     app.use(bodyParser.urlencoded({
         extended: false
@@ -95,12 +95,9 @@ cluster(function (worker) {
         var server = app.listen(process.env.PORT, function () {
             console.log('Listening on port ' + server.address().port + ', thread #' + worker.id);
         });
-        
-        routeOptimization.optimalSpot([-122.45, 46.91], [-122.3208, 47.613874], constants.optimize.PARK_WALK)
-        
     } else {
         console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
 }, {
-    count: 1 // cpuCount
+    count: cpuCount
 })

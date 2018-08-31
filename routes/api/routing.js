@@ -57,13 +57,11 @@ router.post('/get_drive_walk_route', function (req, res, next) {
 
 router.post('/get_drive_bike_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
-        routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_BIKE, function (bestSpots) {
-            console.log(bestSpots);
-            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', bestSpots));
+        routeOptimization.optimalSpot([-122.45, 46.91], [-122.3208, 47.613874], constants.optimize.PARK_WALK, function (results) {
+            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', results));
         }, function (error) {
-            console.log("ERROR: ");
-            console.log(error);
-        });
+            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+        })
     });
     // errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
     //     getDriveBikeWaypoints(req, function (waypointSet) {
