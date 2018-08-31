@@ -1,9 +1,7 @@
 var router = require('express').Router();
 var errors = require('@errors');
 const constants = require('@config');
-var sql = require('@sql');
 var routeOptimization = require('@route-optimization');
-var turf = require('@turf/turf');
 const mbxDirections = require('@mapbox/mapbox-sdk/services/directions');
 const directionsClient = mbxDirections({
     accessToken: constants.mapbox.API_KEY
@@ -19,90 +17,113 @@ router.get('/ping', function (req, res, next) {
 
 router.post('/get_drive_walk_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
-        routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], 100, 500, 10, ['parking_price'], [1e-2, 1], 3, constants.optimize.PARK_WALK, function (bestSpots) {
+        routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.PARK_WALK, function (bestSpots) {
+            routeOptionsResponse = {};
             console.log(bestSpots);
+            routeOptionsResponse['waypoint_info'] = bestSpots;
+            routeOptionsResponse['segments'] = [];
+            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
         }, function (error) {
             console.log("ERROR: ");
             console.log(error);
         });
-
-        getDriveWalkWaypoints(req, function (waypointSet) {
-            formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_dest"]);
-            reqs = [];
-            formattedRoutes.forEach(function (currentRouteOption) {
-                currentRouteOption.forEach(function (currentSegment) {
-                    reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
-                });
-            });
-            Promise.all(reqs)
-                .then(data => {
-                    currentIndex = 0;
-                    formattedRoutes.forEach(function (currentRouteOption) {
-                        currentRouteOption.forEach(function (currentSegment) {
-                            currentSegment['directions'] = data[currentIndex].body.routes;
-                            currentIndex++;
-                        });
-                    });
-                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
-                }).catch(function (error) {
-                    console.log(error);
-                });
-        });
     });
 });
 
+//     getDriveWalkWaypoints(req, function (waypointSet) {
+//         formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_dest"]);
+//         reqs = [];
+//         formattedRoutes.forEach(function (currentRouteOption) {
+//             currentRouteOption.forEach(function (currentSegment) {
+//                 reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
+//             });
+//         });
+//         Promise.all(reqs)
+//             .then(data => {
+//                 currentIndex = 0;
+//                 formattedRoutes.forEach(function (currentRouteOption) {
+//                     currentRouteOption.forEach(function (currentSegment) {
+//                         currentSegment['directions'] = data[currentIndex].body.routes;
+//                         currentIndex++;
+//                     });
+//                 });
+//                 next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
+//             }).catch(function (error) {
+//                 console.log(error);
+//             });
+//     });
+//     });
+// });
+
 router.post('/get_drive_bike_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
-        getDriveBikeWaypoints(req, function (waypointSet) {
-            formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_bike", "bike_dest"]);
-            reqs = [];
-            formattedRoutes.forEach(function (currentRouteOption) {
-                currentRouteOption.forEach(function (currentSegment) {
-                    reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
-                });
-            });
-            Promise.all(reqs)
-                .then(data => {
-                    currentIndex = 0;
-                    formattedRoutes.forEach(function (currentRouteOption) {
-                        currentRouteOption.forEach(function (currentSegment) {
-                            currentSegment['directions'] = data[currentIndex].body.routes;
-                            currentIndex++;
-                        });
-                    });
-                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
-                }).catch(function (error) {
-                    console.log(error);
-                });
-        });
+        routeOptimization.optimalSpot([-122.45, 46.91], [-122.3208, 47.613874], constants.optimize.PARK_WALK, function (results) {
+            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', results));
+        }, function (error) {
+            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', error));
+        })
     });
+    // errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
+    //     getDriveBikeWaypoints(req, function (waypointSet) {
+    //         formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_bike", "bike_dest"]);
+    //         reqs = [];
+    //         formattedRoutes.forEach(function (currentRouteOption) {
+    //             currentRouteOption.forEach(function (currentSegment) {
+    //                 reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
+    //             });
+    //         });
+    //         Promise.all(reqs)
+    //             .then(data => {
+    //                 currentIndex = 0;
+    //                 formattedRoutes.forEach(function (currentRouteOption) {
+    //                     currentRouteOption.forEach(function (currentSegment) {
+    //                         currentSegment['directions'] = data[currentIndex].body.routes;
+    //                         currentIndex++;
+    //                     });
+    //                 });
+    //                 next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
+    //             }).catch(function (error) {
+    //                 console.log(error);
+    //             });
+    //     });
+    // });
 });
 
 router.post('/get_drive_direct_route', function (req, res, next) {
     errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
-        getDriveDirectWaypoints(req, function (waypointSet) {
-            formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_dest"]);
-            reqs = [];
-            formattedRoutes.forEach(function (currentRouteOption) {
-                currentRouteOption.forEach(function (currentSegment) {
-                    reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
-                });
-            });
-            Promise.all(reqs)
-                .then(data => {
-                    currentIndex = 0;
-                    formattedRoutes.forEach(function (currentRouteOption) {
-                        currentRouteOption.forEach(function (currentSegment) {
-                            currentSegment['directions'] = data[currentIndex].body.routes;
-                            currentIndex++;
-                        });
-                    });
-                    next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
-                }).catch(function (error) {
-                    console.log(error);
-                });
+        routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], constants.optimize.DRIVE_PARK, function (bestSpots) {
+            routeOptionsResponse = {};
+            routeOptionsResponse['waypoint_info'] = bestSpots;
+            routeOptionResponse['segments'] = [];
+            next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', routeOptionsResponse));
+        }, function (error) {
+            next(errors.getResponseJSON('ROUTE_CALCULATION_ERROR', 'Route could not be calculated.'));
         });
     });
+    // errors.checkQueries(req, res, ['origin_lat', 'origin_lng', 'dest_lat', 'dest_lng'], function () {
+    //     getDriveDirectWaypoints(req, function (waypointSet) {
+    //         formattedRoutes = formatSegments(waypointSet, ["drive_park", "walk_dest"]);
+    //         reqs = [];
+    //         formattedRoutes.forEach(function (currentRouteOption) {
+    //             currentRouteOption.forEach(function (currentSegment) {
+    //                 reqs.push(getDirectionsRequest(getProfile(currentSegment['name']), currentSegment['origin'], currentSegment['dest']));
+    //             });
+    //         });
+    //         Promise.all(reqs)
+    //             .then(data => {
+    //                 currentIndex = 0;
+    //                 formattedRoutes.forEach(function (currentRouteOption) {
+    //                     currentRouteOption.forEach(function (currentSegment) {
+    //                         currentSegment['directions'] = data[currentIndex].body.routes;
+    //                         currentIndex++;
+    //                     });
+    //                 });
+    //                 next(errors.getResponseJSON('ROUTING_ENDPOINT_FUNCTION_SUCCESS', formattedRoutes));
+    //             }).catch(function (error) {
+    //                 console.log(error);
+    //             });
+    //     });
+    // });
 });
 
 function getDirectionsRequest(profile, origin, dest) {
