@@ -23,7 +23,7 @@ module.exports = {
 
         // Define optional parameters
         if (car_radius === undefined) {
-            car_radius = 5000;
+            car_radius = 11000;
         }
         if (bike_radius === undefined) {
             bike_radius = 500;
@@ -171,7 +171,6 @@ module.exports = {
                                 })
                         );
                     }
-                    print(walk_time_reqs.length)
                     Promise.all(walk_time_reqs).then(function (results) {
                         var X_walk = Object.assign([], X);
                         var walk_weights = Object.assign([], param_weights)
@@ -191,8 +190,8 @@ module.exports = {
                             parking_spot_data[best_walk_indices[i]]["walking_time"] = walk_times[best_walk_indices[i]]
                             best_spots.push(parking_spot_data[best_walk_indices[i]])
                         }
-                        /* print('Best walking spots: ')
-                        print(best_spots) */
+                        print('Best walking spots: ')
+                        print(best_spots)
                         successCB(best_spots);
                     });
                 }
