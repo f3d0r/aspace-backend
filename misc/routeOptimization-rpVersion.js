@@ -1,9 +1,7 @@
 const constants = require('@config');
 var sql = require('@sql');
 const math = require('mathjs');
-// var rp = require("request-promise");
-var osrm = new OSRM('network.osrm');
-const {promisify} = require('util');
+var rp = require("request-promise");
 
 module.exports = {
     /* Algorithm:
@@ -55,12 +53,19 @@ module.exports = {
 
             // 3. Acquire driving times
             var driving_reqs = []
+            const orig_s = origin[0].toString() + ',' + origin[1].toString()
             for (var i = 0; i < parking_spot_data.length; i++) {
+                var dest_s = parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString().toString()
                 driving_reqs.push(
-                    promisify(osrm.route({coordinates: [origin, [parking_spot_data[i].lng, parking_spot_data[i].lat]]}))
-                    .then((result) => {return result.routes[0].duration} )
-                    .catch((err) => {print(err)})
-                )
+                    rp('http://localhost:5000/route/v1/drive/' + orig_s + ';' + dest_s)
+                    .then(function (body) {
+                        body = JSON.parse(body)
+                        return body.routes[0].duration
+                    })
+                    .catch(function (err) {
+                        return failCB(err);
+                    })
+                );
             }
             Promise.all(driving_reqs).then(function (results) {
                 var times = [].concat.apply([], results);
