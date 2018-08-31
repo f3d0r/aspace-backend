@@ -1,7 +1,10 @@
 const constants = require('@config');
 var sql = require('@sql');
 const math = require('mathjs');
-var rp = require("request-promise");
+var googleMapsClient = require('@google/maps').createClient({
+    Promise: Promise,
+    key: 'AIzaSyAw5S7tPXaLOQ499BzWAXqEGpJ50t7G3c0'
+});
 
 module.exports = {
     /* Algorithm:
@@ -23,7 +26,7 @@ module.exports = {
 
         // Define optional parameters
         if (car_radius === undefined) {
-            car_radius = 11000;
+            car_radius = 5000;
         }
         if (bike_radius === undefined) {
             bike_radius = 500;
@@ -53,18 +56,21 @@ module.exports = {
 
             // 3. Acquire driving times
             var driving_reqs = []
-            const orig_s = origin[0].toString() + ',' + origin[1].toString()
+            const orig_s = origin[1].toString() + ', ' + origin[0].toString()
             for (var i = 0; i < parking_spot_data.length; i++) {
-                var dest_s = parking_spot_data[i].lng.toString() + ',' +parking_spot_data[i].lat.toString().toString()
                 driving_reqs.push(
-                    rp('https://api.trya.space/v1/routing/engine/route/v1/drive/' + orig_s +';'+ dest_s)
-                    .then(function (body) {
-                       body = JSON.parse(body)
-                       return body.routes[0].duration
-                   })
-                   .catch(function (err) {
-                       throw new Error(err);
-                   })
+                    googleMapsClient.directions({
+                        // Order: lat, lng
+                        origin: orig_s,
+                        destination: parking_spot_data[i]["lat"].toString() + ', ' + parking_spot_data[i]["lng"].toString(),
+                        mode: "driving",
+                    }).asPromise()
+                    .then(response => {
+                        return response.json.routes[0].legs[0].duration.value;
+                    })
+                    .catch(function (error) {
+                        return failCB("No route found");
+                    })
                 );
             }
             Promise.all(driving_reqs).then(function (results) {
@@ -118,19 +124,32 @@ module.exports = {
                         bike_coords.push([])
                         // Add coordinate
                         bike_coords[i].push(
-                            parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString()
+                            parking_spot_data[i]["lat"].toString() + ',' + parking_spot_data[i]["lng"].toString()
                         )
                     }
                     for (var i = 0; i < results.length; i++) {
                         for (var j = 0; j < bike_coords[i].length; j++) {
                             bike_reqs.push(
-                                rp('https://api.trya.space/v1/routing/engine/route/v1/bike/' + bike_coords[i][j] +';'+ destination[0].toString() + ',' + destination[1].toString())
-                                .then(function (body) {
-                                    body = JSON.parse(body)
-                                    return body.routes[0].duration
+                                googleMapsClient.directions({
+                                    origin: bike_coords[i][j],
+                                    destination: destination[1].toString() + ', ' + destination[0].toString(),
+                                    mode: "bicycling"
+                                })
+                                .asPromise()
+                                .then(function (response) {
+                                    return response.json.routes[0].legs[0].duration.value;
                                 })
                                 .catch(function (err) {
-                                    throw new Error(err);
+                                    if (err === 'timeout') {
+                                        // print('timeout error')
+                                    } else if (err.json) {
+                                        // print("error.json :")
+                                        // print(err.json)
+                                        // print("Response status: " + err.status) // Current error
+                                    } else {
+                                        // print('network error')
+                                    }
+                                    return failCB(error);
                                 })
                             );
                         }
@@ -161,16 +180,31 @@ module.exports = {
                     var walk_time_reqs = []
                     for (var i = 0; i < parking_spot_data.length; i++) {
                         walk_time_reqs.push(
-                            rp('https://api.trya.space/v1/routing/engine/route/v1/foot/' + parking_spot_data[i].lng.toString() + ',' + parking_spot_data[i].lat.toString() +';'+ destination[0].toString() + ',' + destination[1].toString())
-                                .then(function (body) {
-                                    body = JSON.parse(body)
-                                    return body.routes[0].duration
-                                })
-                                .catch(function (err) {
-                                    throw new Error(err);
-                                })
+                            googleMapsClient.directions({
+                                origin: parking_spot_data[i]["lat"].toString() + ',' + parking_spot_data[i]["lng"].toString(),
+                                destination: destination[1].toString() + ', ' + destination[0].toString(),
+                                mode: "walking"
+                            })
+                            .asPromise()
+                            .then(function (response) {
+                                // print(response)
+                                return response.json.routes[0].legs[0].duration.value;
+                            })
+                            .catch(function (err) {
+                                if (err === 'timeout') {
+                                    // print('timeout error')
+                                } else if (err.json) {
+                                    // print("error.json :")
+                                    // print(err.json)
+                                    // print("Response status: " + err.status) // Current error
+                                } else {
+                                    // print('network error')
+                                }
+                                return failCB(err);
+                            })
                         );
                     }
+
                     Promise.all(walk_time_reqs).then(function (results) {
                         var X_walk = Object.assign([], X);
                         var walk_weights = Object.assign([], param_weights)
