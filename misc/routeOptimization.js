@@ -94,8 +94,8 @@ module.exports = {
                     )
                 }
                 if (code == constants.optimize.DRIVE_PARK) {
-                    print('Best drive & park spots:')
-                    print(best_spots)
+                    /* print('Best drive & park spots:')
+                    print(best_spots) */
                     successCB(best_spots)
                 } else if (code == constants.optimize.PARK_BIKE) {
                     // Biking optimization
@@ -152,8 +152,8 @@ module.exports = {
                                 approx_biking_time: results[best_bike_indices[i]]
                             })
                         }
-                        print('Best park & bike spots: ')
-                        print(best_spots)
+                        /* print('Best park & bike spots: ')
+                        print(best_spots) */
                         successCB(best_spots);
                     });
                 } else if (code == constants.optimize.PARK_WALK) {
@@ -191,8 +191,8 @@ module.exports = {
                             parking_spot_data[best_walk_indices[i]]["walking_time"] = walk_times[best_walk_indices[i]]
                             best_spots.push(parking_spot_data[best_walk_indices[i]])
                         }
-                        print('Best walking spots: ')
-                        print(best_spots)
+                        /* print('Best walking spots: ')
+                        print(best_spots) */
                         successCB(best_spots);
                     });
                 }
