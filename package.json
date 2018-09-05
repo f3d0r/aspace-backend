@@ -66,7 +66,6 @@
     "@timestamp": "misc/timestamp",
     "@parking-calc": "misc/parkingCalc",
     "@bcrypt": "misc/auth/bcrypt",
-    "@route-optimization": "misc/routeOptimization",
     "@body-structure": "config/bodyStructs",
     "@upload": "app"
   },

@@ -8,7 +8,6 @@ const timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
-var routeOptimization = require('@route-optimization');
 
 const {
     IncomingWebhook
