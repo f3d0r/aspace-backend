@@ -173,5 +173,10 @@ module.exports = Object.freeze({
         HTTP_CODE: 200,
         RESPONSE_CODE: 41,
         INFO: "bikes_endpoint_function_success"
+    },
+    ROUTE_UPDATE_ENDPOINT_FUNCTION_SUCCESS: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 42,
+        INFO: "route_update_endpoint_function_success"
     }
 });
