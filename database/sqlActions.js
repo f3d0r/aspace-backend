@@ -3,6 +3,7 @@ var mysql = require('mysql');
 var uniqueString = require('unique-string');
 const constants = require('@config');
 
+var rp = require('request-promise');
 var turf = require('@turf/turf');
 var routeOptimization = require('@route-optimization');
 
@@ -208,10 +209,10 @@ module.exports = {
                 connection.release();
             });
         },
-        locationUpdate: function (currLng, currLat, userId, commuteMode, successCB, failCB) {
+        locationUpdate: function (currLng, currLat, userId, successCB, failCB) {
             db.getConnection(function (err, connection) {
                 var sql = 'UPDATE `routing_sessions` SET `last_location` = ? WHERE `user_id` = ?; ';
-                sql += 'SELECT `parking_spot`,`remaining_bikes`,`remaining_scoots` FROM `routing_sessions` WHERE `user_id` = ?;';
+                sql += 'SELECT `parking_spot`,`remaining_bikes`,`remaining_scoots`, `mode` FROM `routing_sessions` WHERE `user_id` = ?;';
                 // console.log(mysql.format(sql, [currLng + "," + currLat, userId, userId]));
                 // sql += "UPDATE CASE ( 3959 * acos( cos( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 2) AS float)) ) + sin( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * sin(radians(`lat`)) ) ) )"
                 connection.query(sql, [currLng + "," + currLat, userId, userId], function (error, rows) {
@@ -221,6 +222,7 @@ module.exports = {
                         noneFoundCB();
                     else {
                         var dest = rows[1][0].parking_spot.split(',');
+                        var commuteMode = rows[1][0].mode;
                         if (turf.distance([currLng, currLat], [parseFloat(dest[0]), parseFloat(dest[1])], {
                                 units: 'miles'
                             }) > constants.reroute.proximity_threshold &&
@@ -228,9 +230,16 @@ module.exports = {
                             // if this happens, we'll re-route the user
                             console.log('REROUTE')
                             sql = 'UPDATE `routing_sessions` SET `reroute` = ? WHERE `user_id` = ?; ';
-                            // make sure commuteMode == one of constants.optimize.DRIVE_PARK, constants.optimize.PARK_WALK, constants.optimize.PARK_BIKE
-                            routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], commuteMode, function (bestSpots) {
-
+                            // make sure commuteMode == one of 'direct', 'walk', 'bike'
+                            rp('https://routing-dev.trya.space/v1/get_drive_' + commuteMode + '_route?origin_lat=' + currLat + '&origin_lng=' + currLng +'&dest_lat=' + dest[1] + '&dest_lng=' + dest[0])
+                            .then(function (body) {
+                                console.log(body)
+                                // body = JSON.parse(body)
+                                return body
+                            })
+                            .catch(function (err) {
+                                //print('error')
+                                return failCB(err);
                             })
                         }
                         // console.log(rows)
