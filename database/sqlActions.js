@@ -2,6 +2,7 @@ var db = require('./db');
 var mysql = require('mysql');
 var uniqueString = require('unique-string');
 const constants = require('@config');
+var turf = require('@turf/turf')
 
 module.exports = {
     insert: {
@@ -205,15 +206,16 @@ module.exports = {
                 connection.release();
             });
         },
-        locationUpdate: function (data, successCB, failCB) {
+        locationUpdate: function (currLng, currLat, userId, successCB, failCB) {
             db.getConnection(function (err, connection) {
-                var sql = 'UPDATE `routing_sessions` SET `last_location` = ? WHERE `user_id` = ?;';
-                sql += 'SELECT `parking_spot`, `remaining_bikes`,`remaining_scoots` FROM `routing_sessions` WHERE `user_id` = ?';
+                var sql = 'UPDATE `routing_sessions` SET `last_location` = ? WHERE `user_id` = ?; ';
+                sql += 'SELECT `parking_spot`,`remaining_bikes`,`remaining_scoots` FROM `routing_sessions` WHERE `user_id` = ?;';
+                console.log(mysql.format(sql, [currLng + "," + currLat, userId, userId]));
                 // sql += "UPDATE CASE ( 3959 * acos( cos( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 2) AS float)) ) + sin( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * sin(radians(`lat`)) ) ) )"
-                connection.query(sql, [toString(data[0]) + ',' + toString(data[1]), data[2], data[2]], function (error, results) {
+                connection.query(sql, [currLat + "," + currLng, userId, userId], function (error, results) {
                     if (error)
                         return failCB(error);
-                    if (results.length == 0)
+                    else if (results.length == 0)
                         noneFoundCB();
                     else {
                         /* if (turf.distance([data[0], data[1]], [data[0], data[1]], {
