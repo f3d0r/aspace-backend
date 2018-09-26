@@ -4,7 +4,7 @@ var uniqueString = require('unique-string');
 const constants = require('@config');
 
 var turf = require('@turf/turf');
-// var routeOptimization = require('@route-optimization');
+var routeOptimization = require('@route-optimization');
 
 module.exports = {
     insert: {
@@ -231,14 +231,14 @@ module.exports = {
                             }) > constants.reroute.proximity_threshold &&
                             rows[1][0].remaining_bikes + rows[1][0].remaining_scoots < constants.reroute.last_mile_options_threshold) {
                             // if this happens, we'll re-route the user
-                            // console.log('REROUTE')
+                            console.log('REROUTE')
                             sql = 'UPDATE `routing_sessions` SET `reroute` = ? WHERE `user_id` = ?; ';
                             // make sure commuteMode == one of constants.optimize.DRIVE_PARK, constants.optimize.PARK_WALK, constants.optimize.PARK_BIKE
-                            // routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], commuteMode, function (bestSpots) {
+                            routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], commuteMode, function (bestSpots) {
 
-                            // });
+                            });
                         }
-                        // console.log(rows)
+                        console.log(rows)
                         successCB(rows);
                     }
                 });
