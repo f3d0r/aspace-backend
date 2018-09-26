@@ -215,6 +215,8 @@ module.exports = {
                 // console.log(mysql.format(sql, [currLng + "," + currLat, userId, userId]));
                 // sql += "UPDATE CASE ( 3959 * acos( cos( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 2) AS float)) ) + sin( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * sin(radians(`lat`)) ) ) )"
                 connection.query(sql, [currLng + "," + currLat, userId, userId], function (error, rows) {
+                    connection.release();
+
                     if (error)
                         return failCB(error);
                     else if (rows.length == 0)
@@ -237,7 +239,6 @@ module.exports = {
                         successCB(rows);
                     }
                 });
-                connection.release();
             });
         }
     }
