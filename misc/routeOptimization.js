@@ -57,12 +57,6 @@ module.exports = {
             var driving_reqs = []
             for (var i = 0; i < parking_spot_data.length; i++) {
                 driving_reqs.push(
-<<<<<<< HEAD
-                    promisify(osrm.route({coordinates: [origin, [parking_spot_data[i].lng, parking_spot_data[i].lat]]}))
-                    .then((result) => {return result.routes[0].duration} )
-                    .catch((err) => {print(err)})
-                )
-=======
                     rp('https://routing.trya.space/v1/route/v1/drive/' + orig_s +';'+ dest_s)
                     .then(function (body) {
                        body = JSON.parse(body)
@@ -72,7 +66,6 @@ module.exports = {
                        throw new Error(err);
                    })
                 );
->>>>>>> 2557d01c5112eb5307d020dd5b310eb85e41d706
             }
             Promise.all(driving_reqs).then(function (results) {
                 var times = [].concat.apply([], results);
@@ -130,11 +123,7 @@ module.exports = {
                     for (var i = 0; i < results.length; i++) {
                         for (var j = 0; j < bike_coords[i].length; j++) {
                             bike_reqs.push(
-<<<<<<< HEAD
-                                rp('http://localhost:5000/route/v1/bike/' + bike_coords[i][j] + ';' + destination[0].toString() + ',' + destination[1].toString())
-=======
                                 rp('https://routing.trya.space/v1/route/v1/bike/' + bike_coords[i][j] +';'+ destination[0].toString() + ',' + destination[1].toString())
->>>>>>> 2557d01c5112eb5307d020dd5b310eb85e41d706
                                 .then(function (body) {
                                     body = JSON.parse(body)
                                     return body.routes[0].duration

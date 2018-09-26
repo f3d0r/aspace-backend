@@ -17,9 +17,9 @@ router.get('/ping', function (req, res, next) {
 });
 
 router.get('/route_status/:user_id', function (req, res, next) {
-    errors.checkQueries(req, res, ['coordinate'], function () {
+    errors.checkQueries(req, res, ['curr_lng','curr_lat'], function () {
         // do stuff here
-        sql.insert.locationUpdate([req.query.coordinate, req.param.user_id], function (results) {
+        sql.insert.locationUpdate([req.query.curr_lng, req.query.curr_lat, req.param.user_id], function (results) {
             next(errors.getResponseJSON('ROUTE_UPDATE_ENDPOINT_FUNCTION_SUCCESS', "SUCCESS!"));
         }, function (error) {
             next(error);

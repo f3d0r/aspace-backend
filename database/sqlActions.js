@@ -1,6 +1,7 @@
 var db = require('./db');
 var mysql = require('mysql');
 var uniqueString = require('unique-string');
+const constants = require('@config');
 
 module.exports = {
     insert: {
@@ -209,18 +210,20 @@ module.exports = {
                 var sql = 'UPDATE `routing_sessions` SET `last_location` = ? WHERE `user_id` = ?;';
                 sql += 'SELECT `parking_spot`, `remaining_bikes`,`remaining_scoots` FROM `routing_sessions` WHERE `user_id` = ?';
                 // sql += "UPDATE CASE ( 3959 * acos( cos( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 2) AS float)) ) + sin( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * sin(radians(`lat`)) ) ) )"
-                connection.query(sql, [data[0], data[1], data[1]], function (error, results) {
+                connection.query(sql, [toString(data[0]) + ',' + toString(data[1]), data[2], data[2]], function (error, results) {
                     if (error)
                         return failCB(error);
                     if (results.length == 0)
                         noneFoundCB();
                     else {
-                        if (turf.distance([parking_spots[i].lng, parking_spots[i].lat],
-                                [parking_spots[j].lng, parking_spots[j].lat],
-                                options) > constants.optimize.cluster_distance_threshold &&
-                            remaining_bikes + remaining_scoots < lastMileOptions_threshold) {
+                        /* if (turf.distance([data[0], data[1]], [data[0], data[1]], {
+                                units: 'miles'
+                            }) > constants.reroute.proximity_threshold &&
+                            remaining_bikes + remaining_scoots < constants.reroute.last_mile_options_threshold) {
                             // if this happens, we'll re-route the user
-                        }
+
+                        } */
+                        console.log(results)
                         successCB(results);
                     }
                 });

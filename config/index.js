@@ -61,6 +61,12 @@ module.exports = {
     optimize: {
         DRIVE_PARK: '***REMOVED***',
         PARK_BIKE: '***REMOVED***',
-        PARK_WALK: '***REMOVED***'
+        PARK_WALK: '***REMOVED***',
+        time_threshold: 600,
+        cluster_distance_threshold: 0.1
+    },
+    reroute: {
+        proximity_threshold: 0.75,
+        last_mile_options_threshold: 2
     }
 }
