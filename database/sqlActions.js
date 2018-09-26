@@ -14,7 +14,7 @@ module.exports = {
                     connection.release();
                     if (error)
                         failCB(error);
-                    else 
+                    else
                         successCB(results);
                 });
             });
