@@ -2,7 +2,9 @@ var db = require('./db');
 var mysql = require('mysql');
 var uniqueString = require('unique-string');
 const constants = require('@config');
-var turf = require('@turf/turf')
+
+var turf = require('@turf/turf');
+var routeOptimization = require('@route-optimization');
 
 module.exports = {
     insert: {
@@ -206,27 +208,33 @@ module.exports = {
                 connection.release();
             });
         },
-        locationUpdate: function (currLng, currLat, userId, successCB, failCB) {
+        locationUpdate: function (currLng, currLat, userId, commuteMode, successCB, failCB) {
             db.getConnection(function (err, connection) {
                 var sql = 'UPDATE `routing_sessions` SET `last_location` = ? WHERE `user_id` = ?; ';
                 sql += 'SELECT `parking_spot`,`remaining_bikes`,`remaining_scoots` FROM `routing_sessions` WHERE `user_id` = ?;';
-                console.log(mysql.format(sql, [currLng + "," + currLat, userId, userId]));
+                // console.log(mysql.format(sql, [currLng + "," + currLat, userId, userId]));
                 // sql += "UPDATE CASE ( 3959 * acos( cos( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 2) AS float)) ) + sin( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * sin(radians(`lat`)) ) ) )"
-                connection.query(sql, [currLat + "," + currLng, userId, userId], function (error, results) {
+                connection.query(sql, [currLng + "," + currLat, userId, userId], function (error, rows) {
                     if (error)
                         return failCB(error);
-                    else if (results.length == 0)
+                    else if (rows.length == 0)
                         noneFoundCB();
                     else {
-                        /* if (turf.distance([data[0], data[1]], [data[0], data[1]], {
+                        var dest = rows[1][0].parking_spot.split(',');
+                        if (turf.distance([currLng, currLat], [parseFloat(dest[0]), parseFloat(dest[1])], {
                                 units: 'miles'
                             }) > constants.reroute.proximity_threshold &&
-                            remaining_bikes + remaining_scoots < constants.reroute.last_mile_options_threshold) {
+                            rows[1][0].remaining_bikes + rows[1][0].remaining_scoots < constants.reroute.last_mile_options_threshold) {
                             // if this happens, we'll re-route the user
+                            console.log('REROUTE')
+                            sql = 'UPDATE `routing_sessions` SET `reroute` = ? WHERE `user_id` = ?; ';
+                            // make sure commuteMode == one of constants.optimize.DRIVE_PARK, constants.optimize.PARK_WALK, constants.optimize.PARK_BIKE
+                            routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], commuteMode, function (bestSpots) {
 
-                        } */
-                        console.log(results)
-                        successCB(results);
+                            })
+                        }
+                        // console.log(rows)
+                        successCB(rows);
                     }
                 });
                 connection.release();
