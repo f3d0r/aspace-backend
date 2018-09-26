@@ -4,18 +4,19 @@ var uniqueString = require('unique-string');
 const constants = require('@config');
 
 var turf = require('@turf/turf');
-var routeOptimization = require('@route-optimization');
+// var routeOptimization = require('@route-optimization');
 
 module.exports = {
     insert: {
         addObject: function (database, jsonObject, successCB, failCB) {
             db.getConnection(function (err, connection) {
                 connection.query('INSERT INTO ' + connection.escapeId(database) + ' SET ?', jsonObject, function (error, results, fields) {
+                    connection.release();
                     if (error)
-                        return failCB(error);
-                    successCB(results);
+                        failCB(error);
+                    else 
+                        successCB(results);
                 });
-                connection.release();
             });
         },
         addSpots: function (points, successCB, failCB) {
@@ -40,42 +41,42 @@ module.exports = {
             db.getConnection(function (err, connection) {
                 var sql = "SELECT * FROM " + connection.escapeId(database) + " WHERE `auth_key` = ? AND `permission` LIKE ?";
                 connection.query(sql, [auth_key, "%" + permission + "%"], function (error, rows) {
+                    connection.release();
                     if (error)
-                        return failCB(error);
-                    if (rows.length == 1)
+                        failCB(error);
+                    else if (rows.length == 1)
                         successCB();
                     else
                         failCB();
                 });
-                connection.release();
             });
         },
         authKeyPermissionCheck: function (database, username, permission, successCB, failCB) {
             db.getConnection(function (err, connection) {
                 var sql = "SELECT * FROM " + connection.escapeId(database) + " WHERE `username` = ? AND `auth_key_permissions` LIKE ?";
                 connection.query(sql, [username, "%" + permission + "%"], function (error, rows) {
+                    connection.release();
                     if (error)
-                        return failCB(error);
-                    if (rows.length == 1)
+                        failCB(error);
+                    else if (rows.length == 1)
                         successCB(rows);
                     else
                         failCB();
                 });
-                connection.release();
             });
         },
         tempAuthKeyCheck: function (database, username, genKey, permission, successCB, failCB) {
             db.getConnection(function (err, connection) {
                 var sql = "SELECT * FROM " + connection.escapeId(database) + " WHERE `request_user` = ? AND `temp_key` = ? AND `permissions` LIKE ?";
                 connection.query(sql, [username, genKey, "%" + permission + "%"], function (error, rows) {
+                    connection.release();
                     if (error)
-                        return failCB(error);
-                    if (rows.length == 1)
+                        failCB(error);
+                    else if (rows.length == 1)
                         successCB(rows);
                     else
                         failCB();
                 });
-                connection.release();
             });
         },
         regularSelect: function (database, selection, keys, operators, values, numResults, successCB, noneFoundCB, failCB) {
@@ -99,30 +100,30 @@ module.exports = {
                         sql += "`" + keys[index] + "` " + operators[index] + " ?";
                 }
                 connection.query(sql, values, function (error, rows) {
+                    connection.release();
                     if (error)
-                        return failCB(error);
-                    if (numResults == null)
+                        failCB(error);
+                    else if (numResults == null)
                         successCB(rows)
                     else if (numResults != null && rows.length == 0)
                         noneFoundCB();
                     else
                         successCB(rows);
                 });
-                connection.release();
             });
         },
         selectRadius: function (database, lat, lng, miles, successCB, noneFoundCB, failCB) {
             db.getConnection(function (err, connection) {
                 var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
                 connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
+                    connection.release();
                     if (error)
-                        return failCB(error);
+                        failCB(error);
                     if (rows.length == 0)
                         noneFoundCB();
                     else
                         successCB(rows)
                 });
-                connection.release();
             });
         }
     },
@@ -138,21 +139,24 @@ module.exports = {
                     else
                         sql += "`" + keys[index] + "` = ?";
                 connection.query(sql, values, function (error, rows) {
+                    connection.release();
                     if (error)
-                        return failCB(error);
-                    successCB(rows);
+                        failCB(error);
+                    else
+                        successCB(rows);
                 });
-                connection.release();
             });
         },
         deleteVerificationCode: function (phoneNumber, deviceId, successCB, failCB) {
             db.getConnection(function (err, connection) {
                 var sql = "DELETE FROM `user_verify_codes` WHERE `phone_number` = ? AND `device_id` = ?";
                 connection.query(sql, [phoneNumber, deviceId], function (error, rows) {
+                    connection.release();
                     if (error)
-                        return failCB(error)
+                        return failCB(error);
+                    else
+                        successCB(rows);
                 });
-                connection.release();
             });
         }
     },
@@ -161,14 +165,14 @@ module.exports = {
             db.getConnection(function (err, connection) {
                 var sql = "UPDATE `parking` SET `occupied` = ? WHERE `spot_id` = ?";
                 connection.query(sql, [occupied, spot_id], function (error, results, fields) {
+                    connection.release();
                     if (error)
-                        return failCB(error);
-                    if (results.affectedRows == 1)
+                        failCB(error);
+                    else if (results.affectedRows == 1)
                         successCB();
                     else
                         noExistCB();
                 });
-                connection.release();
             });
         },
         updateProfilePic(accessCode, deviceId, successCB, failCB) { //return profileID to use for s3 upload
@@ -176,14 +180,14 @@ module.exports = {
                 var sql = "SELECT * FROM `user_access_codes` WHERE `access_code` = ? AND `device_id` = ?";
                 connection.query(sql, [accessCode, deviceId], function (error, rows) {
                     if (error)
-                        return failCB(error);
+                        failCB(error);
                     if (rows.length == 0) {
                         failCB('INVALID_ACCESS_CODE');
                     } else {
                         var sql = "SELECT * FROM `users` WHERE `user_id` = ?";
                         connection.query(sql, [rows[0].user_id], function (error, rows) {
                             if (error)
-                                return failCB(error);
+                                failCB(error);
                             if (rows.length == 0) {
                                 failCB('INVALID_ACCESS_CODE');
                             } else {
@@ -192,7 +196,7 @@ module.exports = {
                                     var sql = 'UPDATE `users` SET `profile_pic` = ? WHERE `user_id` = ?';
                                     connection.query(sql, [profilePicID, rows[0].user_id], function (error, results, fields) {
                                         if (error)
-                                            return failCB(error);
+                                            failCB(error);
                                         if (results.affectedRows == 0)
                                             failCB('INVALID_ACCESS_CODE');
                                         else
@@ -215,8 +219,9 @@ module.exports = {
                 // console.log(mysql.format(sql, [currLng + "," + currLat, userId, userId]));
                 // sql += "UPDATE CASE ( 3959 * acos( cos( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 2) AS float)) ) + sin( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * sin(radians(`lat`)) ) ) )"
                 connection.query(sql, [currLng + "," + currLat, userId, userId], function (error, rows) {
+                    connection.release();
                     if (error)
-                        return failCB(error);
+                        failCB(error);
                     else if (rows.length == 0)
                         noneFoundCB();
                     else {
@@ -226,18 +231,17 @@ module.exports = {
                             }) > constants.reroute.proximity_threshold &&
                             rows[1][0].remaining_bikes + rows[1][0].remaining_scoots < constants.reroute.last_mile_options_threshold) {
                             // if this happens, we'll re-route the user
-                            console.log('REROUTE')
+                            // console.log('REROUTE')
                             sql = 'UPDATE `routing_sessions` SET `reroute` = ? WHERE `user_id` = ?; ';
                             // make sure commuteMode == one of constants.optimize.DRIVE_PARK, constants.optimize.PARK_WALK, constants.optimize.PARK_BIKE
-                            routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], commuteMode, function (bestSpots) {
+                            // routeOptimization.optimalSpot([req.query.origin_lng, req.query.origin_lat], [req.query.dest_lng, req.query.dest_lat], commuteMode, function (bestSpots) {
 
-                            })
+                            // });
                         }
                         // console.log(rows)
                         successCB(rows);
                     }
                 });
-                connection.release();
             });
         }
     }
