@@ -17,7 +17,7 @@ router.get('/ping', function (req, res, next) {
 });
 
 router.get('/route_status/:user_id', function (req, res, next) {
-    errors.checkQueries(req, res, ['curr_lng', 'curr_lat', 'commute_mode'], function () {
+    errors.checkQueries(req, res, ['curr_lng', 'curr_lat'], function () {
         // console.log(req.query.curr_lng);
         // console.log(req.query.curr_lat);
         // console.log(req.params.user_id);

@@ -5,7 +5,6 @@ const constants = require('@config');
 
 var rp = require('request-promise');
 var turf = require('@turf/turf');
-var routeOptimization = require('@route-optimization');
 
 module.exports = {
     insert: {
@@ -118,11 +117,14 @@ module.exports = {
                 var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
                 connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
                     connection.release();
-                    if (error)
+                    if (error) {
+                        // console.log(error)
                         failCB(error);
-                    if (rows.length == 0)
+                    }
+                    if (rows.length == 0) {
+                        // console.log('None found.')
                         noneFoundCB();
-                    else
+                    } else
                         successCB(rows)
                 });
             });
@@ -215,10 +217,10 @@ module.exports = {
         },
         locationUpdate: function (currLng, currLat, userId, successCB, failCB) {
             db.getConnection(function (err, connection) {
-                var sql = 'UPDATE `routing_sessions` SET `last_location` = ? WHERE `user_id` = ?; ';
-                sql += 'SELECT `parking_spot`,`remaining_bikes`,`remaining_scoots`, `mode` FROM `routing_sessions` WHERE `user_id` = ?;';
+                var sql = 'UPDATE `routing_sessions` SET `last_location` = ? WHERE `user_id` = ?;';
+                sql += 'SELECT `parking_dest`,`remaining_bikes`,`remaining_scoots`, `mode` FROM `routing_sessions` WHERE `user_id` = ?;';
                 // console.log(mysql.format(sql, [currLng + "," + currLat, userId, userId]));
-                // sql += "UPDATE CASE ( 3959 * acos( cos( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 2) AS float)) ) + sin( radians(CAST(PARSENAME(REPLACE(`parking_spot`, ',', '.'), 1) AS float)) ) * sin(radians(`lat`)) ) ) )"
+                // sql += "UPDATE CASE ( 3959 * acos( cos( radians(CAST(PARSENAME(REPLACE(`parking_dest`, ',', '.'), 1) AS float)) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(CAST(PARSENAME(REPLACE(`parking_dest`, ',', '.'), 2) AS float)) ) + sin( radians(CAST(PARSENAME(REPLACE(`parking_dest`, ',', '.'), 1) AS float)) ) * sin(radians(`lat`)) ) ) )"
                 connection.query(sql, [currLng + "," + currLat, userId, userId], function (error, rows) {
                     connection.release();
                     if (error)
@@ -226,28 +228,42 @@ module.exports = {
                     else if (rows.length == 0)
                         noneFoundCB();
                     else {
-                        var dest = rows[1][0].parking_spot.split(',');
+                        var dest = rows[1][0].parking_dest.split(',');
                         var commuteMode = rows[1][0].mode;
-                        if (turf.distance([currLng, currLat], [parseFloat(dest[0]), parseFloat(dest[1])], {
-                                units: 'miles'
-                            }) > constants.reroute.proximity_threshold &&
-                            rows[1][0].remaining_bikes + rows[1][0].remaining_scoots < constants.reroute.last_mile_options_threshold) {
+                        if ((turf.distance([currLng, currLat], [parseFloat(dest[0]), parseFloat(dest[1])], {
+                                    units: 'miles'
+                                }) > constants.reroute.proximity_threshold &&
+                                rows[1][0].remaining_bikes + rows[1][0].remaining_scoots < constants.reroute.last_mile_options_threshold) ||
+                            rows[1][0].remaining_bikes + rows[1][0].remaining_scoots < 1) {
                             // if this happens, we'll re-route the user
-                            console.log('REROUTE')
-                            sql = 'UPDATE `routing_sessions` SET `reroute` = ? WHERE `user_id` = ?; ';
                             // make sure commuteMode == one of 'direct', 'walk', 'bike'
-                            rp('https://routing-dev.trya.space/v1/get_drive_' + commuteMode + '_route?origin_lat=' + currLat + '&origin_lng=' + currLng +'&dest_lat=' + dest[1] + '&dest_lng=' + dest[0])
-                            .then(function (body) {
-                                console.log(body)
-                                // body = JSON.parse(body)
-                                return body
-                            })
-                            .catch(function (err) {
-                                //print('error')
-                                return failCB(err);
-                            })
+                            var options = {
+                                method: 'POST',
+                                uri: 'http://localhost:3000/get_drive_' + commuteMode + '_route',
+                                qs: {
+                                    origin_lat: currLat,
+                                    origin_lng: currLng,
+                                    dest_lat: dest[1],
+                                    dest_lng: dest[0]
+                                },
+                                json: true // Automatically stringifies the body to JSON
+                            };
+                            rp(options)
+                                .then(function (body) {
+                                    var new_dest = body.res_content.routes[0][0].dest.lng.toString() + "," + body.res_content.routes[0][0].dest.lat.toString();
+                                    // console.log(new_dest)
+                                    sql = 'UPDATE `routing_sessions` SET `parking_dest` = ? WHERE `user_id` = ?; ';
+                                    connection.query(sql, [new_dest, userId], function (error, results) {
+                                        //connection.end();
+                                    });
+                                    return
+                                })
+                                .catch(function (err) {
+                                    // console.log('ERROR: ', err)
+                                    return failCB(err);
+                                })
                         }
-                        console.log(rows)
+                        // console.log(rows)
                         successCB(rows);
                     }
                 });
