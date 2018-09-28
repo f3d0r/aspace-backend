@@ -228,6 +228,7 @@ module.exports = {
                     else {
                         var dest = rows[1][0].parking_dest.split(',');
                         var commuteMode = rows[1][0].mode;
+                        // This conditional checks if user has arrived at their destination
                         if (turf.distance([parseFloat(currLng), parseFloat(currLat)], [parseFloat(dest[0]), parseFloat(dest[1])], {
                                 units: 'miles'
                             }) < constants.reroute.proximity_threshold) {
@@ -236,13 +237,14 @@ module.exports = {
                                 if (error)
                                     failCB(error);
                             });
+                        // This conditional checks if too many bike/scooters have been taken from user's parking dest
                         } else if (commuteMode == 'bike' && ((turf.distance([parseFloat(currLng), parseFloat(currLat)], [parseFloat(dest[0]), parseFloat(dest[1])], {
                                         units: 'miles'
                                     }) > constants.reroute.distant_threshold &&
                                     rows[1][0].remaining_bikes + rows[1][0].remaining_scoots < constants.reroute.last_mile_options_threshold) ||
                                 rows[1][0].remaining_bikes + rows[1][0].remaining_scoots < 1)) {
-                            // if this happens, we'll re-route the user
-                            // NOTE: we'll only have to re-route if user is using last-mile transport, i.e. mode=='bike'
+                            // If this happens, we'll re-route the user
+                            // Note: we'll only have to re-route if user is using last-mile transport, i.e. mode=='bike'
                             var options = {
                                 method: 'POST',
                                 // uri: 'http://localhost:3000/get_drive_' + commuteMode + '_route',
