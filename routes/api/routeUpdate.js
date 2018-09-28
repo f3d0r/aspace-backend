@@ -16,15 +16,12 @@ router.get('/ping', function (req, res, next) {
     next(errors.getResponseJSON('ROUTE_UPDATE_ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
-router.get('/route_status/:user_id', function (req, res, next) {
+router.get('/route_status/:session_id', function (req, res, next) {
     errors.checkQueries(req, res, ['curr_lng', 'curr_lat'], function () {
-        // console.log(req.query.curr_lng);
-        // console.log(req.query.curr_lat);
-        // console.log(req.params.user_id);
-        sql.update.locationUpdate(req.query.curr_lng, req.query.curr_lat, req.params.user_id, function (results) {
-            next(errors.getResponseJSON('ROUTE_UPDATE_ENDPOINT_FUNCTION_SUCCESS', "SUCCESS!"));
+        sql.update.locationUpdate(req.query.curr_lng, req.query.curr_lat, req.params.session_id, function (results) {
+            next(errors.getResponseJSON('ROUTE_STATUS_UPDATE_SUCCESS'));
         }, function (error) {
-            next(error);
+            next(error.getResponseJSON('ROUTE_STATUS_UPDATE_FAILED', error));
         });
     });
 });

@@ -66,7 +66,8 @@ module.exports = {
         cluster_distance_threshold: 0.1
     },
     reroute: {
-        proximity_threshold: 0.75,
+        proximity_threshold: 0.05,
+        distant_threshold: 0.75,
         last_mile_options_threshold: 2
     }
 }
