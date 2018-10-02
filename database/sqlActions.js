@@ -217,7 +217,7 @@ module.exports = {
         },
         locationUpdate: function (currLng, currLat, sessionId, successCB, failCB) {
             db.getConnection(function (err, connection) {
-                var sql = 'UPDATE `routing_sessions` SET `last_location` = ? WHERE `session_id` = ?;';
+                var sql = 'UPDATE `routing_sessions` SET `last_location` = ?, `counter` = 0 WHERE `session_id` = ?;';
                 sql += 'SELECT `parking_dest`,`remaining_bikes`,`remaining_scoots`, `mode` FROM `routing_sessions` WHERE `session_id` = ?;';
                 connection.query(sql, [currLng + "," + currLat, sessionId, sessionId], function (error, rows) {
                     connection.release();
@@ -229,6 +229,7 @@ module.exports = {
                         var dest = rows[1][0].parking_dest.split(',');
                         var commuteMode = rows[1][0].mode;
                         // This conditional checks if user has arrived at their destination
+                        // Fedor idea: Instead of turf.distance use time remaining as proximity metric!!
                         if (turf.distance([parseFloat(currLng), parseFloat(currLat)], [parseFloat(dest[0]), parseFloat(dest[1])], {
                                 units: 'miles'
                             }) < constants.reroute.proximity_threshold) {
