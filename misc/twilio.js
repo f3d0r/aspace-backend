@@ -24,24 +24,28 @@ module.exports = {
             })
             .done();
     },
-    lookupPhone: function (phoneNumber, successCallBack, failCallBack) {
-        var authorization = Buffer.from(constants.twilio.TWILIO_ACCOUNT_SID + ":" + constants.twilio.TWILIO_AUTH_TOKEN).toString('base64');
-        var options = {
-            method: 'GET',
-            url: 'https://lookups.twilio.com/v1/PhoneNumbers/' + phoneNumber,
-            headers: {
-                Authorization: 'Basic ' + authorization
-            }
-        };
-
-        request(options, function (error, response, body) {
-            if (error)
-                failCallBack(error);
-            body = JSON.parse(body);
-            if (body.status == 404)
-                failCallBack(body.status);
-            else
-                successCallBack(body.phone_number);
-        });
+    lookupPhone: function (phoneNumber, successCB, failCB) {
+        if (phoneNumber.length == 0) {
+            return failCB();
+        } else {
+            var authorization = Buffer.from(constants.twilio.TWILIO_ACCOUNT_SID + ":" + constants.twilio.TWILIO_AUTH_TOKEN).toString('base64');
+            var options = {
+                method: 'GET',
+                url: 'https://lookups.twilio.com/v1/PhoneNumbers/' + phoneNumber,
+                headers: {
+                    Authorization: 'Basic ' + authorization
+                }
+            };
+    
+            request(options, function (error, response, body) {
+                if (error)
+                    failCB(error);
+                body = JSON.parse(body);
+                if (body.status == 404)
+                failCB(body.status);
+                else
+                successCB(body.phone_number);
+            });
+        }
     }
 }
