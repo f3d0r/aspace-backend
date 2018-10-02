@@ -21,7 +21,7 @@ router.get('/route_status/:session_id', function (req, res, next) {
         sql.update.locationUpdate(req.query.curr_lng, req.query.curr_lat, req.params.session_id, function (results) {
             next(errors.getResponseJSON('ROUTE_STATUS_UPDATE_SUCCESS'));
         }, function (error) {
-            next(error.getResponseJSON('ROUTE_STATUS_UPDATE_FAILED', error));
+            next(errors.getResponseJSON('ROUTE_STATUS_UPDATE_FAILED', error));
         });
     });
 });
