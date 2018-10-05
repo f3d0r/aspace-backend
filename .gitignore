@@ -1,3 +1,4 @@
-.gitignore
-node_modules
+node_modules/
+optic.yml
+*.pbf
 ecosystem.config.json
