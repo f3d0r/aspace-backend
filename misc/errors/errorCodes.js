@@ -29,6 +29,11 @@ module.exports = Object.freeze({
         RESPONSE_CODE: -1,
         INFO: "missing_parameter"
     },
+    ENDPOINT_FUNCTION_SUCCESS: {
+        HTTP_CODE: 200,
+        RESPONSE_CODE: 0,
+        INFO: "endpoint_function_success"
+    },
     NEW_PHONE: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 1,
@@ -114,36 +119,6 @@ module.exports = Object.freeze({
         RESPONSE_CODE: 27,
         INFO: "route_calculation_error"
     },
-    MAIN_ENDPOINT_FUNCTION_SUCCESS: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: 30,
-        INFO: "main_endpoint_function_success"
-    },
-    ROUTING_ENDPOINT_FUNCTION_SUCCESS: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: 31,
-        INFO: "routing_endpoint_function_success"
-    },
-    ADMIN_ENDPOINT_FUNCTION_SUCCESS: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: 32,
-        INFO: "admin_endpoint_function_success"
-    },
-    AUTH_ENDPOINT_FUNCTION_SUCCESS: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: 33,
-        INFO: "auth_endpoint_function_success"
-    },
-    PARKING_ENDPOINT_FUNCTION_SUCCESS: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: 34,
-        INFO: "parking_endpoint_function_success"
-    },
-    USER_ENDPOINT_FUNCTION_SUCCESS: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: 35,
-        INFO: "user_endpoint_function_success"
-    },
     PROFILE_PIC_EXISTS: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 36,
@@ -169,11 +144,6 @@ module.exports = Object.freeze({
         RESPONSE_CODE: 40,
         INFO: "valid_access_code"
     },
-    BIKES_ENDPOINT_FUNCTION_SUCCESS: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: 41,
-        INFO: "bikes_endpoint_function_success"
-    },
     NO_PARKING_FOUND: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 42,
@@ -193,11 +163,6 @@ module.exports = Object.freeze({
         HTTP_CODE: 500,
         RESPONSE_CODE: 45,
         INFO: "routing_not_available"
-    },
-    ROUTE_UPDATE_ENDPOINT_FUNCTION_SUCCESS: {
-        HTTP_CODE: 200,
-        RESPONSE_CODE: 46,
-        INFO: "route_update_endpoint_function_success"
     },
     ROUTE_STATUS_UPDATE_SUCCESS: {
         HTTP_CODE: 200,

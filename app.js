@@ -49,11 +49,11 @@ cluster(function (worker) {
 
     // MAIN ENDPOINTS
     app.get('/', function (req, res, next) {
-        next(errors.getResponseJSON('MAIN_ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)"));
+        next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)"));
     });
 
     app.get('/ping', function (req, res, next) {
-        next(errors.getResponseJSON('MAIN_ENDPOINT_FUNCTION_SUCCESS', "pong"));
+        next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
     });
 
     app.use(require('./routes'));

@@ -9,11 +9,11 @@ var geojson = require('geojson');
 geojson.defaults = constants.geojson.settings;
 
 router.get('/', function (req, res, next) {
-    next(errors.getResponseJSON('ROUTE_UPDATE_ENDPOINT_FUNCTION_SUCCESS', "This is the parking sub-API for aspace! :)"));
+    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "This is the parking sub-API for aspace! :)"));
 });
 
 router.get('/ping', function (req, res, next) {
-    next(errors.getResponseJSON('ROUTE_UPDATE_ENDPOINT_FUNCTION_SUCCESS', "pong"));
+    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
 router.get('/route_status/:session_id', function (req, res, next) {

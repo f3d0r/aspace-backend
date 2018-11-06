@@ -6,7 +6,7 @@ var uniqueString = require('unique-string');
 
 router.get('/', function (req, res, next) {
     basicAuth.authenticate(req, function () {
-        next(errors.getResponseJSON('ADMIN_ENDPOINT_FUNCTION_SUCCESS', "Welcome to the admin sub-API for aspace! :)"));
+        next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the admin sub-API for aspace! :)"));
     }, function (error) {
         next('INVALID_BASIC_AUTH');
     });
@@ -14,7 +14,7 @@ router.get('/', function (req, res, next) {
 
 router.get('/ping', function (req, res, next) {
     basicAuth.authenticate(req, function () {
-        next(errors.getResponseJSON('ADMIN_ENDPOINT_FUNCTION_SUCCESS', "pong"));
+        next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
     }, function (error) {
         next('INVALID_BASIC_AUTH');
     });

@@ -9,11 +9,11 @@ var geojson = require('geojson');
 geojson.defaults = constants.geojson.settings;
 
 router.get('/', function (req, res, next) {
-    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', "This is the parking sub-API for aspace! :)"));
+    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "This is the parking sub-API for aspace! :)"));
 });
 
 router.get('/ping', function (req, res, next) {
-    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', "pong"));
+    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
 router.post('/update_status', function (req, res, next) {
@@ -42,9 +42,9 @@ router.get('/get_status/:outputType', function (req, res, next) {
     errors.checkQueries(req, res, ['block_id', 'spot_id'], function () {
         sql.select.regularSelect('parking', null, ['block_id', 'spot_id'], ['=', '='], [req.query.block_id, req.query.spot_id], null, function (results) {
             if (req.params.outputType == "json") {
-                next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', results));
+                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', results));
             } else if (req.params.outputType == "geojson") {
-                next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
+                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
             } else {
                 next(errors.getResponseJSON('INVALID_OR_MISSING_OUTPUT_TYPE'))
             }
@@ -59,9 +59,9 @@ router.get('/get_status/:outputType', function (req, res, next) {
         } else {
             sql.select.regularSelect('parking', null, [foundQueries[0]], ['='], [req.query[foundQueries[0]]], null, function (results) {
                 if (req.params.outputType == "json") {
-                    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', results));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', results));
                 } else if (req.params.outputType == "geojson") {
-                    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
                 } else {
                     next(errors.getResponseJSON('INVALID_OR_MISSING_OUTPUT_TYPE'))
                 }
@@ -92,14 +92,14 @@ router.post('/get_status_bbox/:outputType', function (req, res, next) {
     } else {
         sql.select.regularSelect('parking', null, ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
                 if (req.params.outputType == "json") {
-                    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', results));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', results));
                 } else if (req.params.outputType == "geojson") {
-                    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
                 } else {
                     next(errors.getResponseJSON('INVALID_OR_MISSING_OUTPUT_TYPE'))
                 }
             }, function () {
-                next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', []));
+                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', []));
             },
             function (error) {
                 next(error);
@@ -119,14 +119,14 @@ router.post('/get_status_radius/:outputType', function (req, res, next) {
             var miles = req.query.radius_feet / 5280;
             sql.select.selectRadius('parking', req.body.lat, req.body.lng, miles, function (results) {
                 if (req.params.outputType == "json") {
-                    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', results));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', results));
                 } else if (req.params.outputType == "geojson") {
-                    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
                 } else {
                     next(errors.getResponseJSON('INVALID_OR_MISSING_OUTPUT_TYPE'))
                 }
             }, function () {
-                next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', []));
+                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', []));
             }, function (error) {
                 next(error);
             });
@@ -139,10 +139,10 @@ router.get('/block_id_exists', function (req, res, next) {
         var jsonReturn = {};
         sql.select.regularSelect('parking', null, ['block_id'], ['='], [req.query.block_id], 1, function () {
             jsonReturn['block_id_exists'] = "T";
-            next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', jsonReturn));
+            next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', jsonReturn));
         }, function () {
             jsonReturn['block_id_exists'] = "F";
-            next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', jsonReturn));
+            next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', jsonReturn));
         }, function (error) {
             next(error);
         })
@@ -163,14 +163,14 @@ router.post('/get_min_size_parking/:outputType', function (req, res, next) {
             var miles = req.query.radius_feet / 5280;
             sql.select.selectRadius('parking', req.body.lat, req.body.lng, miles, function (results) {
                 if (req.params.outputType == "json") {
-                    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', parkingCalc.searchApplicableParking(results, req.query.spot_size_feet)));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', parkingCalc.searchApplicableParking(results, req.query.spot_size_feet)));
                 } else if (req.params.outputType == "geojson") {
-                    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', geojson.parse(parkingCalc.searchApplicableParking(results, req.query.spot_size_feet))));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', geojson.parse(parkingCalc.searchApplicableParking(results, req.query.spot_size_feet))));
                 } else {
                     next(errors.getResponseJSON('INVALID_OR_MISSING_OUTPUT_TYPE'))
                 }
             }, function () {
-                next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', []));
+                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', []));
             }, function (error) {
                 next(error);
             });
@@ -185,7 +185,7 @@ router.post('/upload_spots', function (req, res, next) {
         } else {
             sql.select.databasePermissionCheck('database_authority', req.query.auth_key, 'upload_spots', function () {
                 sql.insert.addSpots(req.body, function (results) {
-                    next(errors.getResponseJSON('PARKING_ENDPOINT_FUNCTION_SUCCESS', "SUCCESS!"));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "SUCCESS!"));
                 }, function (error) {
                     next(error);
                 });

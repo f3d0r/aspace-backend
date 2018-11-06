@@ -22,11 +22,11 @@ var upload = multer({
 });
 
 router.get('/', function (req, res, next) {
-    next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS', "This is the user info sub-API for aspace! :)"));
+    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "This is the user info sub-API for aspace! :)"));
 });
 
 router.get('/ping', function (req, res, next) {
-    next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS', "pong"));
+    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
 router.get('/check_auth', function (req, res, next) {
@@ -43,9 +43,9 @@ router.get('/get_vehicles', function (req, res, next) {
     errors.checkQueries(req, res, ['access_code', 'device_id'], function () {
         userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
             sql.select.regularSelect('user_vehicles', ['vehicle_id', 'vehicle_vin', 'vehicle_year', 'vehicle_make', 'vehicle_model', 'vehicle_color', 'vehicle_length_feet'], ['user_id'], ['='], [user[0].user_id], null, function (userVehicles) {
-                next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS', userVehicles));
+                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', userVehicles));
             }, function () {
-                next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS', {}));
+                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', {}));
             }, function (err) {
                 next(err);
             });
@@ -62,7 +62,7 @@ router.post('/remove_vehicle', function (req, res, next) {
                 if (rows.affectedRows == 0) {
                     next(errors.getResponseJSON('INVALID_VEHICLE_ID'));
                 } else {
-                    next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS'));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS'));
                 }
             }, function (err) {
                 next(err);
@@ -89,7 +89,7 @@ router.post('/add_vehicle', function (req, res, next) {
             if (typeof req.query.vehicle_color != 'undefined' && req.query.vehicle_color !== null && req.query.vehicle_color != '')
                 newVehicle['vehicle_color'] = req.query.vehicle_color;
             sql.insert.addObject('user_vehicles', newVehicle, function () {
-                next(errors.getResponseJSON('USER_ENDPOINT_FUNCTION_SUCCESS', newVehicle['vehicle_id']));
+                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', newVehicle['vehicle_id']));
             }, function (err) {
                 next(err);
             });

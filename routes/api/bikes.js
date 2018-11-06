@@ -8,11 +8,11 @@ var geojson = require('geojson');
 geojson.defaults = constants.geojson.settings;
 
 router.get('/', function (req, res, next) {
-    next(errors.getResponseJSON('BIKES_ENDPOINT_FUNCTION_SUCCESS', "Welcome to the bikeshare sub-API for aspace! :)"));
+    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the bikeshare sub-API for aspace! :)"));
 });
 
 router.get('/ping', function (req, res, next) {
-        next(errors.getResponseJSON('BIKES_ENDPOINT_FUNCTION_SUCCESS', "pong"));
+        next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
 });
 
 router.post('/get_bikes_bbox/:outputType', function (req, res, next) {
@@ -33,14 +33,14 @@ router.post('/get_bikes_bbox/:outputType', function (req, res, next) {
     } else {
         sql.select.regularSelect('bike_locs', null, ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
                 if (req.params.outputType == "json") {
-                    next(errors.getResponseJSON('BIKES_ENDPOINT_FUNCTION_SUCCESS', results));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', results));
                 } else if (req.params.outputType == "geojson") {
-                    next(errors.getResponseJSON('BIKES_ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
                 } else {
                     next(errors.getResponseJSON('INVALID_OR_MISSING_OUTPUT_TYPE'))
                 }
             }, function () {
-                next(errors.getResponseJSON('BIKES_ENDPOINT_FUNCTION_SUCCESS', []));
+                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', []));
             },
             function (error) {
                 next(error);
@@ -60,14 +60,14 @@ router.post('/get_bikes_radius/:outputType', function (req, res, next) {
             var miles = req.query.radius_feet / 5280;
             sql.select.selectRadius('bike_locs', req.body.lat, req.body.lng, miles, function (results) {
                 if (req.params.outputType == "json") {
-                    next(errors.getResponseJSON('BIKES_ENDPOINT_FUNCTION_SUCCESS', results));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', results));
                 } else if (req.params.outputType == "geojson") {
-                    next(errors.getResponseJSON('BIKES_ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
+                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
                 } else {
                     next(errors.getResponseJSON('INVALID_OR_MISSING_OUTPUT_TYPE'))
                 }
             }, function () {
-                next(errors.getResponseJSON('BIKES_ENDPOINT_FUNCTION_SUCCESS', []));
+                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', []));
             }, function (error) {
                 next(error);
             });
