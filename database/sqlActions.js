@@ -118,11 +118,9 @@ module.exports = {
                 connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
                     connection.release();
                     if (error) {
-                        // console.log(error)
                         failCB(error);
                     }
                     if (rows.length == 0) {
-                        // console.log('None found.')
                         noneFoundCB();
                     } else
                         successCB(rows)
@@ -238,7 +236,7 @@ module.exports = {
                                 if (error)
                                     failCB(error);
                             });
-                        // This conditional checks if too many bike/scooters have been taken from user's parking dest
+                            // This conditional checks if too many bike/scooters have been taken from user's parking dest
                         } else if (commuteMode == 'bike' && ((turf.distance([parseFloat(currLng), parseFloat(currLat)], [parseFloat(dest[0]), parseFloat(dest[1])], {
                                         units: 'miles'
                                     }) > constants.reroute.distant_threshold &&
