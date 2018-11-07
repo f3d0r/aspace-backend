@@ -1,4 +1,14 @@
 module.exports = Object.freeze({
+    GENERAL_SERVER_ERROR: {
+        HTTP_CODE: 500,
+        RESPONSE_CODE: -20,
+        INFO: "general_server_error"
+    },
+    RESPONSE_TIMEOUT: {
+        HTTP_CODE: 408,
+        RESPONSE_CODE: -10,
+        INFO: "response_timeout"
+    },
     INVALID_OR_MISSING_OUTPUT_TYPE: {
         HTTP_CODE: 422,
         RESPONSE_CODE: -7,
@@ -24,15 +34,15 @@ module.exports = Object.freeze({
         RESPONSE_CODE: -2,
         INFO: "invalid_access_code"
     },
-    MISSING_PARAMETER: {
-        HTTP_CODE: 422,
-        RESPONSE_CODE: -1,
-        INFO: "missing_parameter"
-    },
     ENDPOINT_FUNCTION_SUCCESS: {
         HTTP_CODE: 200,
         RESPONSE_CODE: 0,
         INFO: "endpoint_function_success"
+    },
+    MISSING_PARAMETER: {
+        HTTP_CODE: 422,
+        RESPONSE_CODE: -1,
+        INFO: "missing_parameter"
     },
     NEW_PHONE: {
         HTTP_CODE: 200,
