@@ -6,5 +6,6 @@ router.use('/parking', require('./api/parking'));
 router.use('/user', require('./api/user'));
 router.use('/bikes', require('./api/bikes'));
 router.use('/route_update', require('./api/routeUpdate'));
+router.use('/regions', require('./api/regions'));
 
 module.exports = router;
