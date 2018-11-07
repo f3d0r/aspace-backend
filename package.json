@@ -1,67 +1,74 @@
 {
-  "name": "aspace_backend",
-  "version": "1.0.0",
-  "description": "aspace, Inc. - Backend (node.js/Express.js stack), available at https://api.trya.space.",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js",
-    "dev": "PORT=3001 node app.js",
-    "prod": "PORT=3000 node app.js",
-    "deploy": "pm2 start app.js --watch",
-    "test": "debug"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@gitlab.com/aspace/backend.git"
-  },
-  "author": "aspace, Inc.",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://gitlab.com/aspace/backend/issues"
-  },
-  "homepage": "https://gitlab.com/aspace/backend#README",
-  "dependencies": {
-    "@slack/client": "^4.8.0",
-    "@turf/turf": "^5.1.6",
-    "app-root-path": "^2.1.0",
-    "aws-sdk": "^2.349.0",
-    "bcryptjs": "^2.4.3",
-    "connect-timeout": "^1.9.0",
-    "cors": "^2.8.5",
-    "express": "^4.16.4",
-    "express-cluster": "0.0.5",
-    "express-toobusy": "0.0.3",
-    "geojson": "^0.5.0",
-    "helmet": "^3.14.0",
-    "module-alias": "^2.1.0",
-    "moment": "^2.22.2",
-    "multer": "^1.4.1",
-    "mysql": "github:mysqljs/mysql",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.2",
-    "sharp": "^0.21.0",
-    "sqreen": "^1.27.0",
-    "twilio": "^3.23.2",
-    "unique-string": "^1.0.0"
-  },
-  "_moduleAliases": {
-    "@root": ".",
-    "@auth-bcrypt": "misc/auth/bcrypt",
-    "@auth-basic": "misc/auth/basic",
-    "@auth-user": "misc/auth/user",
-    "@errors": "misc/errors/errorHandler",
-    "@error-codes": "misc/errors/errorCodes",
-    "@misc": "misc",
-    "@config": "config",
-    "@sql": "database/sqlActions",
-    "@connection": "app",
-    "@twilio": "misc/twilio",
-    "@timestamp": "misc/timestamp",
-    "@parking-calc": "misc/parkingCalc",
-    "@bcrypt": "misc/auth/bcrypt",
-    "@upload": "app"
-  },
-  "_moduleDirectories": [
-    "node_modules"
-  ]
+    "name": "aspace_backend",
+    "version": "1.0.0",
+    "description": "aspace, Inc. - Backend (node.js/Express.js stack), available at https://api.trya.space.",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "dev": "PORT=3001 node app.js",
+        "prod": "PORT=3000 node app.js",
+        "deploy": "pm2 start app.js --watch"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@gitlab.com/aspace/backend.git"
+    },
+    "author": "aspace, Inc.",
+    "license": "Apache-2.0",
+    "bugs": {
+        "url": "https://gitlab.com/aspace/backend/issues"
+    },
+    "homepage": "https://gitlab.com/aspace/backend#README",
+    "dependencies": {
+        "@slack/client": "^4.8.0",
+        "@turf/turf": "^5.1.6",
+        "app-root-path": "^2.1.0",
+        "aws-sdk": "^2.350.0",
+        "bcryptjs": "^2.4.3",
+        "body-parser": "^1.18.3",
+        "connect-timeout": "^1.9.0",
+        "cors": "^2.8.5",
+        "express": "^4.16.4",
+        "express-cluster": "0.0.5",
+        "express-toobusy": "0.0.3",
+        "geojson": "^0.5.0",
+        "helmet": "^3.14.0",
+        "ip": "^1.1.5",
+        "logdna": "^2.0.4",
+        "module-alias": "^2.1.0",
+        "moment": "^2.22.2",
+        "morgan": "^1.9.1",
+        "multer": "^1.4.1",
+        "mysql": "^2.16.0",
+        "os": "^0.1.1",
+        "request": "^2.88.0",
+        "request-promise": "^4.2.2",
+        "response-time": "^2.3.2",
+        "sharp": "^0.21.0",
+        "sqreen": "^1.27.0",
+        "timber": "^3.1.3",
+        "twilio": "^3.23.2",
+        "unique-string": "^1.0.0",
+        "winston": "^3.1.0"
+    },
+    "_moduleAliases": {
+        "@root": ".",
+        "@auth-bcrypt": "misc/auth/bcrypt",
+        "@auth-basic": "misc/auth/basic",
+        "@auth-user": "misc/auth/user",
+        "@errors": "misc/errors/errorHandler",
+        "@error-codes": "misc/errors/errorCodes",
+        "@misc": "misc",
+        "@config": "config",
+        "@sql": "database/sqlActions",
+        "@connection": "app",
+        "@twilio": "misc/twilio",
+        "@timestamp": "misc/timestamp",
+        "@parking-calc": "misc/parkingCalc",
+        "@bcrypt": "misc/auth/bcrypt",
+        "@upload": "app"
+    },
+    "_moduleDirectories": [
+        "node_modules"
+    ]
 }
