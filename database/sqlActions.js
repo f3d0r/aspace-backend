@@ -267,8 +267,8 @@ module.exports = {
                                     });
                                     return
                                 })
-                                .catch(function (err) {
-                                    return failCB(err);
+                                .catch(function (error) {
+                                    return failCB(error);
                                 })
                         }
                         successCB(rows);

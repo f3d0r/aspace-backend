@@ -17,8 +17,8 @@ async function initRegions() {
             var reqs = [];
             for (var i = 0; i < items.length; i++) {
                 reqs.push(new Promise(function (resolve, reject) {
-                    fs.readFile(path.join(appRoot.path, 'config/regions', items[i]), 'utf-8', function (err, data) {
-                        if (err) {
+                    fs.readFile(path.join(appRoot.path, 'config/regions', items[i]), 'utf-8', function (error, data) {
+                        if (error) {
                             reject(data);
                         } else {
                             resolve(JSON.parse(data));
@@ -29,8 +29,8 @@ async function initRegions() {
             Promise.all(reqs)
                 .then(function (responses) {
                     resolveAll(responses);
-                }).catch(function (err) {
-                    rejectAll(err);
+                }).catch(function (error) {
+                    rejectAll(error);
                 })
         });
     });
@@ -45,7 +45,8 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/ping', function (req, res, next) {
-    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
+    var response=  errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong");
+    res.status(response.code).send(response.res);
 });
 
 router.get('/get_by_loc', function (req, res, next) {
@@ -56,6 +57,7 @@ router.get('/get_by_loc', function (req, res, next) {
                 found = true;
             }
         });
+        res.status(200).send("OK");
         // if (!found) {
         //     res.
         // }

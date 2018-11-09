@@ -8,42 +8,59 @@ var geojson = require('geojson');
 geojson.defaults = constants.geojson.settings;
 
 router.get('/', function (req, res, next) {
-    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the bikeshare sub-API for aspace! :)"));
+    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the bikeshare sub-API for aspace! :)");
+    res.status(response.code).send(response.res);
 });
 
 router.get('/ping', function (req, res, next) {
-        next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
+    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong");
+    res.status(response.code).send(response.res);
 });
 
 router.post('/get_bikes_bbox/:outputType', function (req, res, next) {
     if (typeof req.body == 'undefined' || req.body === null) {
-        next(errors.getResponseJSON('MISSING_BODY'));
+        var response = errors.getResponseJSON('MISSING_BODY');
+        res.status(response.code).send(response.res);
     } else if (typeof req.body.sw == 'undefined' || req.body.sw === null) {
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.sw"));
+        var response = errors.getResponseJSON('MISSING_BODY', "Missing body.sw");
+        res.status(response.code).send(response.res);
     } else if (typeof req.body.ne == 'undefined' || req.body.ne === null) {
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.ne"));
+        var response = errors.getResponseJSON('MISSING_BODY', "Missing body.ne");
+        res.status(response.code).send(response.res);
     } else if (typeof req.body.sw.lat == 'undefined' || req.body.sw.lat === null) {
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.sw.lat"));
+        var response = errors.getResponseJSON('MISSING_BODY', "Missing body.sw.lat");
+        res.status(response.code).send(response.res);
     } else if (typeof req.body.sw.lng == 'undefined' || req.body.sw.lng === null) {
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.sw.lng"));
+        var response = errors.getResponseJSON('MISSING_BODY', "Missing body.sw.lng");
+        res.status(response.code).send(response.res);
     } else if (typeof req.body.ne.lat == 'undefined' || req.body.ne.lat === null) {
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.ne.lat"));
+        var response = errors.getResponseJSON('MISSING_BODY', "Missing body.ne.lat");
+        res.status(response.code).send(response.res);
     } else if (typeof req.body.ne.lng == 'undefined' || req.body.ne.lng === null) {
-        next(errors.getResponseJSON('MISSING_BODY', "Missing body.ne.lng"));
+        var response = errors.getResponseJSON('MISSING_BODY', "Missing body.ne.lng");
+        res.status(response.code).send(response.res);
     } else {
         sql.select.regularSelect('bike_locs', null, ['lat', 'lng', 'lat', 'lng'], ['>=', '>=', '<=', '<='], [req.body.sw.lat, req.body.sw.lng, req.body.ne.lat, req.body.ne.lng], null, function (results) {
                 if (req.params.outputType == "json") {
-                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', results));
+                    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', results);
+                    res.status(response.code).send(response.res);
                 } else if (req.params.outputType == "geojson") {
-                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
+                    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results));
+                    res.status(response.code).send(response.res);
                 } else {
-                    next(errors.getResponseJSON('INVALID_OR_MISSING_OUTPUT_TYPE'))
+                    var response = errors.getResponseJSON('INVALID_OR_MISSING_OUTPUT_TYPE')
+                    res.status(response.code).send(response.res);
                 }
             }, function () {
-                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', []));
+                var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', []);
+                res.status(response.code).send(response.res);
             },
             function (error) {
-                next(error);
+                var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                next({
+                    response,
+                    error
+                });
             });
     }
 });
@@ -51,25 +68,36 @@ router.post('/get_bikes_bbox/:outputType', function (req, res, next) {
 router.post('/get_bikes_radius/:outputType', function (req, res, next) {
     errors.checkQueries(req, res, ['radius_feet'], function () {
         if (JSON.stringify(req.body) == "{}" || typeof req.body == 'undefined' || req.body === null) {
-            next(errors.getResponseJSON('MISSING_BODY', "lat/lng body required"));
+            var response = errors.getResponseJSON('MISSING_BODY', "lat/lng body required");
+            res.status(response.code).send(response.res);
         } else if (typeof req.body.lat == 'undefined' || req.body.lat === null) {
-            next(errors.getResponseJSON('MISSING_BODY', "Missing body.lat"));
+            var response = errors.getResponseJSON('MISSING_BODY', "Missing body.lat");
+            res.status(response.code).send(response.res);
         } else if (typeof req.body.lng == 'undefined' || req.body.lng === null) {
-            next(errors.getResponseJSON('MISSING_BODY', "Missing body.lng"));
+            var response = errors.getResponseJSON('MISSING_BODY', "Missing body.lng");
+            res.status(response.code).send(response.res);
         } else {
             var miles = req.query.radius_feet / 5280;
             sql.select.selectRadius('bike_locs', req.body.lat, req.body.lng, miles, function (results) {
                 if (req.params.outputType == "json") {
-                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', results));
+                    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', results);
+                    res.status(response.code).send(response.res);
                 } else if (req.params.outputType == "geojson") {
-                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results)));
+                    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', geojson.parse(results));
+                    res.status(response.code).send(response.res);
                 } else {
-                    next(errors.getResponseJSON('INVALID_OR_MISSING_OUTPUT_TYPE'))
+                    var response = errors.getResponseJSON('INVALID_OR_MISSING_OUTPUT_TYPE');
+                    res.status(response.code).send(response.res);
                 }
             }, function () {
-                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', []));
+                var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', []);
+                res.status(response.code).send(response.res);
             }, function (error) {
-                next(error);
+                var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                next({
+                    response,
+                    error
+                });
             });
         }
     });

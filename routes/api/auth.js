@@ -9,11 +9,13 @@ var uniqueString = require('unique-string');
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 
 router.get('/', function (req, res, next) {
-    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "This is the user authentication sub-API for aspace! :)"));
+    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "This is the user authentication sub-API for aspace! :)");
+    res.status(response.code).send(response.res);
 });
 
 router.get('/ping', function (req, res, next) {
-    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
+    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong");
+    res.status(response.code).send(response.res);
 });
 
 router.get('/verification_twiml', function (req, res, next) {
@@ -31,7 +33,11 @@ router.get('/verification_twiml', function (req, res, next) {
             res.set('Content-Type', 'text/xml');
             res.status(200).send(response.toString());
         } else {
-            next(errors.getResponseJSON('INVALID_AUTH_KEY'));
+            var response = errors.getResponseJSON('INVALID_AUTH_KEY');
+            next({
+                response,
+                error
+            });
         }
     });
 });
@@ -54,9 +60,14 @@ router.post("/phone_login", function (req, res, next) {
                     } else {
                         twilio.sendVerifyText(formattedPhoneNumber, pin);
                     }
-                    next(errors.getResponseJSON('RETURNING_PHONE'));
+                    var response = errors.getResponseJSON('RETURNING_PHONE');
+                    res.status(response.code).send(response.res);
                 }, function (error) {
-                    next(error);
+                    var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                    next({
+                        response,
+                        error
+                    });
                 });
             }, function () {
                 verifyUser['user_id'] = uniqueString();
@@ -66,15 +77,25 @@ router.post("/phone_login", function (req, res, next) {
                     } else {
                         twilio.sendVerifyText(formattedPhoneNumber, pin);
                     }
-                    next(errors.getResponseJSON('NEW_PHONE'));
+                    var response = errors.getResponseJSON('NEW_PHONE');
+                    res.status(response.code).send(response.res)
                 }, function (error) {
-                    next(error);
+                    var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                    next({
+                        response,
+                        error
+                    });
                 });
             }, function (error) {
-                next(error);
+                var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                next({
+                    response,
+                    error
+                });
             });
         }, function () {
-            next(errors.getResponseJSON('INVALID_PHONE'));
+            var response = errors.getResponseJSON('INVALID_PHONE');
+            res.status(response.code).send(response.res);
         });
     });
 });
@@ -86,9 +107,14 @@ router.post("/check_pin", function (req, res, next) {
                     function (rows) {
                         if (timestamp.timePassed(moment.utc(rows[0].expiry_date))) {
                             sql.remove.regularDelete('user_verify_codes', ['phone_number', 'device_id'], [formattedPhoneNumber, req.query.device_id], function () {
-                                next(errors.getResponseJSON('PIN_EXPIRED'));
+                                var response = errors.getResponseJSON('PIN_EXPIRED');
+                                res.status(response.code).send(response.res);
                             }, function (error) {
-                                next(error);
+                                var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                                next({
+                                    response,
+                                    error
+                                });
                             });
                         } else {
                             var newAccessCode = uniqueString();
@@ -103,36 +129,54 @@ router.post("/check_pin", function (req, res, next) {
                                 jsonReturn = {};
                                 jsonReturn['access_code'] = newAccessCode
                                 jsonReturn['expiry'] = expiry_date;
-                                next(errors.getResponseJSON('NEW_ACCESS_CODE', jsonReturn));
+                                var response = errors.getResponseJSON('NEW_ACCESS_CODE', jsonReturn);
+                                res.status(response.code).send(response.res);
                                 sql.remove.regularDelete('user_verify_codes', ['phone_number', 'device_id'], [formattedPhoneNumber, req.query.device_id], function () {
                                     sql.select.regularSelect('users', null, ['user_id'], ['='], [rows[0].user_id], 1, function () {}, function () {
                                         newUserJSON = {};
                                         newUserJSON['user_id'] = accessCode['user_id'];
                                         newUserJSON['phone_number'] = formattedPhoneNumber;
                                         sql.insert.addObject('users', newUserJSON, function () {}, function (error) {
-                                            next(error);
                                         });
                                     }, function (error) {
-                                        next(error);
+                                        var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                                        next({
+                                            response,
+                                            error
+                                        });
                                     })
                                 }, function (error) {
-                                    next(error);
+                                    var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                                    next({
+                                        response,
+                                        error
+                                    });
                                 });
                             }, function (error) {
-                                next(error);
+                                var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                                next({
+                                    response,
+                                    error
+                                });
                             });
                         }
                     },
                     function () {
-                        next(errors.getResponseJSON('INVALID_PIN'));
+                        var response = errors.getResponseJSON('INVALID_PIN');
+                        res.status(response.code).send(response.res)
                     },
                     function (error) {
-                        next(error);
+                        var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                        next({
+                            response,
+                            error
+                        });
                     });
             },
             function () {
-                next(errors.getResponseJSON('INVALID_PHONE'));
-            });;
+                var response = errors.getResponseJSON('INVALID_PHONE');
+                res.status(response.code).send(response.res);
+            });
     });
 });
 

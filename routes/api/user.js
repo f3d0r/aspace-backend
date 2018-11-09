@@ -22,19 +22,23 @@ var upload = multer({
 });
 
 router.get('/', function (req, res, next) {
-    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "This is the user info sub-API for aspace! :)"));
+    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "This is the user info sub-API for aspace! :)");
+    res.status(response.code).send(response.res);
 });
 
 router.get('/ping', function (req, res, next) {
-    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
+    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong");
+    res.status(response.code).send(response.res);
 });
 
 router.get('/check_auth', function (req, res, next) {
     errors.checkQueries(req, res, ['access_code', 'device_id'], function () {
         userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
-            next(errors.getResponseJSON('VALID_ACCESS_CODE'));
+            var response = errors.getResponseJSON('VALID_ACCESS_CODE');
+            res.status(response.code).send(response.res);
         }, function () {
-            next(errors.getResponseJSON('INVALID_ACCESS_CODE'));
+            var response = errors.getResponseJSON('INVALID_ACCESS_CODE');
+            res.status(response.code).send(response.res);
         });
     });
 });
@@ -43,14 +47,21 @@ router.get('/get_vehicles', function (req, res, next) {
     errors.checkQueries(req, res, ['access_code', 'device_id'], function () {
         userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
             sql.select.regularSelect('user_vehicles', ['vehicle_id', 'vehicle_vin', 'vehicle_year', 'vehicle_make', 'vehicle_model', 'vehicle_color', 'vehicle_length_feet'], ['user_id'], ['='], [user[0].user_id], null, function (userVehicles) {
-                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', userVehicles));
+                var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', userVehicles);
+                res.status(response.code).send(response.res);
             }, function () {
-                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', {}));
-            }, function (err) {
-                next(err);
+                var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', {});
+                res.status(response.code).send(response.res);
+            }, function (error) {
+                var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                next({
+                    response,
+                    error
+                });
             });
         }, function () {
-            next(errors.getResponseJSON('INVALID_ACCESS_CODE'));
+            var response = errors.getResponseJSON('INVALID_ACCESS_CODE');
+            res.status(response.code).send(response.res);
         });
     });
 });
@@ -60,15 +71,22 @@ router.post('/remove_vehicle', function (req, res, next) {
         userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
             sql.remove.regularDelete('user_vehicles', ['user_id', 'vehicle_id'], [user[0].user_id, req.query.vehicle_id], function (rows) {
                 if (rows.affectedRows == 0) {
-                    next(errors.getResponseJSON('INVALID_VEHICLE_ID'));
+                    var response = errors.getResponseJSON('INVALID_VEHICLE_ID');
+                    res.status(response.code).send(response.res);
                 } else {
-                    next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS'));
+                    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS');
+                    res.status(response.code).send(response.res);
                 }
-            }, function (err) {
-                next(err);
+            }, function (error) {
+                var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                next({
+                    response,
+                    error
+                });
             });
         }, function () {
-            next(errors.getResponseJSON('INVALID_ACCESS_CODE'));
+            var response = errors.getResponseJSON('INVALID_ACCESS_CODE');
+            res.status(response.code).send(response.res);
         });
     });
 });
@@ -89,12 +107,18 @@ router.post('/add_vehicle', function (req, res, next) {
             if (typeof req.query.vehicle_color != 'undefined' && req.query.vehicle_color !== null && req.query.vehicle_color != '')
                 newVehicle['vehicle_color'] = req.query.vehicle_color;
             sql.insert.addObject('user_vehicles', newVehicle, function () {
-                next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', newVehicle['vehicle_id']));
-            }, function (err) {
-                next(err);
+                var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', newVehicle['vehicle_id']);
+                res.status(response.code).send(response.res);
+            }, function (error) {
+                var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                next({
+                    response,
+                    error
+                });
             });
         }, function () {
-            next(errors.getResponseJSON('INVALID_ACCESS_CODE'));
+            var response = errors.getResponseJSON('INVALID_ACCESS_CODE');
+            res.status(response.code).send(response.res);
         });
     });
 });
@@ -103,9 +127,10 @@ router.post('/update_profile_pic', upload.single('photo'), function (req, res, n
     errors.checkQueries(req, res, ['access_code', 'device_id'], function () {
         sql.update.updateProfilePic(req.query.access_code, req.query.device_id, function (profilePicID) {
             if (typeof req.file == 'undefined') {
-                next(errors.getResponseJSON('MULTI_PART_BODY_MISSING', 'multi-part body with key \'photo\' missing.'));
+                var response = errors.getResponseJSON('MULTI_PART_BODY_MISSING', 'multi-part body with key \'photo\' missing.');
+                res.status(response.code).send(response.res);
             } else {
-                sharp(req.file.path).resize(200, 200).toBuffer(function (err, buf) {
+                sharp(req.file.path).resize(200, 200).toBuffer(function (error, buf) {
                     var keyName = "***REMOVED***" + profilePicID + ".png";
                     var params = {
                         Bucket: constants.digitalocean.BUCKET_NAME,
@@ -113,24 +138,45 @@ router.post('/update_profile_pic', upload.single('photo'), function (req, res, n
                         ACL: 'public-read',
                         Body: buf,
                     };
-                    constants.digitalocean.S3.upload(params, function (err, data) {
-                        if (err)
-                            next(err);
-                        else
-                            fs.unlink(req.file.path, function (err) {
-                                if (err)
-                                    next(err);
-                                else
-                                    next(errors.getResponseJSON('PROFILE_PIC_UPDATED', data.Location));
+                    constants.digitalocean.S3.upload(params, function (error, data) {
+                        if (error) {
+                            var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                            next({
+                                response,
+                                error
                             });
+                        } else {
+                            fs.unlink(req.file.path, function (error) {
+                                if (error) {
+                                    var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                                    next({
+                                        response,
+                                        error
+                                    });
+                                } else {
+                                    var response = errors.getResponseJSON('PROFILE_PIC_UPDATED', data.Location);
+                                    res.status(response.code).send(response.res);
+                                }
+                            });
+                        }
                     });
                 });
             }
         }, function (error) {
             fs.unlink(req.file.path, function (err) {
-                if (err)
-                    next(err);
-                next(errors.getResponseJSON(error));
+                if (err) {
+                    var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', err);
+                    next({
+                        response,
+                        err
+                    });
+                } else {
+                    var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                    next({
+                        response,
+                        error
+                    });
+                }
             });
         });
     });
@@ -140,19 +186,28 @@ router.get('/get_profile_pic', function (req, res, next) {
     errors.checkQueries(req, res, ['access_code', 'device_id'], function () {
         userAuth.accessAuth(req.query.access_code, req.query.device_id, function (user) {
                 sql.select.regularSelect('users', null, ['user_id'], ['='], [user[0].user_id], 0, function (userInfo) {
-                        if (userInfo[0].profile_pic == null)
-                            next(errors.getResponseJSON('PROFILE_PIC_NULL'));
-                        else
-                            next(errors.getResponseJSON('PROFILE_PIC_EXISTS', constants.digitalocean.BUCKET_BASE_URL + constants.digitalocean.PROFILE_PIC_ENDPOINT + userInfo[0].profile_pic + constants.digitalocean.PROFILE_PIC_EXTENSION));
+                        if (userInfo[0].profile_pic == null) {
+                            var response = errors.getResponseJSON('PROFILE_PIC_NULL');
+                            res.status(response.code).send(response.res);
+                        } else {
+                            var response = errors.getResponseJSON('PROFILE_PIC_EXISTS', constants.digitalocean.BUCKET_BASE_URL + constants.digitalocean.PROFILE_PIC_ENDPOINT + userInfo[0].profile_pic + constants.digitalocean.PROFILE_PIC_EXTENSION);
+                            res.status(response.code).send(response.res);
+                        }
                     }, function () {
-                        next(errors.getResponseJSON('PROFILE_PIC_NULL'));
+                        var response = errors.getResponseJSON('PROFILE_PIC_NULL');
+                        res.status(response.code).send(response.res);
                     },
-                    function (err) {
-                        next(err)
+                    function (error) {
+                        var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                        next({
+                            response,
+                            error
+                        });
                     });
             },
             function () {
-                next(errors.getResponseJSON('INVALID_ACCESS_CODE'));
+                var response = errors.getResponseJSON('INVALID_ACCESS_CODE');
+                res.status(response.code).send(response.res);
             });
     });
 });

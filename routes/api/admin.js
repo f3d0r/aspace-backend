@@ -6,17 +6,27 @@ var uniqueString = require('unique-string');
 
 router.get('/', function (req, res, next) {
     basicAuth.authenticate(req, function () {
-        next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the admin sub-API for aspace! :)"));
+        var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the admin sub-API for aspace! :)")
+        res.status(response.code).send(response.res);
     }, function (error) {
-        next('INVALID_BASIC_AUTH');
+        var response = errors.getResponseJSON('INVALID_BASIC_AUTH', error)
+        next({
+            response,
+            error
+        })
     });
 });
 
 router.get('/ping', function (req, res, next) {
     basicAuth.authenticate(req, function () {
-        next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
+        var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong")
+        res.status(response.code).send(response.res);
     }, function (error) {
-        next('INVALID_BASIC_AUTH');
+        var response = errors.getResponseJSON('INVALID_BASIC_AUTH', error)
+        next({
+            response,
+            error
+        })
     });
 });
 
@@ -34,10 +44,18 @@ router.get('/get_auth_key', function (req, res, next) {
         sql.insert.addObject('temp_gen_auth_key', newTempAuthKeyInsert, function () {
             res.render('get_auth_key.ejs', metaData);
         }, function (error) {
-            next(error);
+            var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error)
+            next({
+                response,
+                error
+            })
         });
     }, function (error) {
-        next('INVALID_BASIC_AUTH');
+        var response = errors.getResponseJSON('INVALID_BASIC_AUTH', error)
+        next({
+            response,
+            error
+        })
     });
 });
 
@@ -50,18 +68,27 @@ router.post('/finalize_temp_auth_key', function (req, res, next) {
                 newAuth['auth_key'] = uniqueString();
                 newAuth['permission'] = req.query.requested_permission;
                 sql.insert.addObject('database_authority', newAuth, function (results) {
-                    next(errors.getResponseJSON('AUTH_KEY_ADDED', newAuth));
+                    var response = errors.getResponseJSON('AUTH_KEY_ADDED', newAuth);
+                    res.status(response.code).send(response.res);
                 }, function (error) {
-                    next(errors.getResponseJSON('INVALID_PERMISSION'));
+                    var response = errors.getResponseJSON('INVALID_PERMISSION');
+                    next({
+                        response,
+                        error
+                    })
                 });
                 sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {}, function (error) {
-                    next(error);
+                    var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
+                    next({
+                        response,
+                        error
+                    })
                 });
             },
             function (error) {
-                next(errors.getResponseJSON('INVALID_PERMISSION'));
+                var response = errors.getResponseJSON('INVALID_PERMISSION');
+                res.status(response.code).send(response.res);
                 sql.remove.regularDelete('temp_gen_auth_key', ['temp_key'], [req.query.temp_auth_key], function () {}, function (error) {
-                    next(error);
                 });
             });
     });

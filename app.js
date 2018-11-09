@@ -1,19 +1,48 @@
+//GLOBAL IMPORTS
 require('module-alias/register');
+require('sqreen');
 
 // PACKAGE IMPORTS
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const timeout = require('connect-timeout');
+var express = require('express');
+var bodyParser = require('body-parser');
+var cors = require('cors');
+var timeout = require('connect-timeout');
 var helmet = require('helmet')
 var cluster = require('express-cluster');
 var toobusy = require('express-toobusy')();
-var sqreen = require('sqreen');
-
-const {
+var Logger = require('logdna');
+var ip = require('ip')
+var os = require('os')
+var responseTime = require('response-time');
+var morgan = require('morgan')
+var {
     IncomingWebhook
 } = require('@slack/client');
 
+// LOCAL IMPORTS
+var constants = require('@config');
+var errors = require('@errors');
+var errorCodes = require('@error-codes');
+
+//LOGGING SET UP
+var logger = Logger.setupDefaultLogger("1390778264d6a4672158e747548a0e74", {
+    hostname: os.hostname(),
+    ip: ip.address(),
+    app: process.env.APP_NAME,
+    env: process.env.ENV_NAME,
+    index_meta: true,
+    tags: process.env.APP_NAME + ',' + process.env.ENV_NAME + ',' + os.hostname()
+});
+console.log = function (d) {
+    process.stdout.write(d + '\n');
+    logger.log(d);
+}
+logger.write = function (d) {
+    console.log(d);
+}
+const loggingFormat = ':remote-addr - [:date[clf]] - ":method :url HTTP/:http-version" :status ":user-agent" :response-time[digits] ms';
+
+//EXPRESS THREAD COUNT SET UP
 var threadCount;
 if (process.env.THREAD_COUNT == "CPU_COUNT" || process.env.THREAD_COUNT == "CPU") {
     threadCount = require('os').cpus().length;
@@ -26,12 +55,7 @@ if (process.env.THREAD_COUNT == "CPU_COUNT" || process.env.THREAD_COUNT == "CPU"
     }
 }
 
-
-// LOCAL IMPORTS
-const constants = require('@config');
-const errors = require('@errors');
-const errorCodes = require("@error-codes");
-
+// SLACK SET UP
 const webhook = new IncomingWebhook(constants.slack.webhook);
 
 // EXPRESS SET UP
@@ -46,14 +70,27 @@ cluster(function (worker) {
     app.use(bodyParser.json());
     app.use(cors());
     app.use(helmet())
+    app.use(responseTime());
+    app.use(morgan(loggingFormat, {
+        skip: function (req, res) {
+            if (req.url == '/ping' || req.url == '/') {
+                return true;
+            } else {
+                return false;
+            }
+        },
+        stream: logger
+    }));
 
     // MAIN ENDPOINTS
-    app.get('/', function (req, res, next) {
-        next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)"));
+    app.get('/', function (req, res) {
+        var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)");
+        res.status(response.code).send(response.res);
     });
 
     app.get('/ping', function (req, res, next) {
-        next(errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong"));
+        var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong");
+        res.status(response.code).send(response.res);
     });
 
     app.use(require('./routes'));
@@ -61,21 +98,27 @@ cluster(function (worker) {
     app.use(haltOnTimedout);
     app.use(errorHandler);
     app.use(haltOnTimedout);
+    app.use(sendSlackError);
+    app.use(haltOnTimedout);
 
     function errorHandler(error, req, res, next) {
+        var url = process.env.BASE_URL + req.originalUrl;
         if (error.message == "Response timeout") {
-            res.status(500).send("Response timeout, please check API status at <a href=\"https://status.api.trya.space\">status.trya.space</a>");
-            sendSlackError(error, req);
+            var response = errors.getResponseJSON('RESPONSE_TIMEOUT', "Please check API status at status.trya.space");
+            res.status(response.code).send(response.res);
         } else if (error == 'INVALID_BASIC_AUTH') {
             res.set("WWW-Authenticate", "Basic realm=\"Authorization Required\"");
-            res.status(401).send("Authorization Required");
-            sendSlackError(error, req);
-        } else if (errors.getErrorCode(error) >= 403 && errors.getErrorCode(error) != 422) {
-            sendSlackError(error, req);
-            res.status(errors.getErrorCode(error)).send(error);
+            res.status(401).send("aspace Authorization Required");
         } else {
-            res.status(errors.getErrorCode(error)).send(error);
+            if (process.env.NODE_ENV == "dev") {
+                console.log(JSON.stringify("ERROR: " + JSON.stringify(error)));
+                res.status(500).send(error);
+            } else {
+                var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', "Please check API status at status.trya.space");
+                res.status(response.code).send(response.res);
+            }
         }
+        next(error);
     }
 
     function sendSlackError(error, req) {
@@ -110,8 +153,8 @@ cluster(function (worker) {
             }
         });
     } else {
-        console.log("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
+        console.error("Please check that process.ENV.PORT is set and that all error codes in errorCodes.js are unique.");
     }
 }, {
     count: threadCount
-})
+});

@@ -19,7 +19,7 @@ module.exports = {
                 url: twimlURL,
                 from: constants.twilio.ORIGIN_PHONE,
                 to: phoneNumber
-            }).catch(function (err) {
+            }).catch(function (error) {
                 console.error(err.message);
             })
             .done();
