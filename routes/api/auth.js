@@ -45,7 +45,6 @@ router.get('/verification_twiml', function (req, res, next) {
 router.post("/phone_login", function (req, res, next) {
     errors.checkQueries(req, res, ['phone_number', 'device_id', 'call_verify'], function () {
         twilio.lookupPhone(req.query.phone_number, function (formattedPhoneNumber) {
-            console.log('here');
             verifyUser = {};
             verifyUser.phone_number = formattedPhoneNumber;
             var pin = Math.floor(100000 + Math.random() * 900000);
