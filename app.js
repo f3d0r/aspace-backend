@@ -99,8 +99,6 @@ cluster(function (worker) {
     app.use(haltOnTimedout);
     app.use(errorHandler);
     app.use(haltOnTimedout);
-    app.use(sendSlackError);
-    app.use(haltOnTimedout);
 
     function errorHandler(error, req, res, next) {
         var url = process.env.BASE_URL + req.originalUrl;
@@ -117,6 +115,7 @@ cluster(function (worker) {
             } else {
                 response = errors.getResponseJSON('GENERAL_SERVER_ERROR', "Please check API status at status.trya.space");
                 res.status(response.code).send(response.res);
+                sendSlackError(error, req);
             }
         }
     }
