@@ -42,10 +42,6 @@ logger.write = function (d) {
 };
 const loggingFormat = ':remote-addr - [:date[clf]] - ":method :url HTTP/:http-version" :status ":user-agent" :response-time[digits] ms';
 
-morgan.token('remote-addr', function (req) {
-    return req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-});
-
 //EXPRESS THREAD COUNT SET UP
 var threadCount;
 if (process.env.THREAD_COUNT == "CPU_COUNT" || process.env.THREAD_COUNT == "CPU") {
