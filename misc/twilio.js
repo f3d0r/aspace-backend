@@ -36,16 +36,16 @@ module.exports = {
                     Authorization: 'Basic ' + authorization
                 }
             };
-    
+
             request(options, function (error, response, body) {
                 if (error)
                     failCB(error);
                 body = JSON.parse(body);
                 if (body.status == 404)
-                failCB(body.status);
+                    failCB(body.status);
                 else
-                successCB(body.phone_number);
+                    successCB(body.phone_number);
             });
         }
     }
-}
+};

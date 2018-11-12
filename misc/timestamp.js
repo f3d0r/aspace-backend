@@ -10,4 +10,4 @@ module.exports = {
     getFormattedTime: function (momentTime) {
         return momentTime.format("YYYY-MM-DD HH:mm:ss");
     }
-}
+};

@@ -21,10 +21,10 @@ module.exports = {
         },
         addSpots: function (points, successCB, failCB) {
             db.getConnection(function (err, connection) {
-                mappedSpots = []
+                mappedSpots = [];
                 points.forEach(function (currentSpot) {
                     mappedSpots.push([currentSpot.lng, currentSpot.lat, currentSpot.block_id]);
-                })
+                });
                 var sql = 'INSERT INTO `parking` (`lng`, `lat`, `block_id`) VALUES ?';
                 connection.query(sql, [mappedSpots], function (error, results, fields) {
                     if (error)
@@ -87,7 +87,7 @@ module.exports = {
                 } else {
                     sql += selection[0] + ' ';
                     for (index = 1; index < selection.length; index++) {
-                        sql += ', ' + selection[index]
+                        sql += ', ' + selection[index];
                     }
                 }
                 sql += ' FROM ' + connection.escapeId(database) + ' WHERE ';
@@ -104,7 +104,7 @@ module.exports = {
                     if (error)
                         failCB(error);
                     else if (numResults == null)
-                        successCB(rows)
+                        successCB(rows);
                     else if (numResults != null && rows.length == 0)
                         noneFoundCB();
                     else
@@ -114,7 +114,7 @@ module.exports = {
         },
         selectRadius: function (database, lat, lng, miles, successCB, noneFoundCB, failCB) {
             db.getConnection(function (err, connection) {
-                var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?"
+                var sql = "SELECT *, ( 3959 * acos( cos( radians(?) ) * cos( radians( `lat` ) ) * cos( radians( `lng` ) - radians(?) ) + sin( radians(?) ) * sin(radians(`lat`)) ) ) AS distance FROM " + connection.escapeId(database) + "  HAVING distance < ?";
                 connection.query(sql, [lat, lng, lat, miles], function (error, rows) {
                     connection.release();
                     if (error) {
@@ -123,7 +123,7 @@ module.exports = {
                     if (rows.length == 0) {
                         noneFoundCB();
                     } else
-                        successCB(rows)
+                        successCB(rows);
                 });
             });
         }
@@ -265,11 +265,11 @@ module.exports = {
                                         if (error)
                                             failCB(error);
                                     });
-                                    return
+                                    return;
                                 })
                                 .catch(function (error) {
                                     return failCB(error);
-                                })
+                                });
                         }
                         successCB(rows);
                     }
@@ -277,4 +277,4 @@ module.exports = {
             });
         }
     }
-}
+};

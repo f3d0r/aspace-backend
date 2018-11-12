@@ -70,4 +70,4 @@ module.exports = {
         distant_threshold: 0.75,
         last_mile_options_threshold: 2
     }
-}
+};

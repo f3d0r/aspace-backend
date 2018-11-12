@@ -1,7 +1,7 @@
 var router = require('express').Router();
 var geojson = require('geojson');
-var appRoot = require('app-root-path')
-var path = require('path')
+var appRoot = require('app-root-path');
+var path = require('path');
 var fs = require('fs');
 var turf = require('@turf/turf');
 var errors = require('@errors');
@@ -31,7 +31,7 @@ async function initRegions() {
                     resolveAll(responses);
                 }).catch(function (error) {
                     rejectAll(error);
-                })
+                });
         });
     });
     for (var index = 0; index < results.length; index++) {
@@ -45,14 +45,14 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/ping', function (req, res, next) {
-    var response=  errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong");
+    var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong");
     res.status(response.code).send(response.res);
 });
 
 router.get('/get_by_loc', function (req, res, next) {
     errors.checkQueries(req, res, ['lat', 'lng'], function () {
-        var found = false
-        regionBounds.forEach(function(currentRegion) {
+        var found = false;
+        regionBounds.forEach(function (currentRegion) {
             if (turf.booleanPointInPolygon(turf.point([req.query.lng, req.query.lat]), currentRegion)) {
                 found = true;
             }

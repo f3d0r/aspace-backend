@@ -15,7 +15,7 @@ module.exports = {
                 failureCB();
             }, function (error) {
                 failureCB(error);
-            })
+            });
         } else {
             bcryptImport.compare(password, hashedPassword, function (err, match) {
                 if (match)
@@ -25,4 +25,4 @@ module.exports = {
             });
         }
     }
-}
+};

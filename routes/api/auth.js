@@ -47,13 +47,13 @@ router.post("/phone_login", function (req, res, next) {
         twilio.lookupPhone(req.query.phone_number, function (formattedPhoneNumber) {
             console.log('here');
             verifyUser = {};
-            verifyUser['phone_number'] = formattedPhoneNumber;
+            verifyUser.phone_number = formattedPhoneNumber;
             var pin = Math.floor(100000 + Math.random() * 900000);
-            verifyUser['verify_pin'] = pin;
-            verifyUser['device_id'] = req.query.device_id;
-            verifyUser['expiry_date'] = timestamp.getExpiryTimestamp(constants.auth.PIN_EXPIRY_MINUTES, 'm');
+            verifyUser.verify_pin = pin;
+            verifyUser.device_id = req.query.device_id;
+            verifyUser.expiry_date = timestamp.getExpiryTimestamp(constants.auth.PIN_EXPIRY_MINUTES, 'm');
             sql.select.regularSelect('users', null, ['phone_number'], ['='], [formattedPhoneNumber], 1, function (rows) {
-                verifyUser['user_id'] = rows[0].user_id;
+                verifyUser.user_id = rows[0].user_id;
                 sql.insert.addObject('user_verify_codes', verifyUser, function () {
                     if (req.query.call_verify == 'T') {
                         twilio.sendVerifyCall(formattedPhoneNumber, pin);
@@ -70,7 +70,7 @@ router.post("/phone_login", function (req, res, next) {
                     });
                 });
             }, function () {
-                verifyUser['user_id'] = uniqueString();
+                verifyUser.user_id = uniqueString();
                 sql.insert.addObject('user_verify_codes', verifyUser, function () {
                     if (req.query.call_verify == 'T') {
                         twilio.sendVerifyCall(formattedPhoneNumber, pin);
@@ -78,7 +78,7 @@ router.post("/phone_login", function (req, res, next) {
                         twilio.sendVerifyText(formattedPhoneNumber, pin);
                     }
                     var response = errors.getResponseJSON('NEW_PHONE');
-                    res.status(response.code).send(response.res)
+                    res.status(response.code).send(response.res);
                 }, function (error) {
                     var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
                     next({
@@ -120,31 +120,30 @@ router.post("/check_pin", function (req, res, next) {
                             var newAccessCode = uniqueString();
                             accessCode = {};
                             expiry_date = timestamp.getExpiryTimestamp(2, 'months');
-                            accessCode['user_id'] = rows[0].user_id;
-                            accessCode['access_code'] = newAccessCode;
-                            accessCode['device_id'] = req.query.device_id;
-                            accessCode['expiry_date'] = expiry_date;
-                            accessCode['grant_date'] = timestamp.getFormattedTime(moment().utc());
+                            accessCode.user_id = rows[0].user_id;
+                            accessCode.access_code = newAccessCode;
+                            accessCode.device_id = req.query.device_id;
+                            accessCode.expiry_date = expiry_date;
+                            accessCode.grant_date = timestamp.getFormattedTime(moment().utc());
                             sql.insert.addObject('user_access_codes', accessCode, function () {
                                 jsonReturn = {};
-                                jsonReturn['access_code'] = newAccessCode
-                                jsonReturn['expiry'] = expiry_date;
+                                jsonReturn.access_code = newAccessCode;
+                                jsonReturn.expiry = expiry_date;
                                 var response = errors.getResponseJSON('NEW_ACCESS_CODE', jsonReturn);
                                 res.status(response.code).send(response.res);
                                 sql.remove.regularDelete('user_verify_codes', ['phone_number', 'device_id'], [formattedPhoneNumber, req.query.device_id], function () {
                                     sql.select.regularSelect('users', null, ['user_id'], ['='], [rows[0].user_id], 1, function () {}, function () {
                                         newUserJSON = {};
-                                        newUserJSON['user_id'] = accessCode['user_id'];
-                                        newUserJSON['phone_number'] = formattedPhoneNumber;
-                                        sql.insert.addObject('users', newUserJSON, function () {}, function (error) {
-                                        });
+                                        newUserJSONuser_id = accessCode.user_id;
+                                        newUserJSON.phone_number = formattedPhoneNumber;
+                                        sql.insert.addObject('users', newUserJSON, function () {}, function (error) {});
                                     }, function (error) {
                                         var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
                                         next({
                                             response,
                                             error
                                         });
-                                    })
+                                    });
                                 }, function (error) {
                                     var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
                                     next({
@@ -163,7 +162,7 @@ router.post("/check_pin", function (req, res, next) {
                     },
                     function () {
                         var response = errors.getResponseJSON('INVALID_PIN');
-                        res.status(response.code).send(response.res)
+                        res.status(response.code).send(response.res);
                     },
                     function (error) {
                         var response = errors.getResponseJSON('GENERAL_SERVER_ERROR', error);
