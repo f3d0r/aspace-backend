@@ -6,6 +6,7 @@ const secretKey = '***REMOVED***';
 
 module.exports = {
     express: {
+        GLOBAL_ENDPOINT: '/v1',
         RESPONSE_TIMEOUT_MILLI: 30000
     },
     twilio: {
@@ -33,7 +34,7 @@ module.exports = {
         DATABASE_USER: 'api',
         DATABASE_PASSWORD: 'db_password',
         DATABASE_NAME: 'aspace',
-        DATABASE_IP: 'db_ip',
+        DATABASE_IP: '***REMOVED***',
         DATABASE_PORT: 'db_port'
     },
     digitalocean: {
