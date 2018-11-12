@@ -63,6 +63,8 @@ var app = express();
 const globalEndpoint = constants.express.GLOBAL_ENDPOINT;
 
 cluster(function (worker) {
+    app.enable("trust proxy");
+    
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
     app.use(toobusy);
     app.use(bodyParser.urlencoded({
@@ -72,6 +74,7 @@ cluster(function (worker) {
     app.use(cors());
     app.use(helmet());
     app.use(responseTime());
+    
     app.use(morgan(loggingFormat, {
         skip: function (req, res) {
             if ((req.url.length >= 1 && req.url.charAt(req.url.length - 1) == '/') || (req.url.length >= 1 && req.url.substring(req.url.length - 4, req.url.length) == 'ping')) {
