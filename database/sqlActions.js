@@ -1,8 +1,6 @@
 var db = require('./db');
-var mysql = require('mysql');
 var uniqueString = require('unique-string');
 const constants = require('@config');
-
 var rp = require('request-promise');
 var turf = require('@turf/turf');
 
@@ -17,22 +15,6 @@ module.exports = {
                     else
                         successCB(results);
                 });
-            });
-        },
-        addSpots: function (points, successCB, failCB) {
-            db.getConnection(function (err, connection) {
-                mappedSpots = [];
-                points.forEach(function (currentSpot) {
-                    mappedSpots.push([currentSpot.lng, currentSpot.lat, currentSpot.block_id]);
-                });
-                var sql = 'INSERT INTO `parking` (`lng`, `lat`, `block_id`) VALUES ?';
-                connection.query(sql, [mappedSpots], function (error, results, fields) {
-                    if (error)
-                        failCB(error);
-                    else
-                        successCB(results);
-                });
-                connection.release();
             });
         }
     },
@@ -162,20 +144,6 @@ module.exports = {
         }
     },
     update: {
-        updateSpotStatus(spot_id, occupied, successCB, noExistCB, failCB) {
-            db.getConnection(function (err, connection) {
-                var sql = "UPDATE `parking` SET `occupied` = ? WHERE `spot_id` = ?";
-                connection.query(sql, [occupied, spot_id], function (error, results, fields) {
-                    connection.release();
-                    if (error)
-                        failCB(error);
-                    else if (results.affectedRows == 1)
-                        successCB();
-                    else
-                        noExistCB();
-                });
-            });
-        },
         updateProfilePic(accessCode, deviceId, successCB, failCB) { //return profileID to use for s3 upload
             db.getConnection(function (err, connection) {
                 var sql = "SELECT * FROM `user_access_codes` WHERE `access_code` = ? AND `device_id` = ?";
