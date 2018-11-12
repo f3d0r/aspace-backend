@@ -60,6 +60,7 @@ const webhook = new IncomingWebhook(constants.slack.webhook);
 
 // EXPRESS SET UP
 var app = express();
+const globalEndpoint = constants.express.GLOBAL_ENDPOINT;
 
 cluster(function (worker) {
     app.use(timeout(constants.express.RESPONSE_TIMEOUT_MILLI));
@@ -83,12 +84,12 @@ cluster(function (worker) {
     }));
 
     // MAIN ENDPOINTS
-    app.get('/', function (req, res) {
+    app.get(globalEndpoint + '/', function (req, res) {
         var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "Welcome to the aspace API! :)");
         res.status(response.code).send(response.res);
     });
 
-    app.get('/ping', function (req, res, next) {
+    app.get(globalEndpoint + '/ping', function (req, res, next) {
         var response = errors.getResponseJSON('ENDPOINT_FUNCTION_SUCCESS', "pong");
         res.status(response.code).send(response.res);
     });
@@ -98,8 +99,8 @@ cluster(function (worker) {
     app.use(haltOnTimedout);
     app.use(errorHandler);
     app.use(haltOnTimedout);
-    app.use(sendSlackError);
-    app.use(haltOnTimedout);
+    // app.use(sendSlackError);
+    // app.use(haltOnTimedout);
 
     function errorHandler(error, req, res, next) {
         var url = process.env.BASE_URL + req.originalUrl;
@@ -121,13 +122,13 @@ cluster(function (worker) {
         next(error);
     }
 
-    function sendSlackError(error, req) {
-        var message = "aspace Backend Error Notification\n" + "Error: " + JSON.stringify(error) + "\nreq: " + req.url;
-        webhook.send(message, function (error, res) {
-            if (error)
-                console.log('Error: ', error);
-        });
-    }
+    // function sendSlackError(error, req) {
+    //     var message = "aspace Backend Error Notification\n" + "Error: " + JSON.stringify(error) + "\nreq: " + req.url;
+    //     webhook.send(message, function (error, res) {
+    //         if (error)
+    //             console.log('Error: ', error);
+    //     });
+    // }
 
     function haltOnTimedout(req, res, next) {
         if (!req.timedout)
