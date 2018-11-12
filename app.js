@@ -119,10 +119,10 @@ cluster(function (worker) {
                 res.status(response.code).send(response.res);
             }
         }
-        next(error);
     }
 
     function sendSlackError(error, req) {
+        console.log("HERE!");
         var message = "aspace Backend Error Notification\n" + "Error: " + JSON.stringify(error) + "\nreq: " + req.url;
         webhook.send(message, function (error, res) {
             if (error)
