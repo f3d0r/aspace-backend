@@ -134,7 +134,7 @@ router.post("/check_pin", function (req, res, next) {
                                 sql.remove.regularDelete('user_verify_codes', ['phone_number', 'device_id'], [formattedPhoneNumber, req.query.device_id], function () {
                                     sql.select.regularSelect('users', null, ['user_id'], ['='], [rows[0].user_id], 1, function () {}, function () {
                                         newUserJSON = {};
-                                        newUserJSONuser_id = accessCode.user_id;
+                                        newUserJSON.user_id = accessCode.user_id;
                                         newUserJSON.phone_number = formattedPhoneNumber;
                                         sql.insert.addObject('users', newUserJSON, function () {}, function (error) {});
                                     }, function (error) {
