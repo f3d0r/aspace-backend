@@ -1434,10 +1434,10 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
 
-aws-sdk@^2.503.0:
-  version "2.503.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.503.0.tgz#983b8c03aa919060a81127cb9d94fbb1667f4cf2"
-  integrity sha512-DPwRxhPYCGNvKL9rUhpAoOVpMRyISbVMlXykLQknYo7wyOI+jYcyA7t8H7IFPAqj4ZG+R+Au9tO/KT4im+2gbg==
+aws-sdk@^2.504.0:
+  version "2.504.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.504.0.tgz#d7111b3f5117548935d68c717d72bbf57a9362f9"
+  integrity sha512-azOX54oovJv0zWzO23fBgIprwsvx8KUuMR+cAUAOx23D8LJ5S+sl3UYS9Q1X4qF/blBTa4+ZNawZDV0N1HiQmw==
   dependencies:
     buffer "4.9.1"
     events "1.1.1"
@@ -3662,10 +3662,10 @@ tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
   integrity sha1-WuaBd/GS1EViadEIr6k/+HQ/T2Q=
 
-twilio@^3.33.2:
-  version "3.33.2"
-  resolved "https://registry.yarnpkg.com/twilio/-/twilio-3.33.2.tgz#9be40fbbc79ca3b4ce5fac548784cd4c9a06968d"
-  integrity sha512-aKmZKL5dP79Xt1pkEhHyTZQj9xRRaWBKPrOKa30aXYnm9mVxZ5FPVawipq+Sho7c6JYpmyQK1FNsTJhV78dtrQ==
+twilio@^3.33.3:
+  version "3.33.3"
+  resolved "https://registry.yarnpkg.com/twilio/-/twilio-3.33.3.tgz#ad610c19914ba8f9950b672c62eddd69b6349b54"
+  integrity sha512-xw/NjPXJ7JoeDSC1Eq6rkxlRdgJhiLeE8BM2KeI14g9ir5Hb1ui9YKYacqnnv/Hf9ZgLvtz4O/HWXzRItg7kqA==
   dependencies:
     "@types/express" "^4.16.1"
     deprecate "1.0.0"
